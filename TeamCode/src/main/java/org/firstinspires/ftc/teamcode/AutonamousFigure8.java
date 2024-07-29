@@ -7,8 +7,13 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 @Autonomous
 
+
+
+
+//we need to add the DcMotors
 public class AutonamousFigure8 extends LinearOpMode {
-    @Override
+
+
     public void runOpMode() throws InterruptedException {
         // Declare our motors
         // Make sure your ID's match your configuration
