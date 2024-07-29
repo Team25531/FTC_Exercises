@@ -22,7 +22,7 @@ public class AutonamousFigure8 extends LinearOpMode {
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("rearRight");
 
-
+        resetRuntime();
         if (getRuntime() <= 4) {
             frontLeftMotor.setPower(0.8);
             backLeftMotor.setPower(0.8);
