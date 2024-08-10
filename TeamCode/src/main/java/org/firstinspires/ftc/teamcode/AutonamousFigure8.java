@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Neel: Autonomous8", group = "Neel")
+@Autonomous(name = "Main: Autonomous8", group = "Main")
 //we need to add the DcMotors
 public class AutonamousFigure8 extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
