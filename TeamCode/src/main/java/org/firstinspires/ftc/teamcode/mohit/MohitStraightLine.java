@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.neel;
+package org.firstinspires.ftc.teamcode.mohit;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -8,9 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Neel: Autonomous8", group = "Neel")
+@Autonomous(name = "Mohit: StraightLine", group = "Mohit")
 //we need to add the DcMotors
-public class NeelAutonamousFigure8 extends LinearOpMode {
+public class MohitStraightLine extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     @Override
     public void runOpMode() throws InterruptedException {
@@ -20,7 +20,6 @@ public class NeelAutonamousFigure8 extends LinearOpMode {
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("rearLeft");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("rearRight");
-
         telemetry.addData("Path 00", "Leg 1: %4.1f S Elapsed", runtime.seconds());
         telemetry.update();
 
@@ -30,7 +29,7 @@ public class NeelAutonamousFigure8 extends LinearOpMode {
         waitForStart();
        // resetRuntime();
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
+        while (opModeIsActive() && (runtime.seconds() < 5.0)) {
             telemetry.addData("Path 11", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
             frontLeftMotor.setPower(0.8);
@@ -39,13 +38,7 @@ public class NeelAutonamousFigure8 extends LinearOpMode {
             backRightMotor.setPower(0.8);
         }
         runtime.reset();
-
-        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
-        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
-
-        while (opModeIsActive() && (runtime.seconds() < 3.0)) {
+        while (opModeIsActive() && (runtime.seconds() < 5.0)) {
             telemetry.addData("Path 22", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
             frontLeftMotor.setPower(0.8);

@@ -8,9 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Neel: Autonomous8", group = "Neel")
+@Autonomous(name = "Neel: StraightLine", group = "Neel")
 //we need to add the DcMotors
-public class NeelAutonamousFigure8 extends LinearOpMode {
+public class StraightLIne extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     @Override
     public void runOpMode() throws InterruptedException {
@@ -28,7 +28,7 @@ public class NeelAutonamousFigure8 extends LinearOpMode {
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         waitForStart();
-       // resetRuntime();
+        // resetRuntime();
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             telemetry.addData("Path 11", "Leg 1: %4.1f S Elapsed", runtime.seconds());
@@ -45,7 +45,7 @@ public class NeelAutonamousFigure8 extends LinearOpMode {
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        while (opModeIsActive() && (runtime.seconds() < 3.0)) {
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             telemetry.addData("Path 22", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
             frontLeftMotor.setPower(0.8);
@@ -55,8 +55,16 @@ public class NeelAutonamousFigure8 extends LinearOpMode {
 
 
         }
+
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
+            telemetry.addData("Path 33", "Leg 1: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+            frontLeftMotor.setPower(0.2);
+            backLeftMotor.setPower(0.2);
+            frontRightMotor.setPower(0.8);
+            backRightMotor.setPower(0.8);
+
+        }
     }
 }
-
-
-
