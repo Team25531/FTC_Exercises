@@ -45,7 +45,7 @@ public class StraightLIne extends LinearOpMode {
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        while (opModeIsActive() && (runtime.seconds() < 3.0)) {
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             telemetry.addData("Path 22", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
             frontLeftMotor.setPower(0.8);
@@ -57,7 +57,7 @@ public class StraightLIne extends LinearOpMode {
         }
 
         runtime.reset();
-        while (opModeIsActive() && (runtime.seconds() < 3.0)) {
+        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             telemetry.addData("Path 33", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
             frontLeftMotor.setPower(0.2);
