@@ -39,7 +39,7 @@ public class StraightLIne extends LinearOpMode {
 
         telemetry.addData("Path 00", "Leg 1: %4.1f S Elapsed", runtime.seconds());
         telemetry.update();
-    // setting robot to go forward
+        // setting robot to go forward
         frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -54,16 +54,7 @@ public class StraightLIne extends LinearOpMode {
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
-        straightLine();
-        // semicircle
-        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
-            telemetry.addData("Path 33", "Leg 1: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
-            frontLeftMotor.setPower(0.2);
-            backLeftMotor.setPower(0.2);
-            frontRightMotor.setPower(0.8);
-            backRightMotor.setPower(0.8);
-
-        }
+       straightLine();
     }
 }
+
