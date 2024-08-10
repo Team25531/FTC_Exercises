@@ -9,6 +9,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 @TeleOp(name = "Aaron: DrivingOmniWithLauncher", group = "Aaron")
 public class DrivingOmniWithLauncher extends LinearOpMode {
     Servo servo;
+double position = 0;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -52,8 +53,16 @@ public class DrivingOmniWithLauncher extends LinearOpMode {
             backRightMotor.setPower(backRightPower);
 
             if (gamepad1.b) {
-                servo.setPosition(0.018);
+//                position += 0.002;
+                position = 0.08;
+                servo.setPosition(position);
+             //  sleep(50);
             }
+
+            telemetry.addData("Servo Position", "%5.2f", position);
+            telemetry.update();
+
+
         }
     }
 }
