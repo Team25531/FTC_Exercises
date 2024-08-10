@@ -8,9 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Neel: StraightLine", group = "Neel")
+@Autonomous(name = "Neel: Semicirlce", group = "Neel")
 //we need to add the DcMotors
-public class StraightLIne extends LinearOpMode {
+public class semicircle extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
     private DcMotor backLeftMotor = hardwareMap.dcMotor.get("rearLeft");
@@ -33,28 +33,7 @@ public class StraightLIne extends LinearOpMode {
     }
     @Override
     public void runOpMode() throws InterruptedException {
-        // Declare our motors
-        // Make sure your ID's match your configuration
 
-
-        telemetry.addData("Path 00", "Leg 1: %4.1f S Elapsed", runtime.seconds());
-        telemetry.update();
-    // setting robot to go forward
-        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
-
-        waitForStart();
-        // resetRuntime();
-        straightLine();
-        // setting robot to go backward
-        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
-        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
-
-
-        straightLine();
         // semicircle
         while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             telemetry.addData("Path 33", "Leg 1: %4.1f S Elapsed", runtime.seconds());
