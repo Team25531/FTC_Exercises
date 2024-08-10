@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.neel;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name = "Neel: Autonomous8", group = "Neel")
 //we need to add the DcMotors
-public class AutonamousFigure8 extends LinearOpMode {
+public class NeelAutonamousFigure8 extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     @Override
     public void runOpMode() throws InterruptedException {
