@@ -33,6 +33,10 @@ public class semicircle extends LinearOpMode {
     }
     @Override
     public void runOpMode() throws InterruptedException {
+        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
         // semicircle
         while (opModeIsActive() && (runtime.seconds() < 2.0)) {
