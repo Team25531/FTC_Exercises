@@ -8,27 +8,16 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Neel: StraightLine", group = "Neel")
+@Autonomous(name = "Neel: Semicirlce", group = "Neel")
 //we need to add the DcMotors
-public class StraightLIne extends LinearOpMode {
+public class semicircle extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
-    @Override
-    public void runOpMode() throws InterruptedException {
-        // Declare our motors
-        // Make sure your ID's match your configuration
-        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
-        DcMotor backLeftMotor = hardwareMap.dcMotor.get("rearLeft");
-        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
-        DcMotor backRightMotor = hardwareMap.dcMotor.get("rearRight");
+    private DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
+    private DcMotor backLeftMotor = hardwareMap.dcMotor.get("rearLeft");
+    private DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
+    private DcMotor backRightMotor = hardwareMap.dcMotor.get("rearRight");
 
-        telemetry.addData("Path 00", "Leg 1: %4.1f S Elapsed", runtime.seconds());
-        telemetry.update();
-
-        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-
-        waitForStart();
-        // resetRuntime();
+    private void straightLine() {
         runtime.reset();
         while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             telemetry.addData("Path 11", "Leg 1: %4.1f S Elapsed", runtime.seconds());
@@ -37,26 +26,19 @@ public class StraightLIne extends LinearOpMode {
             backLeftMotor.setPower(0.8);
             frontRightMotor.setPower(0.8);
             backRightMotor.setPower(0.8);
+
         }
         runtime.reset();
 
+    }
+    @Override
+    public void runOpMode() throws InterruptedException {
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
-        while (opModeIsActive() && (runtime.seconds() < 2.0)) {
-            telemetry.addData("Path 22", "Leg 1: %4.1f S Elapsed", runtime.seconds());
-            telemetry.update();
-            frontLeftMotor.setPower(0.8);
-            backLeftMotor.setPower(0.8);
-            frontRightMotor.setPower(0.8);
-            backRightMotor.setPower(0.8);
-
-
-        }
-
-        runtime.reset();
+        // semicircle
         while (opModeIsActive() && (runtime.seconds() < 2.0)) {
             telemetry.addData("Path 33", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
