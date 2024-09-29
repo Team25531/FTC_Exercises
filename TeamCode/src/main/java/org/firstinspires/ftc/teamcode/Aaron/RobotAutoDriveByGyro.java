@@ -234,11 +234,15 @@ public class RobotAutoDriveByGyro extends LinearOpMode  {
         holdHeading(TURN_SPEED, 90.0, 2.5);   // Hold -45 Deg heading for a 1/2 second
         imu.resetYaw();
 
-        driveStraight(DRIVE_SPEED, 55.0, 0.0);    // Drive Forward 24"
+        driveStraight(DRIVE_SPEED, 85.0, 0.0);    // Drive Forward 24"
         turnToHeading(TURN_SPEED, 90.0);               // Turn  CW to -45 Degrees
         holdHeading(TURN_SPEED, 90.0, 2.5);   // Hold -45 Deg heading for a 1/2 second
         imu.resetYaw();
 
+        driveStraight(DRIVE_SPEED, 65.0, 0.0);    // Drive Forward 24"
+        turnToHeading(TURN_SPEED, 90.0);               // Turn  CW to -45 Degrees
+        holdHeading(TURN_SPEED, 90.0, 2.5);   // Hold -45 Deg heading for a 1/2 second
+        imu.resetYaw();
         if (1==2) {
 
             driveStraight(DRIVE_SPEED, 17.0, -45.0);  // Drive Forward 17" at -45 degrees (12"x and 12"y)
