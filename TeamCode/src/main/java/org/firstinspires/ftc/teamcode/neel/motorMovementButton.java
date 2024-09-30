@@ -18,9 +18,9 @@ public class motorMovementButton extends LinearOpMode {
     private DcMotor frontRightMotor;// = hardwareMap.dcMotor.get("frontRight");
     private DcMotor backRightMotor;// = hardwareMap.dcMotor.get("backRight");
     private DcMotor elbow;// = hardwareMap.dcMotor.get("backRight");
-
     private Servo finger;
 
+    int position = 0;
 
 
 
@@ -58,10 +58,12 @@ public class motorMovementButton extends LinearOpMode {
 
             }
             while (gamepad1.dpad_left){
-                finger.setPosition(2);
+                position = 10;
+                finger.setPosition(position);
             }
             while (gamepad1.dpad_right){
-                finger.setPosition(-2);
+                position = -10;
+                finger.setPosition(position);
             }
 
         }
