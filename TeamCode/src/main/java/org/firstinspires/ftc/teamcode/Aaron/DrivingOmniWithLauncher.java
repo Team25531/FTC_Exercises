@@ -12,6 +12,7 @@ public class DrivingOmniWithLauncher extends LinearOpMode {
     Servo servo;
     Servo Second_servo;
     double position = 0;
+    boolean buttonState;
     Controller gp;
   //  Pad pad;
 
@@ -87,18 +88,20 @@ public class DrivingOmniWithLauncher extends LinearOpMode {
         // Declare our motors
         // Make sure your ID's match your configuration
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
-        DcMotor backLeftMotor = hardwareMap.dcMotor.get("rearLeft");
+        DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeft");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
-        DcMotor backRightMotor = hardwareMap.dcMotor.get("rearRight");
+        DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
         servo = hardwareMap.get(Servo.class, "servo");
-        Second_servo = hardwareMap.get(Servo.class, "Second_servo");
+       // Second_servo = hardwareMap.get(Servo.class, "Second_servo");
 
         // Reverse the right side motors. This may be wrong for your setup.
         // If your robot moves backwards when commanded to go forwards,
         // reverse the left side instead.
         // See the note about this earlier on this page.
-        frontRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
-        backRightMotor.setDirection(DcMotorSimple.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
         gp = new Controller(gamepad1);
         gamepad = gamepad1;
        // pad = new Pad(gamepad1);
@@ -128,14 +131,16 @@ public class DrivingOmniWithLauncher extends LinearOpMode {
             backRightMotor.setPower(backRightPower);
 
             if (gamepad1.x){
-                position = 0.08;
+                position = 0.18;
+
                 servo.setPosition(position);
             }
+            buttonState = gamepad1.x;
 
             if (gamepad1.b) {
                 position = 0.1;
                 //  counter += 1;
-                Second_servo.setPosition(position);
+              //  Second_servo.setPosition(position);
             }
 
 
@@ -151,16 +156,16 @@ public class DrivingOmniWithLauncher extends LinearOpMode {
 
 
 
-            double curPosition = Second_servo.getPosition();
-            if (!areEqualDouble(curPosition, position, 2)) {
-                Second_servo.setPosition(position);
-            }
+//            double curPosition = Second_servo.getPosition();
+//            if (!areEqualDouble(curPosition, position, 2)) {
+//              //  Second_servo.setPosition(position);
+//            }
 
 
 //            telemetry.addData("Timer", "%5.2f", et.time());
 //            telemetry.addData("Counter", counter);
 //            telemetry.addData("a", aBut);
-//            telemetry.addData("buttonDown", buttonDown);
+            telemetry.addData("buttonState", buttonState);
             telemetry.update();
         }
 
