@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.neel;
 
-import com.google.firestore.v1.Write;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
