@@ -1,10 +1,13 @@
 package org.firstinspires.ftc.teamcode.neel;
 
 <<<<<<< HEAD
+<<<<<<< HEAD
 //imports are used so you can use a code defined from a different system
 =======
 import com.google.firestore.v1.Write;
 >>>>>>> d5665675889ece1f28b22a45f48f524cf46194bb
+=======
+>>>>>>> 2d559da858db5d6aac2932f3a10dd618a3194e82
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
