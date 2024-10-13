@@ -72,7 +72,7 @@ public class motorMovementButton extends LinearOpMode {
 >>>>>>> d5665675889ece1f28b22a45f48f524cf46194bb
     @Override
     public void runOpMode() throws InterruptedException {
-        //this code is used for defining motor
+        //this code is us for defining motor
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeft");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
