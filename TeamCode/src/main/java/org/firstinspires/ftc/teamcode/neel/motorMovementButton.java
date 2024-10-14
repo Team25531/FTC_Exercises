@@ -67,10 +67,17 @@ public class motorMovementButton extends LinearOpMode {
         wrist = hardwareMap.servo.get("wrist");
         //setting direction for motors
 
+
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        wrist.setPosition(position);
+        position = 0;
+        double addposition = 0.1;
+        double addedcurrentPosition = position;
+        double subposition = 0.1;
+        double subcurrentPosition = position;
 
         elbow.setDirection(DcMotor.Direction.REVERSE);
         //make it so that motors don't fall automaticly
@@ -83,9 +90,9 @@ public class motorMovementButton extends LinearOpMode {
 
         //waiting for start
         waitForStart();
-        elbow.setTargetPosition(0);
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+      //  elbow.setTargetPosition(0);
+      //  elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+      //  elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
         //reseting variable called runtime
@@ -109,18 +116,39 @@ public class motorMovementButton extends LinearOpMode {
             backLeftMotor.setPower(backLeftPower);
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
-            position = 1;
+
+
 
 
 
             runtime.reset();
-                wrist.setPosition(position);
+
+                if (gamepad1.a) {
+
+
+                    wrist.setPosition(addedcurrentPosition);
+                    addposition = addposition+0.001;
+                    addedcurrentPosition = addposition;
+                    telemetry.addData("b", addedcurrentPosition);
+                    telemetry.update();
+                }
+                if (gamepad1.y) {
+                    wrist.setPosition(subcurrentPosition);
+                    subposition = subposition+0.001;
+                    subcurrentPosition= subposition;
+                    telemetry.addData("x", subcurrentPosition);
+                    telemetry.update();
+                }
 
                 if (gamepad1.dpad_up) {
                     elbow.setPower(0.8);
+                    telemetry.addLine("dpad_up");
+                    telemetry.update();
                     //makes arm go up
                 } else if (gamepad1.dpad_down) {
                     elbow.setPower(-0.8);
+                    telemetry.addLine("dpad_down");
+                    telemetry.update();
                     //makes arm go down
                 } else {
                     elbow.setPower(0);
