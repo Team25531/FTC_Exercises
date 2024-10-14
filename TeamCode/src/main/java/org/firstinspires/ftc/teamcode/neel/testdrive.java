@@ -15,7 +15,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
-@TeleOp(name = "Neel: Button movement", group = "Neel")
+@TeleOp(name = "Neel: testdrive", group = "Neel")
 //we need to add the DcMotors
 public class testdrive extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();

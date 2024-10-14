@@ -1,13 +1,5 @@
 package org.firstinspires.ftc.teamcode.neel;
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-//imports are used so you can use a code defined from a different system
-=======
-import com.google.firestore.v1.Write;
->>>>>>> d5665675889ece1f28b22a45f48f524cf46194bb
-=======
->>>>>>> 2d559da858db5d6aac2932f3a10dd618a3194e82
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -20,10 +12,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "Neel: Button movement", group = "Neel")
 //we need to add the DcMotors
-//this code makes it so it s able to be shared
 public class motorMovementButton extends LinearOpMode {
-
-    //This code sets up a timer and declares motors for the robot's movement (front left, back left, front right, back right, elbow) and a servo for a claw or finger.
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
@@ -66,28 +55,18 @@ public class motorMovementButton extends LinearOpMode {
     double armPositionFudgeFactor;
 
 
-<<<<<<< HEAD
-    // this code makes it so it dosen't have to follow all the rules fromt he omports
-=======
->>>>>>> d5665675889ece1f28b22a45f48f524cf46194bb
     @Override
     public void runOpMode() throws InterruptedException {
-        //this code is us for defining motor
+
         DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeft");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
         DcMotor elbow = hardwareMap.dcMotor.get("elbow");
-<<<<<<< HEAD
-        finger = hardwareMap.get(Servo.class, "finger");
-
-        //setting direction for motor
-=======
         finger = hardwareMap.crservo.get("finger");
         wrist = hardwareMap.servo.get("wrist");
         //setting direction for motors
 
->>>>>>> d5665675889ece1f28b22a45f48f524cf46194bb
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
