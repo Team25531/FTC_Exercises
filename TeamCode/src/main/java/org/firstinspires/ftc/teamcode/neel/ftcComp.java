@@ -1,18 +1,16 @@
 package org.firstinspires.ftc.teamcode.neel;
 
-import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "Neel: Button movement", group = "Neel")
+@TeleOp(name = "FtcComp", group = "Ftc Comp")
 //we need to add the DcMotors
-public class motorMovementButton extends LinearOpMode {
+public class ftcComp extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
@@ -22,7 +20,7 @@ public class motorMovementButton extends LinearOpMode {
     private CRServo finger;
 
     private Servo wrist;
-    int position = 0;
+    double position = 0.312;
     final double ARM_TICKS_PER_DEGREE =
             28 // number of encoder ticks per rotation of the bare motor
                     * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
@@ -73,10 +71,10 @@ public class motorMovementButton extends LinearOpMode {
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
         wrist.setPosition(position);
-        position = 0;
-        double addposition = 0.1;
+        position = 0;//remove
+        double addposition = 0.001;
         double addedcurrentPosition = position;
-        double subposition = 0.1;
+        double subposition = -0.001;
         double subcurrentPosition = position;
 
         elbow.setDirection(DcMotor.Direction.REVERSE);
@@ -123,20 +121,33 @@ public class motorMovementButton extends LinearOpMode {
 
             runtime.reset();
 
-                if (gamepad1.a) {
+                if (gamepad1.b) {
+                    //math movement
+                  //  addposition = addposition+0.001;
+                  //  addedcurrentPosition = addposition;
+                    position += addposition;
+                    //check limit
+                    if (position>0.659) {
+                        position = 0.659;
+                    }
+                    //set position
+                    wrist.setPosition(position);
 
-
-                    wrist.setPosition(addedcurrentPosition);
-                    addposition = addposition+0.001;
-                    addedcurrentPosition = addposition;
-                    telemetry.addData("b", addedcurrentPosition);
+                    //debug
+                    telemetry.addData("b position", position);
                     telemetry.update();
                 }
-                if (gamepad1.y) {
-                    wrist.setPosition(subcurrentPosition);
-                    subposition = subposition+0.001;
-                    subcurrentPosition= subposition;
-                    telemetry.addData("x", subcurrentPosition);
+                if (gamepad1.x) {
+                    position -= addposition;
+                    //check limit
+                    if (position<0) {
+                        position = 0;
+                    }
+                    //set position
+                    wrist.setPosition(position);
+
+                    //debug
+                    telemetry.addData("x position", position);
                     telemetry.update();
                 }
 
@@ -160,19 +171,12 @@ public class motorMovementButton extends LinearOpMode {
                     finger.setPower(0.8);
                     //tire moves inward to pull block in
                 } else if (gamepad1.dpad_right) {
-
                     //tire moves outward to push block out
                     finger.setPower(-0.8);
-                } else {
-                    finger.setPower(0);
                 }
-
-
-
+                else {
+                    finger.setPower(0);
+                 }
         }
-
     }
 }
-
-
-
