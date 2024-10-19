@@ -6,8 +6,10 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @TeleOp(name = "Aaron: DrivingOmniWithLauncher", group = "Aaron")
+@Disabled
 public class DrivingOmniWithLauncher extends LinearOpMode {
     Servo servo;
     Servo Second_servo;
