@@ -76,6 +76,8 @@ public class ftcComp extends LinearOpMode {
         double addedcurrentPosition = position;
         double subposition = -0.001;
         double subcurrentPosition = position;
+        int armPosition = 0;
+        double armMovePos = 0.001;
 
         elbow.setDirection(DcMotor.Direction.REVERSE);
         //make it so that motors don't fall automaticly
@@ -152,15 +154,34 @@ public class ftcComp extends LinearOpMode {
                 }
 
                 if (gamepad1.dpad_up) {
-                    elbow.setPower(0.8);
-                    telemetry.addLine("dpad_up");
+                    armPosition -= armMovePos;
+                    //check limit
+                    if (armPosition <0) {
+                        armPosition = 0;
+                    }
+                    //set position
+                    elbow.setTargetPosition(armPosition);
+
+                    //debug
+                    telemetry.addData("dPadUp position", position);
                     telemetry.update();
+
                     //makes arm go up
                 } else if (gamepad1.dpad_down) {
-                    elbow.setPower(-0.8);
-                    telemetry.addLine("dpad_down");
+                    armPosition += armMovePos;
+                    //check limit
+                    if (armPosition <0) {
+                        armPosition = 0;
+                    }
+                    //set position
+                    elbow.setTargetPosition(armPosition);
+
+                    //debug
+                    telemetry.addData("dPadDown position", position);
                     telemetry.update();
-                    //makes arm go down
+
+                    //makes arm go up
+
                 } else {
                     elbow.setPower(0);
                     //the arm doesn't move
@@ -174,9 +195,7 @@ public class ftcComp extends LinearOpMode {
                     //tire moves outward to push block out
                     finger.setPower(-0.8);
                 }
-                else {
-                    finger.setPower(0);
-                 }
+
         }
     }
 }
