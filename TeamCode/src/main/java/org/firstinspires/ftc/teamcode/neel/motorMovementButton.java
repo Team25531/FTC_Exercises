@@ -179,8 +179,6 @@ public class motorMovementButton extends LinearOpMode {
                 }
 
 
-                } else if {
-                    finger.setPower(0);
                 }
 
 
