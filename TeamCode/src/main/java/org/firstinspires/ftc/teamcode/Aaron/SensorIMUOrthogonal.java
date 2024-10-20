@@ -38,6 +38,7 @@ import com.qualcomm.robotcore.hardware.IMU;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AngularVelocity;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /*
  * This OpMode shows how to use the new universal IMU interface. This
@@ -77,6 +78,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * to use those parameters.
  */
 @TeleOp(name = "Aaron: IMU Orthogonal", group = "Aaron")
+@Disabled
 public class SensorIMUOrthogonal extends LinearOpMode
 {
     // The IMU sensor object

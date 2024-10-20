@@ -1,0 +1,24 @@
+[33mc444129[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: reset: moving to HEAD
+[33mc444129[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{1}: reset: moving to HEAD
+[33mc444129[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{2}: commit: why won't this work
+[33m7533081[m HEAD@{3}: reset: moving to HEAD
+[33m7533081[m HEAD@{4}: commit (merge): git test
+[33m22ed16c[m HEAD@{5}: commit (merge): b
+[33m73d34cf[m HEAD@{6}: commit (merge): Your commit message
+[33m2635034[m HEAD@{7}: commit (merge): Your commit message here
+[33m1829690[m HEAD@{8}: commit (merge): Your commit message
+[33m5a3a08b[m HEAD@{9}: reset: moving to HEAD
+[33m5a3a08b[m HEAD@{10}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{11}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{12}: merge refs/remotes/origin/main: updating HEAD
+[33m5a3a08b[m HEAD@{13}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{14}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{15}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{16}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{17}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{18}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{19}: pull: updating HEAD
+[33m5a3a08b[m HEAD@{20}: commit (merge): army
+[33m198263a[m HEAD@{21}: commit (merge): arm
+[33m01c1d51[m HEAD@{22}: commit: trying to move arm
+[33me4f2b4d[m HEAD@{23}: clone: from https://github.com/Team25531/FTC_Exercises.git

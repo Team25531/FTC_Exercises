@@ -99,7 +99,7 @@ import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
  */
 
 @Autonomous(name="Aaron: Auto Drive By Gyro", group="Aaron")
-//@Disabled
+@Disabled
 public class RobotAutoDriveByGyro extends LinearOpMode  {
 
     /* Declare OpMode members. */

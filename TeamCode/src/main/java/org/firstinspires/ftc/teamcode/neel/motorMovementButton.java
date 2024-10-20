@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.neel;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "FtcComp", group = "Ftc Comp")
+@TeleOp(name = "Neel: Button movement", group = "Neel")
 //we need to add the DcMotors
-public class ftcComp extends LinearOpMode {
+public class motorMovementButton extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
@@ -20,7 +22,7 @@ public class ftcComp extends LinearOpMode {
     private CRServo finger;
 
     private Servo wrist;
-    double position = 0.312;
+    int position = 0;
     final double ARM_TICKS_PER_DEGREE =
             28 // number of encoder ticks per rotation of the bare motor
                     * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
@@ -65,11 +67,11 @@ public class ftcComp extends LinearOpMode {
         wrist = hardwareMap.servo.get("wrist");
         //setting direction for motors
 
-
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+
         wrist.setPosition(position);
         position = 0;//remove
         double addposition = 0.001;
@@ -90,9 +92,9 @@ public class ftcComp extends LinearOpMode {
 
         //waiting for start
         waitForStart();
-      //  elbow.setTargetPosition(0);
-      //  elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-      //  elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        elbow.setTargetPosition(0);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
         //reseting variable called runtime
@@ -116,44 +118,15 @@ public class ftcComp extends LinearOpMode {
             backLeftMotor.setPower(backLeftPower);
             frontRightMotor.setPower(frontRightPower);
             backRightMotor.setPower(backRightPower);
-
-
+            position = 1;
 
 
 
             runtime.reset();
-
-                if (gamepad1.b) {
-                    //math movement
-                  //  addposition = addposition+0.001;
-                  //  addedcurrentPosition = addposition;
-                    position += addposition;
-                    //check limit
-                    if (position>0.659) {
-                        position = 0.659;
-                    }
-                    //set position
-                    wrist.setPosition(position);
-
-                    //debug
-                    telemetry.addData("b position", position);
-                    telemetry.update();
-                }
-                if (gamepad1.x) {
-                    position -= addposition;
-                    //check limit
-                    if (position<0) {
-                        position = 0;
-                    }
-                    //set position
-                    wrist.setPosition(position);
-
-                    //debug
-                    telemetry.addData("x position", position);
-                    telemetry.update();
-                }
+                wrist.setPosition(position);
 
                 if (gamepad1.dpad_up) {
+
                     armPosition -= armMovePos;
                     //check limit
                     if (armPosition <0) {
@@ -182,6 +155,13 @@ public class ftcComp extends LinearOpMode {
 
                     //makes arm go up
 
+
+                    elbow.setPower(0.8);
+                    //makes arm go up
+                } else if (gamepad1.dpad_down) {
+                    elbow.setPower(-0.8);
+                    //makes arm go down
+
                 } else {
                     elbow.setPower(0);
                     //the arm doesn't move
@@ -192,10 +172,24 @@ public class ftcComp extends LinearOpMode {
                     finger.setPower(0.8);
                     //tire moves inward to pull block in
                 } else if (gamepad1.dpad_right) {
+
                     //tire moves outward to push block out
                     finger.setPower(-0.8);
+
                 }
 
+
+                } else if {
+                    finger.setPower(0);
+                }
+
+
+
+
         }
+
     }
-}
+
+
+
+
