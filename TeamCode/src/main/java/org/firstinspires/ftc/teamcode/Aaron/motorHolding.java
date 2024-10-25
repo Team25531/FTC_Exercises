@@ -43,7 +43,7 @@ public class motorHolding extends LinearOpMode {
     }
 
     public void HoldArmStill(int posToHold, DcMotor motor) {
-        int tolerance = 10;
+        int tolerance = 4;
         int currentPosition = motor.getCurrentPosition();
         if ((Math.abs(currentPosition - posToHold)) < tolerance) {
             return;
