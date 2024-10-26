@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Neel: Autodrive", group = "Neel")
+@Autonomous(name = "Autodrive", group = "FTC Comp")
 //we need to add the DcMotors
 public class autodrive extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
@@ -25,8 +25,8 @@ public class autodrive extends LinearOpMode {
             telemetry.addData("Path 11", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
             fL.setPower(0.5);
-            bL.setPower(0.5);
             fR.setPower(0.5);
+            bL.setPower(0.5);
             bR.setPower(0.5);
 
         }
@@ -51,17 +51,20 @@ public class autodrive extends LinearOpMode {
         // semicircle
 
         runtime.reset();
-        straightLine(frontLeftMotor, backLeftMotor, frontRightMotor, frontLeftMotor, 0.1);
-        while (opModeIsActive() && (runtime.seconds() < 0.5 )) {
-            frontLeftMotor.setPower(-9);
-            backLeftMotor.setPower(-9);
-            backRightMotor.setPower(9);
-            frontRightMotor.setPower(9);
+        straightLine(frontLeftMotor, backLeftMotor, frontRightMotor, frontLeftMotor, 0.2);
+        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotor.Direction.FORWARD);
+        frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
+        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        while (opModeIsActive() && (runtime.seconds() < 2.9 )) {
+            frontLeftMotor.setPower(0.3);
+            backLeftMotor.setPower(0.3);
+            backRightMotor.setPower(0.3);
+            frontRightMotor.setPower(0.3);
 
 
         }
 
 
-        straightLine(frontLeftMotor, backLeftMotor, frontRightMotor, frontLeftMotor, 2.3);
     }
 }

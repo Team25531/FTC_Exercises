@@ -51,6 +51,8 @@ public class ftcComp extends LinearOpMode {
     /* Variables that are used to set the arm to a specific position */
     double armPosition = (int)ARM_COLLAPSED_INTO_ROBOT;
     double armPositionFudgeFactor;
+    int HoldPosition;
+
 
 
     @Override
@@ -71,6 +73,7 @@ public class ftcComp extends LinearOpMode {
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
         wrist.setPosition(position);
+        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         position = 0;//remove
         double addposition = 0.001;
         double addedcurrentPosition = position;
@@ -152,40 +155,24 @@ public class ftcComp extends LinearOpMode {
                 telemetry.addData("x position", position);
                 telemetry.update();
             }
+            telemetry.addData("Currently goal", HoldPosition);
+            telemetry.addData("Currently   at", elbow.getCurrentPosition());
 
             if (gamepad1.dpad_up) {
-                armPosition -= armMovePos;
-                //check limit
-                if (armPosition <0) {
-                    armPosition = 0;
-                }
-                //set position
-                elbow.setTargetPosition(armPosition);
-
-                //debug
-                telemetry.addData("dPadUp position", position);
-                telemetry.update();
-
-                //makes arm go up
+                elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                elbow.setPower(-0.8);
+                HoldPosition = elbow.getCurrentPosition();
             } else if (gamepad1.dpad_down) {
-                armPosition += armMovePos;
-                //check limit
-                if (armPosition <0) {
-                    armPosition = 0;
-                }
-                //set position
-                elbow.setTargetPosition(armPosition);
-
-                //debug
-                telemetry.addData("dPadDown position", position);
-                telemetry.update();
-
-                //makes arm go up
-
+                elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+                elbow.setPower(0.8);
+                HoldPosition = elbow.getCurrentPosition();
             } else {
                 elbow.setPower(0);
-                //the arm doesn't move
+                HoldArmStill(HoldPosition, elbow);
             }
+            telemetry.update();
+
+
             //code for moving the finger aka the rubber tire with while loops
             if (gamepad1.dpad_left) {
 
@@ -197,5 +184,16 @@ public class ftcComp extends LinearOpMode {
             }
 
         }
+
+    }
+    public void HoldArmStill(int posToHold, DcMotor motor) {
+        int tolerance = 4;
+        int currentPosition = motor.getCurrentPosition();
+        if ((Math.abs(currentPosition - posToHold)) < tolerance) {
+            return;
+        }
+        motor.setTargetPosition(posToHold);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        motor.setPower(Math.abs(0.8));
     }
 }
