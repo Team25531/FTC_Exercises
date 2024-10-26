@@ -1,14 +1,15 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.extra;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name = "General: Autonomous8", group = "General")
-//we need to add the DcMotors
+@Disabled
 public class AutonamousFigure8Gen extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     @Override

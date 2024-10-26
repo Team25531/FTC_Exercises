@@ -4,6 +4,7 @@ import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /*
  * Sine wave sample to demonstrate telemetry and config variables in action. Adjust the amplitude,
@@ -11,6 +12,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
  */
 @Config
 @Autonomous(name = "Aaron: SineWaveTelem", group = "Aaron")
+@Disabled
 public class SineWaveTelem extends LinearOpMode {
     public static double AMPLITUDE = 10;
     public static double PHASE = 90;

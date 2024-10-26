@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.extra;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 
 @TeleOp(name = "General: NCrazyMode", group = "General")
+@Disabled
 public class NCrazyMode extends OpMode {
     @Override
     public void init() {

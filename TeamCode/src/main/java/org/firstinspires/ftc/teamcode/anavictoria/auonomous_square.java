@@ -5,12 +5,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 public class auonomous_square {
 
 
     @Autonomous(name = "auonumous_square", group = "auonumous_square")
-//we need to add the DcMotors
+@Disabled
     public class auonumous_square extends LinearOpMode {
         private ElapsedTime runtime = new ElapsedTime();
         @Override

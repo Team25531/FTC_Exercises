@@ -23,8 +23,8 @@ import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 
 
 
-@Autonomous(name="Neel : Square", group="Neel")
-//@Disabled
+@Autonomous(name="Neel : SquareNeel", group="Neel")
+@Disabled
 public class SquareNeel extends LinearOpMode  {
 
     /* Declare OpMode members. */

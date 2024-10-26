@@ -7,9 +7,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @Autonomous(name = "Neel: StraightLine", group = "Neel")
-//we need to add the DcMotors
+@Disabled//we need to add the DcMotors
 public class StraightLine extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");

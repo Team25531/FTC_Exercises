@@ -3,13 +3,14 @@ package org.firstinspires.ftc.teamcode.neel;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name = "Neel: Semicirlce", group = "Neel")
-//we need to add the DcMotors
+@Disabled//we need to add the DcMotors
 public class semicircle extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");

@@ -5,9 +5,11 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
 
 @Autonomous(name = "AnaVictoria: StraightLine", group = "AnaVictoria")
-//we need to add the DcMotors
+@Disabled//we need to add the DcMotors
 public class AnaVictoriaStraightLine extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     @Override

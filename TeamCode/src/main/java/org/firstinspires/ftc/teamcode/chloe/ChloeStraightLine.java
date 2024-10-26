@@ -3,13 +3,14 @@ package org.firstinspires.ftc.teamcode.chloe;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 @Autonomous(name = "Chloe: StraightLine", group = "Chloe")
-//we need to add the DcMotors
+@Disabled
 public class ChloeStraightLine extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     @Override
