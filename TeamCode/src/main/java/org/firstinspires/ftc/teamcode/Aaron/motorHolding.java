@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 @TeleOp(name = "motorHolding", group = "Aaron")
-//@Disabled
+@Disabled
 public class motorHolding extends LinearOpMode {
     int HoldPosition;
 
