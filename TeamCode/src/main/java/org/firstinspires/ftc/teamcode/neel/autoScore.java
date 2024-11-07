@@ -95,6 +95,7 @@ public class autoScore extends LinearOpMode {
         finger = hardwareMap.crservo.get("finger");
         wrist = hardwareMap.servo.get("wrist");
         //setting direction for motors
+        
 
 
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
