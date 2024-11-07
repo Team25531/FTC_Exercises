@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.neel;
 
+import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "FtcComp", group = "Ftc Comp")
+@Autonomous  (name = "auto Score", group = "auto")
 //we need to add the DcMotors
-public class ftcComp extends LinearOpMode {
+public class autoScore extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
@@ -53,7 +55,34 @@ public class ftcComp extends LinearOpMode {
     double armPositionFudgeFactor;
     int HoldPosition;
 
+    private void turn (DcMotor fL, DcMotor bL, DcMotor fR, DcMotor bR, double time) {
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < time)) {
+            telemetry.addData("Path 11", "Leg 1: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+            fL.setPower(0.5);
+            fR.setPower(0.5);
+            bL.setPower(0.5);
+            bR.setPower(0.5);
 
+        }
+        runtime.reset();
+
+    }
+    private void straightLine (DcMotor fL, DcMotor bL, DcMotor fR, DcMotor bR, double time) {
+        runtime.reset();
+        while (opModeIsActive() && (runtime.seconds() < time)) {
+            telemetry.addData("Path 11", "Leg 1: %4.1f S Elapsed", runtime.seconds());
+            telemetry.update();
+            fL.setPower(0.5);
+            fR.setPower(0.5);
+            bL.setPower(0.5);
+            bR.setPower(0.5);
+
+        }
+        runtime.reset();
+
+    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -102,103 +131,17 @@ public class ftcComp extends LinearOpMode {
         if (isStopRequested()) return;
 
         while (opModeIsActive()) {
-            double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-            double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
-            double rx = gamepad1.right_stick_x;
 
-            // Denominator is the largest motor power (absolute value) or 1
-            // This ensures all the powers maintain the same ratio,
-            // but only if at least one is out of the range [-1, 1]
-            double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+            straightLine(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, 0.1);
+            HoldArmStill(-3180, elbow);
 
-            double speedModifier = Math.abs(1.5);
-            denominator *= speedModifier;
-
-            if (gamepad1.y) {
-                denominator *= 2.5;
-            }
-
-            double frontLeftPower = (y + x + rx) / denominator;
-            double backLeftPower = (y - x + rx) / denominator;
-            double frontRightPower = (y - x - rx) / denominator;
-            double backRightPower = (y + x - rx) / denominator;
-
-            frontLeftMotor.setPower(frontLeftPower);
-            backLeftMotor.setPower(backLeftPower);
-            frontRightMotor.setPower(frontRightPower);
-            backRightMotor.setPower(backRightPower);
-
-
-
-
-
-
-
-            runtime.reset();
-
-            if (gamepad1.b) {
-                //math movement
-                //  addposition = addposition+0.001;
-                //  addedcurrentPosition = addposition;
-                position += addposition;
-                //check limit
-                if (position>0.659) {
-                    position = 0.659;
-                }
-                //set position
-                wrist.setPosition(position);
-
-                //debug
-                telemetry.addData("b position", position);
-                telemetry.update();
-            }
-            if (gamepad1.x) {
-                position -= addposition;
-                //check limit
-                if (position<0) {
-                    position = 0;
-                }
-                //set position
-                wrist.setPosition(position);
-
-                //debug
-                telemetry.addData("x position", position);
-                telemetry.update();
-            }
-            telemetry.addData("Currently goal", HoldPosition);
-            telemetry.addData("Currently   at", elbow.getCurrentPosition());
-
-            if (gamepad1.right_bumper) {
-                elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                elbow.setPower(-0.9);
-                HoldPosition = elbow.getCurrentPosition();
-            } else if (gamepad1.right_trigger > 0) {
-                elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                elbow.setPower(0.9);
-                telemetry.addData("currently at :", elbow.getCurrentPosition());
-                HoldPosition = elbow.getCurrentPosition();
-            } else {
-                elbow.setPower(0);
-                HoldArmStill(HoldPosition, elbow);
-            }
-            telemetry.update();
-
-
-            //code for moving the finger aka the rubber tire with while loops
-            if (gamepad1.left_bumper) {
-
-                finger.setPower(0.8);
-                //tire moves inward to pull block in
-            } else if (gamepad1.left_trigger > 0) {
-                //tire moves outward to push block out
-                finger.setPower(-0.8);
-            } else {
-                finger.setPower(0);
-            }
+            turn(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, 0.1);
+            //finger.setPower(0.8);
 
         }
 
-    } public void HoldArmStill(int posToHold, DcMotor motor) {
+    }
+    public void HoldArmStill(int posToHold, DcMotor motor) {
         int tolerance = 4;
         int currentPosition = motor.getCurrentPosition();
         if ((Math.abs(currentPosition - posToHold)) < tolerance) {
@@ -208,5 +151,4 @@ public class ftcComp extends LinearOpMode {
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motor.setPower(Math.abs(0.8));
     }
-
 }
