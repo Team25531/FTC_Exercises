@@ -136,7 +136,7 @@ public class autoScore extends LinearOpMode {
             HoldArmStill(-3180, elbow);
 
             turn(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, 0.1);
-            //finger.setPower(0.8);
+            finger.setPower(0.8);
 
         }
 
