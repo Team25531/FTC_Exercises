@@ -7,12 +7,14 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
-public class auonomous_square {
+
+//This was a nested class and causing an error on the robot controller.
+//public class auonomous_square {
 
 
     @Autonomous(name = "auonumous_square", group = "auonumous_square")
 @Disabled
-    public class auonumous_square extends LinearOpMode {
+    public class auonomous_square extends LinearOpMode {
         private ElapsedTime runtime = new ElapsedTime();
         @Override
         public void runOpMode() throws InterruptedException {
@@ -44,4 +46,4 @@ public class auonomous_square {
         }
     }
 
-}
+//}
