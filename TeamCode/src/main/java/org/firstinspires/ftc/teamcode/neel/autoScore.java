@@ -171,11 +171,18 @@ public class autoScore extends LinearOpMode {
 
 
 
-            straightLine(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, 0.1);
-            HoldArmStill(-3180, elbow);
-
-            turn(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, 0.1);
-            finger.setPower(0.8);
+        //Start and move arm to set down position
+        //Forward 1; right ticks = 909, left tick = 848
+        //Turn 1; heading = 125.4, right ticks = 1462, left ticks = -1236
+        //Forward 2; right ticks = 735, left ticks = 538
+        //Stop 1; 0,0,0
+        //Arm raise; unfound
+        //eject; finger 0.8 power
+        //arm high set pos; unfound
+        //Turn 2; heading = -151.8, right ticks = -1357, left ticks = 1521
+        // Forward 3;right ticks = 2056, left ticks = 2115
+        //Turn 3; Heading = 67.8, Right ticks -529, left ticks = 705;
+        //Forward 4; right ticks = 247 , left ticks, 260
 
 
 
