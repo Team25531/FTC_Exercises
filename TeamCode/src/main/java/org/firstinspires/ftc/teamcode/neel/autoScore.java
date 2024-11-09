@@ -9,6 +9,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.qualcomm.robotcore.hardware.IMU;
+import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import com.qualcomm.robotcore.util.Range;
+
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+
+import com.qualcomm.robotcore.hardware.Gyroscope;
+import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 
 @Autonomous  (name = "auto Score", group = "auto")
 //we need to add the DcMotors
@@ -54,6 +63,7 @@ public class autoScore extends LinearOpMode {
     double armPosition = (int)ARM_COLLAPSED_INTO_ROBOT;
     double armPositionFudgeFactor;
     int HoldPosition;
+    private IMU             imu         = null;
 
     private void turn (DcMotor fL, DcMotor bL, DcMotor fR, DcMotor bR, double time) {
         runtime.reset();
@@ -92,8 +102,30 @@ public class autoScore extends LinearOpMode {
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
         DcMotor elbow = hardwareMap.dcMotor.get("elbow");
+
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         finger = hardwareMap.crservo.get("finger");
         wrist = hardwareMap.servo.get("wrist");
+
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD;
+        RevHubOrientationOnRobot.UsbFacingDirection  usbDirection  = RevHubOrientationOnRobot.UsbFacingDirection.UP;
+        RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
+        imu = hardwareMap.get(IMU.class, "imu");
+        imu.initialize(new IMU.Parameters(orientationOnRobot));
+        imu.resetYaw();
+
+        while (opModeInInit()) {
+            int ticksRight = frontRightMotor.getCurrentPosition();
+            int ticksLeft = frontLeftMotor.getCurrentPosition()*-1;
+            telemetry.addData("> heading", "%4.1f", getHeading())
+                    .addData(">right ticks", ticksRight)
+                    .addData("> left ticks", ticksLeft);
+            telemetry.update();
+        }
+
+
         //setting direction for motors
 
 
@@ -102,6 +134,9 @@ public class autoScore extends LinearOpMode {
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+
+
+
         wrist.setPosition(position);
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         position = 0;//remove
@@ -111,6 +146,7 @@ public class autoScore extends LinearOpMode {
         double subcurrentPosition = position;
         int armPosition = 0;
         double armMovePos = 0.001;
+
 
         elbow.setDirection(DcMotor.Direction.REVERSE);
         //make it so that motors don't fall automaticly
@@ -129,9 +165,11 @@ public class autoScore extends LinearOpMode {
 
 
         //reseting variable called runtime
-        if (isStopRequested()) return;
+        if (isStopRequested()) {
+            return;
+        }
 
-        while (opModeIsActive()) {
+
 
             straightLine(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, 0.1);
             HoldArmStill(-3180, elbow);
@@ -139,8 +177,23 @@ public class autoScore extends LinearOpMode {
             turn(frontLeftMotor, backLeftMotor, frontRightMotor, backRightMotor, 0.1);
             finger.setPower(0.8);
 
-        }
 
+
+    }
+    public double getHeading() {
+        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+        return orientation.getYaw(AngleUnit.DEGREES);
+    }
+    String formatRate(float rate) {
+        return String.format("%.3f", rate);
+    }
+
+    String formatAngle(AngleUnit angleUnit, double angle) {
+        return formatDegrees(AngleUnit.DEGREES.fromUnit(angleUnit, angle));
+    }
+
+    String formatDegrees(double degrees){
+        return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
     public void HoldArmStill(int posToHold, DcMotor motor) {
         int tolerance = 4;
