@@ -17,6 +17,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
+import org.firstinspires.ftc.teamcode.Aaron.BackgroundElbowMove;
+import org.firstinspires.ftc.teamcode.Aaron.GlobalState;
 
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
@@ -29,11 +31,14 @@ public class autoScore extends LinearOpMode {
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
     private DcMotor frontRightMotor;// = hardwareMap.dcMotor.get("frontRight");
     private DcMotor backRightMotor;// = hardwareMap.dcMotor.get("backRight");
-    private DcMotor elbow;// = hardwareMap.dcMotor.get("backRight");
+    public static DcMotor elbow;// = hardwareMap.dcMotor.get("backRight");
     private CRServo finger;
-    private int elbowPosition = -200;
+    private static int elbowPosition = -200;
     private Servo wrist;
     double position = 0.312;
+    GlobalState globalState;
+    private int tickTarget = 100;
+
     private double targetHeading = 0;
     private double driveSpeed = 0.3;
     private double turnSpeed = 0;
@@ -88,191 +93,6 @@ public class autoScore extends LinearOpMode {
     }
 
 
-    public void driveStraight(double maxDriveSpeed, double distance, double heading) {
-
-        // Ensure that the OpMode is still active
-        if (opModeIsActive()) {
-
-            // Determine new target position, and pass to motor controller
-            int moveCounts = (int) (distance * COUNTS_PER_INCH);
-            leftTarget = frontLeftMotor.getCurrentPosition() + moveCounts;
-            rightTarget = frontRightMotor.getCurrentPosition() + moveCounts;
-
-            // Set Target FIRST, then turn on RUN_TO_POSITION
-            frontLeftMotor.setTargetPosition(leftTarget);
-            frontRightMotor.setTargetPosition(rightTarget);
-
-            frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
-            // Set the required driving speed  (must be positive for RUN_TO_POSITION)
-            // Start driving straight, and then enter the control loop
-            maxDriveSpeed = Math.abs(maxDriveSpeed);
-            moveRobot(maxDriveSpeed, 0);
-
-            // keep looping while we are still active, and BOTH motors are running.
-            while (opModeIsActive() && (frontLeftMotor.isBusy() && frontRightMotor.isBusy())) {
-
-                // Determine required steering to keep on heading
-                turnSpeed = getSteeringCorrection(heading, P_DRIVE_GAIN);
-
-                // if driving in reverse, the motor correction also needs to be reversed
-                if (distance < 0) turnSpeed *= -1.0;
-
-                // Apply the turning correction to the current driving speed.
-                moveRobot(driveSpeed, turnSpeed);
-
-                // Display drive status for the driver.
-                sendTelemetry(true);
-            }
-
-            // Stop all motion & Turn off RUN_TO_POSITION
-            moveRobot(0, 0);
-          //  frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-          //  frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        }
-    }
-
-    public void holdHeading(double maxTurnSpeed, double heading, double holdTime) {
-
-        ElapsedTime holdTimer = new ElapsedTime();
-        holdTimer.reset();
-
-        // keep looping while we have time remaining.
-        while (opModeIsActive() && (holdTimer.time() < holdTime)) {
-            // Determine required steering to keep on heading
-            turnSpeed = getSteeringCorrection(heading, P_TURN_GAIN);
-
-            // Clip the speed to the maximum permitted value.
-            turnSpeed = Range.clip(turnSpeed, -maxTurnSpeed, maxTurnSpeed);
-
-            // Pivot in place by applying the turning correction
-            moveRobot(0, turnSpeed);
-
-            // Display drive status for the driver.
-            sendTelemetry(false);
-        }
-
-        // Stop all motion;
-        moveRobot(0, 0);
-    }
-
-
-    private void sendTelemetry(boolean straight) {
-
-        if (straight) {
-            telemetry.addData("Motion", "Drive Straight");
-            telemetry.addData("Target Pos L:R", "%7d:%7d", leftTarget, rightTarget);
-            telemetry.addData("Actual Pos L:R", "%7d:%7d", frontLeftMotor.getCurrentPosition(), frontRightMotor.getCurrentPosition());
-        } else {
-            telemetry.addData("Motion", "Turning");
-        }
-
-        telemetry.addData("Elbow Position", elbow.getCurrentPosition());
-        telemetry.addData("Heading- Target : Current", "%5.2f : %5.0f", targetHeading, getHeading());
-        telemetry.addData("Error  : Steer Pwr", "%5.1f : %5.1f", headingError, turnSpeed);
-        telemetry.addData("Wheel Speeds L : R", "%5.2f : %5.2f", leftSpeed, rightSpeed);
-        telemetry.update();
-    }
-
-    public double getSteeringCorrection(double desiredHeading, double proportionalGain) {
-        targetHeading = desiredHeading;  // Save for telemetry
-
-        // Determine the heading current error
-        headingError = targetHeading - getHeading();
-
-        // Normalize the error to be within +/- 180 degrees
-        while (headingError > 180) headingError -= 360;
-        while (headingError <= -180) headingError += 360;
-
-        // Multiply the error by the gain to determine the required steering correction/  Limit the result to +/- 1.0
-        return Range.clip(headingError * proportionalGain, -1, 1);
-    }
-
-    public void moveRobot(double drive, double turn) {
-        //always tell the arm where to be.
-        HoldArmStill();
-
-        driveSpeed = drive;     // save this value as a class member so it can be used by telemetry.
-        turnSpeed = turn;      // save this value as a class member so it can be used by telemetry.
-
-        leftSpeed = drive - turn;
-        rightSpeed = drive + turn;
-
-
-        // Scale speeds down if either one exceeds +/- 1.0;
-        double max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
-        if (max > 1.0) {
-            leftSpeed /= max;
-            rightSpeed /= max;
-        }
-
-        frontLeftMotor.setPower(leftSpeed);
-        frontRightMotor.setPower(rightSpeed);
-        backLeftMotor.setPower(leftSpeed);
-        backRightMotor.setPower(rightSpeed);
-    }
-
-    public void turnToHeading(double maxTurnSpeed, double heading) {
-
-        // Run getSteeringCorrection() once to pre-calculate the current error
-        getSteeringCorrection(heading, P_DRIVE_GAIN);
-
-        // keep looping while we are still active, and not on heading.
-        while (opModeIsActive() && (Math.abs(headingError) > HEADING_THRESHOLD)) {
-
-            // Determine required steering to keep on heading
-            turnSpeed = getSteeringCorrection(heading, P_TURN_GAIN);
-
-            // Clip the speed to the maximum permitted value.
-            turnSpeed = Range.clip(turnSpeed, -maxTurnSpeed, maxTurnSpeed);
-
-            // Pivot in place by applying the turning correction
-            moveRobot(0, turnSpeed);
-
-            // Display drive status for the driver.
-            sendTelemetry(false);
-        }
-
-        // Stop all motion;
-        moveRobot(0, 0);
-    }
-
-    private void driveStraightGyro() {
-
-        double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
-        double x = gamepad1.left_stick_x;
-        double rx = gamepad1.right_stick_x;
-
-        // This button choice was made so that it is hard to hit on accident,
-        // it can be freely changed based on preference.
-        // The equivalent button is start on Xbox-style controllers.
-        if (gamepad1.options) {
-            imu.resetYaw();
-        }
-
-        double botHeading = imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
-
-        // Rotate the movement direction counter to the bot's rotation
-        double rotX = x * Math.cos(-botHeading) - y * Math.sin(-botHeading);
-        double rotY = x * Math.sin(-botHeading) + y * Math.cos(-botHeading);
-
-        rotX = rotX * 1.1;  // Counteract imperfect strafing
-
-        // Denominator is the largest motor power (absolute value) or 1
-        // This ensures all the powers maintain the same ratio,
-        // but only if at least one is out of the range [-1, 1]
-        double denominator = Math.max(Math.abs(rotY) + Math.abs(rotX) + Math.abs(rx), 1);
-        double frontLeftPower = (rotY + rotX + rx) / denominator;
-        double backLeftPower = (rotY - rotX + rx) / denominator;
-        double frontRightPower = (rotY - rotX - rx) / denominator;
-        double backRightPower = (rotY + rotX - rx) / denominator;
-
-        frontLeftMotor.setPower(frontLeftPower);
-        backLeftMotor.setPower(backLeftPower);
-        frontRightMotor.setPower(frontRightPower);
-        backRightMotor.setPower(backRightPower);
-    }
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -283,7 +103,9 @@ public class autoScore extends LinearOpMode {
         backRightMotor = hardwareMap.dcMotor.get("backRight");
 
         frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
@@ -292,16 +114,16 @@ public class autoScore extends LinearOpMode {
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         elbow = hardwareMap.dcMotor.get("elbow");
         finger = hardwareMap.crservo.get("finger");
         wrist = hardwareMap.servo.get("wrist");
 
-        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        // elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setDirection(DcMotor.Direction.REVERSE);
+        elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.BACKWARD;
         RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.UP;
@@ -311,52 +133,61 @@ public class autoScore extends LinearOpMode {
         imu.resetYaw();
 
         while (opModeInInit()) {
-            int ticksRight = frontRightMotor.getCurrentPosition();
-            int ticksLeft = frontLeftMotor.getCurrentPosition() * -1;
-            telemetry.addData("> heading", "%4.1f", getHeading())
-                    .addData(">right ticks", ticksRight)
-                    .addData("> left ticks", ticksLeft)
-                    .addData("Elbow Position", elbow.getCurrentPosition());
-
-            telemetry.update();
+            sendTelemetry(true);
         }
-
-
-//        wrist.setPosition(position);
-//        position = 0;//remove
-//        double addposition = 0.001;
-//        double addedcurrentPosition = position;
-//        double subposition = -0.001;
-//        double subcurrentPosition = position;
-//        int armPosition = 0;
-//        double armMovePos = 0.001;
-
-
-        //make it so that motors don't fall automaticly
 
         //waiting for start
         waitForStart();
-        //  elbow.setTargetPosition(0);
-        //  elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        //  elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
-        //reseting variable called runtime
-        if (isStopRequested()) {
-            return;
-        }
+        //this only needs to be called once, after that calling SetElbowPosition will move the arm
+        StartElbowControl();
 
-        elbowPosition=-200;
+        //set the Tick position of the elbow
+        SetElbowPosition(-400);
+        double driveSpeed;
 
+        driveSpeed = 0.6;
 
-      //  driveStraight(driveSpeed, 1, 0);
-     //   sleep(2000);
-        elbowPosition = -500;
+        //always starts from zero. Left is positive, Right is negative.
         turnToHeading(driveSpeed, 45);
-        elbowPosition = -700;
-        holdHeading(driveSpeed, 45, 3);
-        turnToHeading(driveSpeed, 0);
-        holdHeading(driveSpeed, 0, 3);
+        //holding can allow it to stabilize on a critical heading. Not required, but improves accuracy.
+        holdHeading(driveSpeed, 45, 1);
+        //this sets the current forward direction of the robot to zero, so the next turn command starts from zero.
+        resetHeadingIMU();
+        sleep(10);
+
+
+        //move a specific distance in ticks. It uses the average of the 4 wheel ticks
+        //use a positive number for Forward, and a negative number for Reverse.
+        MoveStraightTicks(1000, driveSpeed);
+
+        //sometimes a little sleep time helps things from being to jittery.
+        sleep(10);
+
+        turnToHeading(driveSpeed, -45);
+        holdHeading(driveSpeed, -45, 1);
+
+        sleep(10);
+
+        MoveStraightTicks(-2000, driveSpeed);
+        sleep(10);
+
+        turnToHeading(driveSpeed, 75);
+        sleep(10);
+
+
+        SetElbowPosition(-200);
+        sleep(10);
+
+
+        //only needs to be called once at end of operation
+        StopElbowControl();
+        requestOpModeStop();
+
+//TODO: need start roller and stop roller methods, also release arm power (maybe just stop the routine).
+
+
 
         //Start and move arm to set down position
         //Forward 1; right ticks = 909, left tick = 848
@@ -375,11 +206,31 @@ public class autoScore extends LinearOpMode {
     }
 
 
+
+    void SetElbowGoal(int goal) {
+        elbowPosition = goal;
+    }
+
+    public static int GetElbowGoal() {
+        return elbowPosition;
+    }
+
     public double getHeading() {
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         return orientation.getYaw(AngleUnit.DEGREES);
     }
+    private void StopElbowControl() {
+        globalState.isCancelled = true;
+    }
 
+    private void StartElbowControl() {
+        new Thread(new BackgroundElbowMove(globalState)).start();
+    }
+
+    private void SetElbowPosition(int position) {
+        globalState.setElbowPosition(position);
+
+    }
     @SuppressLint("DefaultLocale")
     String formatRate(float rate) {
         return String.format("%.3f", rate);
@@ -394,14 +245,213 @@ public class autoScore extends LinearOpMode {
         return String.format("%.1f", AngleUnit.DEGREES.normalize(degrees));
     }
 
-    public void HoldArmStill() {
-        int tolerance = 4;
-        int currentPosition = elbow.getCurrentPosition();
-        if ((Math.abs(currentPosition - elbowPosition)) < tolerance) {
-            return;
+    private double headingStore;
+
+    public void turnToHeading(double maxTurnSpeed, double heading) {
+        System.out.println("Methods:turnToHeading");
+        headingStore = heading;
+        // Run getSteeringCorrection() once to pre-calculate the current error
+        getSteeringCorrection(heading, P_DRIVE_GAIN);
+
+        // keep looping while we are still active, and not on heading.
+        while (opModeIsActive() && (Math.abs(headingError) > HEADING_THRESHOLD)) {
+
+            // Determine required steering to keep on heading
+            turnSpeed = getSteeringCorrection(heading, P_TURN_GAIN);
+
+            // Clip the speed to the maximum permitted value.
+            turnSpeed = Range.clip(turnSpeed, -maxTurnSpeed, maxTurnSpeed);
+            System.out.println("turnSpeed:" + Double.toString(turnSpeed));
+
+            if (Math.abs(turnSpeed) < .1) {
+                if (turnSpeed > 0) {
+                    turnSpeed = .1;
+                } else {
+                    turnSpeed = -.1;
+                }
+            }
+            System.out.println("OutturnSpeed:" + Double.toString(turnSpeed));
+
+            // Pivot in place by applying the turning correction
+            moveRobot(0, turnSpeed);
+
+            // Display drive status for the driver.
+            sendTelemetry(true);
         }
-        elbow.setTargetPosition(elbowPosition);
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setPower(Math.abs(0.8));
+
+        // Stop all motion;
+        moveRobot(0, 0);
     }
+    private void StopMovement() {
+        moveRobot(0, 0);
+
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public void moveRobot(double drive, double turn) {
+
+        double leftSpeed = drive - turn;
+        double rightSpeed = drive + turn;
+
+        // Scale speeds down if either one exceeds +/- 1.0;
+        double max = Math.max(Math.abs(leftSpeed), Math.abs(rightSpeed));
+        if (max > 1.0) {
+            leftSpeed /= max;
+            rightSpeed /= max;
+        }
+
+        frontLeftMotor.setPower(leftSpeed);
+        frontRightMotor.setPower(rightSpeed);
+        backLeftMotor.setPower(leftSpeed);
+        backRightMotor.setPower(rightSpeed);
+    }
+    public void holdHeading(double maxTurnSpeed, double heading, double holdTime) {
+
+        ElapsedTime holdTimer = new ElapsedTime();
+        holdTimer.reset();
+
+        // keep looping while we have time remaining.
+        while (opModeIsActive() && (holdTimer.time() < holdTime)) {
+            // Determine required steering to keep on heading
+            turnSpeed = getSteeringCorrection(heading, P_TURN_GAIN);
+
+            // Clip the speed to the maximum permitted value.
+            turnSpeed = Range.clip(turnSpeed, -maxTurnSpeed, maxTurnSpeed);
+
+            if (Math.abs(turnSpeed) < .08) {
+                if (turnSpeed > 0) {
+                    turnSpeed = .08;
+                } else {
+                    turnSpeed = -.08;
+                }
+            }
+            // Pivot in place by applying the turning correction
+            moveRobot(0, turnSpeed);
+
+            // Display drive status for the driver.
+            sendTelemetry(false);
+        }
+        // moveRobot(0, 0);
+    }
+
+    public double getSteeringCorrection(double desiredHeading, double proportionalGain) {
+
+        // Determine the heading current error
+        headingError = desiredHeading - getHeadingIMU();
+
+        // Normalize the error to be within +/- 180 degrees
+        while (headingError > 180) headingError -= 360;
+        while (headingError <= -180) headingError += 360;
+
+        // Multiply the error by the gain to determine the required steering correction/  Limit the result to +/- 1.0
+        double correction = headingError * proportionalGain;
+        return Range.clip(correction, -1, 1);
+    }
+
+
+    private void MoveStraightTicks(int targetTicks, double speed) {
+        if (opModeIsActive()) {
+            resetHeadingIMU();
+            tickTarget = targetTicks;
+            frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+            frontLeftMotor.setTargetPosition(tickTarget);
+            backLeftMotor.setTargetPosition(tickTarget);
+            frontRightMotor.setTargetPosition(tickTarget);
+            backRightMotor.setTargetPosition(tickTarget);
+
+            frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            frontRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            backRightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            if (tickTarget > 0) {
+                moveRobotToTickTargetForward(speed);
+            } else {
+                moveRobotToTickTargetReverse(speed);
+            }
+
+        }
+    }
+    public int getAverageTicksMoved() {
+
+        int total = frontLeftMotor.getCurrentPosition() +
+                frontRightMotor.getCurrentPosition() +
+                backLeftMotor.getCurrentPosition() +
+                backRightMotor.getCurrentPosition();
+        total = total / 4;
+        return total;
+    }
+    public void moveRobotToTickTargetReverse(double speed) {
+        while (opModeIsActive() && getAverageTicksMoved() > tickTarget) {
+
+            double turnSpeed = getSteeringCorrection(0, P_DRIVE_GAIN);
+            turnSpeed *= -1.0;
+
+            moveRobot(-speed, turnSpeed);
+        }
+        StopMovement();
+    }
+
+
+    public void moveRobotToTickTargetForward(double speed) {
+        while (opModeIsActive() && getAverageTicksMoved() < tickTarget) {
+            double turnSpeed = getSteeringCorrection(0, P_DRIVE_GAIN);
+
+            // if driving in reverse, the motor correction also needs to be reversed
+            //   if (tickTarget < 0) turnSpeed *= -1.0;
+
+            // Apply the turning correction to the current driving speed.
+            moveRobot(speed, turnSpeed);
+            //  moveRobot(.6, 0);
+        }
+        // moveRobot(0, 0);
+        StopMovement();
+    }
+
+
+    private void sendTelemetry(boolean straight) {
+
+        if (straight) {
+            telemetry.addData("Motion", "Drive Straight");
+            //  telemetry.addData("Target Pos L:R", "%7d:%7d", leftTarget, rightTarget);
+            telemetry.addData("Actual Pos L:R", "%7d:%7d", frontLeftMotor.getCurrentPosition(), frontRightMotor.getCurrentPosition());
+        } else {
+            telemetry.addData("Motion", "Turning");
+        }
+
+        int frontLeftMotorTicks = frontLeftMotor.getCurrentPosition();
+        int backLeftMotorTicks = backLeftMotor.getCurrentPosition();
+        int frontRightMotorTicks = frontRightMotor.getCurrentPosition();
+        int backRightMotorTicks = backRightMotor.getCurrentPosition();
+        int averageTicks = (frontLeftMotorTicks + backLeftMotorTicks + frontRightMotorTicks + backRightMotorTicks) / 4;
+        telemetry.addData("> heading IMU", "%4.1f", getHeadingIMU())
+              //  .addData(">heading NavX", "%4.1f", getHeadingNavX())
+                .addData(">goal heading ", "%4.1f", headingStore)
+                .addData("> delta heading", "%4.1f", headingError)
+                .addData("> turn speed", "%4.1f", turnSpeed)
+                .addData(">frontLeftMotor ticks", frontLeftMotorTicks)
+                .addData(">backLeftMotor ticks", backLeftMotorTicks)
+                .addData(">frontRightMotor ticks", frontRightMotorTicks)
+                .addData(">frontLeftMotor ticks", backRightMotorTicks)
+                .addData(">Average Motor ticks", averageTicks)
+                .addData("> elbow Pos", elbow.getCurrentPosition())
+                .addData("> Elbow State", globalState.getElbowPosition());
+        telemetry.update();
+    }
+
+    public void resetHeadingIMU() {
+        imu.resetYaw();
+    }
+    public double getHeadingIMU() {
+        YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
+        return orientation.getYaw(AngleUnit.DEGREES);
+    }
+
+
 }
