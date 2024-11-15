@@ -36,7 +36,7 @@ public class autoScore extends LinearOpMode {
     private static int elbowPosition = -200;
     private Servo wrist;
     double position = 0.312;
-    GlobalState globalState;
+    GlobalState globalState = new GlobalState();
     private int tickTarget = 100;
 
     private double targetHeading = 0;
@@ -79,6 +79,11 @@ public class autoScore extends LinearOpMode {
 
     private void straightLine(DcMotor fL, DcMotor bL, DcMotor fR, DcMotor bR, double time) {
         runtime.reset();
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
         while (opModeIsActive() && (runtime.seconds() < time)) {
             telemetry.addData("Path 11", "Leg 1: %4.1f S Elapsed", runtime.seconds());
             telemetry.update();
@@ -89,9 +94,9 @@ public class autoScore extends LinearOpMode {
 
         }
         runtime.reset();
+        StopMovement();
 
     }
-
 
 
     @Override
@@ -111,6 +116,8 @@ public class autoScore extends LinearOpMode {
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+
+
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -145,14 +152,21 @@ public class autoScore extends LinearOpMode {
 
         //set the Tick position of the elbow
         SetElbowPosition(-400);
-        double driveSpeed;
 
-        driveSpeed = 0.6;
+        //use this to change the speed during movement.
+        double driveSpeed = 0.5;
+
+        sleep(1000);
+
+        //starting slow during testing. Slower will get more accurate results.
+        driveSpeed = 0.2;
 
         //always starts from zero. Left is positive, Right is negative.
         turnToHeading(driveSpeed, 45);
+
         //holding can allow it to stabilize on a critical heading. Not required, but improves accuracy.
         holdHeading(driveSpeed, 45, 1);
+
         //this sets the current forward direction of the robot to zero, so the next turn command starts from zero.
         resetHeadingIMU();
         sleep(10);
@@ -160,6 +174,7 @@ public class autoScore extends LinearOpMode {
 
         //move a specific distance in ticks. It uses the average of the 4 wheel ticks
         //use a positive number for Forward, and a negative number for Reverse.
+        //NOTE: Reverse might not work properly right now, needs more testing.
         MoveStraightTicks(1000, driveSpeed);
 
         //sometimes a little sleep time helps things from being to jittery.
@@ -170,6 +185,8 @@ public class autoScore extends LinearOpMode {
 
         sleep(10);
 
+        //NOTE: Reverse might not work properly right now, needs more testing.
+        //BE PREPARED TO STOP THE ROBOT WHEN TRYING TO REVERSE, IT MIGHT ACCELERATE QUICKLY AND FAIL TO STOP BY ITSELF
         MoveStraightTicks(-2000, driveSpeed);
         sleep(10);
 
@@ -183,10 +200,10 @@ public class autoScore extends LinearOpMode {
 
         //only needs to be called once at end of operation
         StopElbowControl();
+
         requestOpModeStop();
 
 //TODO: need start roller and stop roller methods, also release arm power (maybe just stop the routine).
-
 
 
         //Start and move arm to set down position
@@ -206,7 +223,6 @@ public class autoScore extends LinearOpMode {
     }
 
 
-
     void SetElbowGoal(int goal) {
         elbowPosition = goal;
     }
@@ -219,6 +235,7 @@ public class autoScore extends LinearOpMode {
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         return orientation.getYaw(AngleUnit.DEGREES);
     }
+
     private void StopElbowControl() {
         globalState.isCancelled = true;
     }
@@ -231,6 +248,7 @@ public class autoScore extends LinearOpMode {
         globalState.setElbowPosition(position);
 
     }
+
     @SuppressLint("DefaultLocale")
     String formatRate(float rate) {
         return String.format("%.3f", rate);
@@ -282,6 +300,7 @@ public class autoScore extends LinearOpMode {
         // Stop all motion;
         moveRobot(0, 0);
     }
+
     private void StopMovement() {
         moveRobot(0, 0);
 
@@ -307,7 +326,9 @@ public class autoScore extends LinearOpMode {
         frontRightMotor.setPower(rightSpeed);
         backLeftMotor.setPower(leftSpeed);
         backRightMotor.setPower(rightSpeed);
+        sendTelemetry(true);
     }
+
     public void holdHeading(double maxTurnSpeed, double heading, double holdTime) {
 
         ElapsedTime holdTimer = new ElapsedTime();
@@ -378,15 +399,18 @@ public class autoScore extends LinearOpMode {
 
         }
     }
+
     public int getAverageTicksMoved() {
 
-        int total = frontLeftMotor.getCurrentPosition() +
-                frontRightMotor.getCurrentPosition() +
-                backLeftMotor.getCurrentPosition() +
-                backRightMotor.getCurrentPosition();
+        int total = getFrontLeftMotorTicks() +
+                getFrontRightMotorTicks() +
+                getBackLeftMotorTicks() +
+                getBackRightMotorTicks();
         total = total / 4;
         return total;
     }
+
+
     public void moveRobotToTickTargetReverse(double speed) {
         while (opModeIsActive() && getAverageTicksMoved() > tickTarget) {
 
@@ -425,29 +449,46 @@ public class autoScore extends LinearOpMode {
             telemetry.addData("Motion", "Turning");
         }
 
-        int frontLeftMotorTicks = frontLeftMotor.getCurrentPosition();
-        int backLeftMotorTicks = backLeftMotor.getCurrentPosition();
-        int frontRightMotorTicks = frontRightMotor.getCurrentPosition();
-        int backRightMotorTicks = backRightMotor.getCurrentPosition();
+        int frontLeftMotorTicks = getFrontLeftMotorTicks();
+        int backLeftMotorTicks = getBackLeftMotorTicks();
+        int frontRightMotorTicks = getFrontRightMotorTicks();
+        int backRightMotorTicks = getBackRightMotorTicks();
         int averageTicks = (frontLeftMotorTicks + backLeftMotorTicks + frontRightMotorTicks + backRightMotorTicks) / 4;
         telemetry.addData("> heading IMU", "%4.1f", getHeadingIMU())
-              //  .addData(">heading NavX", "%4.1f", getHeadingNavX())
+                //  .addData(">heading NavX", "%4.1f", getHeadingNavX())
                 .addData(">goal heading ", "%4.1f", headingStore)
                 .addData("> delta heading", "%4.1f", headingError)
                 .addData("> turn speed", "%4.1f", turnSpeed)
                 .addData(">frontLeftMotor ticks", frontLeftMotorTicks)
                 .addData(">backLeftMotor ticks", backLeftMotorTicks)
                 .addData(">frontRightMotor ticks", frontRightMotorTicks)
-                .addData(">frontLeftMotor ticks", backRightMotorTicks)
+                .addData(">backRightMotor ticks", backRightMotorTicks)
                 .addData(">Average Motor ticks", averageTicks)
                 .addData("> elbow Pos", elbow.getCurrentPosition())
                 .addData("> Elbow State", globalState.getElbowPosition());
         telemetry.update();
     }
 
+    private int getBackRightMotorTicks() {
+        return backRightMotor.getCurrentPosition();
+    }
+
+    private int getFrontRightMotorTicks() {
+        return frontRightMotor.getCurrentPosition();
+    }
+
+    private int getBackLeftMotorTicks() {
+        return backLeftMotor.getCurrentPosition();
+    }
+
+    private int getFrontLeftMotorTicks() {
+        return frontLeftMotor.getCurrentPosition();
+    }
+
     public void resetHeadingIMU() {
         imu.resetYaw();
     }
+
     public double getHeadingIMU() {
         YawPitchRollAngles orientation = imu.getRobotYawPitchRollAngles();
         return orientation.getYaw(AngleUnit.DEGREES);
