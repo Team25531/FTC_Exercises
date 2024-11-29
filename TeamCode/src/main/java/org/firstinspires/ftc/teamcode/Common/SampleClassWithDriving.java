@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 @TeleOp(name = "SampleClassWithDriving", group = "Common")
-//@Disabled
+@Disabled
 public class SampleClassWithDriving extends LinearOpMode {
 
     @Override
