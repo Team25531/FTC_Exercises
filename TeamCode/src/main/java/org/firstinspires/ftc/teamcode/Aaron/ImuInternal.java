@@ -24,7 +24,6 @@ import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 
 public class ImuInternal implements IImuProvider {
     private IMU imu = null;
-    HardwareMap hardwareMap;
 
     @Override
     public void initialize(HardwareMap hardwareMap) {
