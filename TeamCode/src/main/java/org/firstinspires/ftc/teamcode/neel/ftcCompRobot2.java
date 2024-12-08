@@ -8,9 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "FtcComp", group = "Ftc Comp")
+@TeleOp(name = "Robot2 FTC comp", group = "Ftc Comp")
 //we need to add the DcMotors
-public class ftcComp extends LinearOpMode {
+public class ftcCompRobot2 extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
@@ -63,7 +63,7 @@ public class ftcComp extends LinearOpMode {
         DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeft");
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
-        DcMotor extension = hardwareMap.dcMotor.get("extension");
+
 
 
         DcMotor elbow = hardwareMap.dcMotor.get("elbow");
@@ -94,7 +94,7 @@ public class ftcComp extends LinearOpMode {
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        extension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
 
         //waiting for start
@@ -157,9 +157,11 @@ public class ftcComp extends LinearOpMode {
                 telemetry.addData("currently at :", elbow.getCurrentPosition());
                 HoldPosition = elbow.getCurrentPosition();
             } else {
-                elbow.setPower(0);
-                if (gravityCondition) {
-                    HoldArmStill(HoldPosition, elbow);
+                if (!endGame) {
+                    elbow.setPower(0);
+                    if (gravityCondition) {
+                        HoldArmStill(HoldPosition, elbow);
+                    }
                 }
             }
 
@@ -185,24 +187,20 @@ public class ftcComp extends LinearOpMode {
 
             }
 
-            if (gamepad1.dpad_up) {
-                extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                extension.setPower(0.9);
-                HoldPosition = extension.getCurrentPosition();
+            if (gamepad1.dpad_down) {
+                endGame =true;
+
+                elbow.setPower(0.9);
+
             }
-            else if (gamepad1.dpad_down){
-                extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-                extension.setPower(-0.9);
-                HoldPosition = extension.getCurrentPosition();
-            }
-            else {
-                extension.setPower(0);
-                HoldArmStill(HoldPosition, extension);
-            }
+
+
 
         }
+    }
+    boolean endGame = false;
 
-    } public void HoldArmStill(int posToHold, DcMotor motor) {
+    public void HoldArmStill(int posToHold, DcMotor motor) {
         int tolerance = 4;
         int currentPosition = motor.getCurrentPosition();
         if ((Math.abs(currentPosition - posToHold)) < tolerance) {

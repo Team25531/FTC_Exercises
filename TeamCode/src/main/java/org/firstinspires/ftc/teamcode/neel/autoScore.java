@@ -112,11 +112,10 @@ public class autoScore extends LinearOpMode {
         frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontLeftMotor.setDirection(DcMotor.Direction.FORWARD);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
-
 
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -146,60 +145,66 @@ public class autoScore extends LinearOpMode {
         //waiting for start
         waitForStart();
 
-
-        //this only needs to be called once, after that calling SetElbowPosition will move the arm
-        StartElbowControl();
-
-        //set the Tick position of the elbow
-        SetElbowPosition(-400);
-
-        //use this to change the speed during movement.
         double driveSpeed = 0.5;
-
-        sleep(1000);
-
-        //starting slow during testing. Slower will get more accurate results.
-        driveSpeed = 0.2;
+        driveSpeed = 0.3;
 
         //always starts from zero. Left is positive, Right is negative.
-        turnToHeading(driveSpeed, 45);
+        MoveStraightTicks(1115, driveSpeed);
+        int elbowTarget = -300;
+        elbow.setTargetPosition(elbowTarget);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setPower(-0.3);
 
-        //holding can allow it to stabilize on a critical heading. Not required, but improves accuracy.
-        holdHeading(driveSpeed, 45, 1);
+        sleep(10);
+
+        int heading = 135;
+        turnToHeading(driveSpeed, heading);
+        holdHeading(driveSpeed, heading, 1);
 
         //this sets the current forward direction of the robot to zero, so the next turn command starts from zero.
         resetHeadingIMU();
         sleep(10);
 
+        MoveStraightTicks(670, driveSpeed);
 
-        //move a specific distance in ticks. It uses the average of the 4 wheel ticks
-        //use a positive number for Forward, and a negative number for Reverse.
-        //NOTE: Reverse might not work properly right now, needs more testing.
-        MoveStraightTicks(1000, driveSpeed);
+        elbowTarget = -3500;
+        elbow.setTargetPosition(elbowTarget);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setPower(-0.3);
+
+        while (elbow.getCurrentPosition() != elbowTarget) {
+            sleep(10);
+        }
+        sleep(100);
+
+        runtime.reset();
+        while (runtime.seconds() < 3) {
+            finger.setPower(0.9);
+        }
+        finger.setPower(0);
 
         //sometimes a little sleep time helps things from being to jittery.
         sleep(10);
 
-        turnToHeading(driveSpeed, -45);
-        holdHeading(driveSpeed, -45, 1);
+        heading = -135;
+        turnToHeading(driveSpeed, heading);
+        holdHeading(driveSpeed, heading, 1);
 
         sleep(10);
 
         //NOTE: Reverse might not work properly right now, needs more testing.
         //BE PREPARED TO STOP THE ROBOT WHEN TRYING TO REVERSE, IT MIGHT ACCELERATE QUICKLY AND FAIL TO STOP BY ITSELF
-        MoveStraightTicks(-2000, driveSpeed);
+        MoveStraightTicks(1742, driveSpeed);
         sleep(10);
 
-        turnToHeading(driveSpeed, 75);
+        heading = -90;
+        turnToHeading(driveSpeed, heading);
+        holdHeading(driveSpeed, heading, 1);
+
         sleep(10);
 
-
-        SetElbowPosition(-200);
+        MoveStraightTicks(780, driveSpeed);
         sleep(10);
-
-
-        //only needs to be called once at end of operation
-        StopElbowControl();
 
         requestOpModeStop();
 
@@ -241,6 +246,7 @@ public class autoScore extends LinearOpMode {
     }
 
     private void StartElbowControl() {
+        System.out.println("StartElbowControl");
         new Thread(new BackgroundElbowMove(globalState)).start();
     }
 

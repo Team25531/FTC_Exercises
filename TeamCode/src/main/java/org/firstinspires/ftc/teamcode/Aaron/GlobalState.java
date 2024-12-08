@@ -8,6 +8,9 @@ public class GlobalState {
     public volatile boolean isCancelled = false;
 
     public void setElbowPosition(int position) {
+        System.out.println("setElbowPosition original:" + Integer.toString(elbowPosition));
+        System.out.println("setElbowPosition new:" + Integer.toString(position));
+
         elbowPosition = position;
     }
     public int getElbowPosition(){

@@ -28,6 +28,8 @@ public class BackgroundElbowMove implements Runnable {
                 return;
             }
             autoScore.elbow.setTargetPosition(elbowGoal);
+            System.out.println("run elbow:" + Integer.toString(elbowGoal));
+
             autoScore.elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             autoScore.elbow.setPower(Math.abs(0.3));
 
@@ -35,6 +37,7 @@ public class BackgroundElbowMove implements Runnable {
             try {
                 sleep(10);
             } catch (InterruptedException e) {
+                System.out.println("StartElbowControl error state");
                 throw new RuntimeException(e);
             }
         }

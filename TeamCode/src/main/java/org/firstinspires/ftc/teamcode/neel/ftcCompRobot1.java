@@ -8,9 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "FtcComp", group = "Ftc Comp")
+@TeleOp(name = "FtcCompRobot" ,group = "Ftc Comp")
 //we need to add the DcMotors
-public class ftcComp extends LinearOpMode {
+public class ftcCompRobot1 extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
@@ -52,7 +52,8 @@ public class ftcComp extends LinearOpMode {
     /* Variables that are used to set the arm to a specific position */
     double armPosition = (int)ARM_COLLAPSED_INTO_ROBOT;
     double armPositionFudgeFactor;
-    int HoldPosition;
+    int extensionPosition;
+    int HoldElbowPosition;
 
 
 
@@ -143,23 +144,23 @@ public class ftcComp extends LinearOpMode {
             runtime.reset();
 
 
-            telemetry.addData("Currently goal", HoldPosition);
+            telemetry.addData("Currently goal",HoldElbowPosition );
             telemetry.addData("Currently   at", elbow.getCurrentPosition());
             telemetry.addData("Gravity code is now ", gravityCondition);
 
             if (gamepad1.right_bumper) {
                 elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 elbow.setPower(-0.9);
-                HoldPosition = elbow.getCurrentPosition();
+                HoldElbowPosition = elbow.getCurrentPosition();
             } else if (gamepad1.right_trigger > 0) {
                 elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 elbow.setPower(0.9);
                 telemetry.addData("currently at :", elbow.getCurrentPosition());
-                HoldPosition = elbow.getCurrentPosition();
+                HoldElbowPosition = elbow.getCurrentPosition();
             } else {
                 elbow.setPower(0);
                 if (gravityCondition) {
-                    HoldArmStill(HoldPosition, elbow);
+                    HoldArmStill(HoldElbowPosition, elbow);
                 }
             }
 
@@ -188,16 +189,16 @@ public class ftcComp extends LinearOpMode {
             if (gamepad1.dpad_up) {
                 extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 extension.setPower(0.9);
-                HoldPosition = extension.getCurrentPosition();
+                extensionPosition = extension.getCurrentPosition();
             }
             else if (gamepad1.dpad_down){
                 extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 extension.setPower(-0.9);
-                HoldPosition = extension.getCurrentPosition();
+                extensionPosition = extension.getCurrentPosition();
             }
             else {
                 extension.setPower(0);
-                HoldArmStill(HoldPosition, extension);
+                HoldArmStill(extensionPosition, extension);
             }
 
         }
