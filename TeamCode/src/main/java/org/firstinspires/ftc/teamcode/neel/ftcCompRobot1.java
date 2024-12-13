@@ -8,7 +8,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "FtcCompRobot" ,group = "Ftc Comp")
+@TeleOp(name = "FtcCompRobot1" ,group = "Ftc Comp")
 //we need to add the DcMotors
 public class ftcCompRobot1 extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
@@ -95,7 +95,7 @@ public class ftcCompRobot1 extends LinearOpMode {
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        extension.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
 
 
         //waiting for start
@@ -187,19 +187,25 @@ public class ftcCompRobot1 extends LinearOpMode {
             }
 
             if (gamepad1.dpad_up) {
-                extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
                 extension.setPower(0.9);
                 extensionPosition = extension.getCurrentPosition();
             }
             else if (gamepad1.dpad_down){
-                extension.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
                 extension.setPower(-0.9);
                 extensionPosition = extension.getCurrentPosition();
             }
             else {
                 extension.setPower(0);
-                HoldArmStill(extensionPosition, extension);
+
             }
+
+            if (gamepad1.y) {
+                HoldArmStill(-2720, elbow);
+            }
+
+
 
         }
 
@@ -212,6 +218,11 @@ public class ftcCompRobot1 extends LinearOpMode {
         motor.setTargetPosition(posToHold);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         motor.setPower(Math.abs(0.8));
+    }
+
+    public void basketDrop(int posToHold, DcMotor motor){
+        motor.setTargetPosition(posToHold);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
 //    public void StopArmMoving ( DcMotor motor){
 //        motor.setTargetPosition(800);
