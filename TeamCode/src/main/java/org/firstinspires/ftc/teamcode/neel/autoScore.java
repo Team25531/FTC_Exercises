@@ -31,10 +31,11 @@ public class autoScore extends LinearOpMode {
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
     private DcMotor frontRightMotor;// = hardwareMap.dcMotor.get("frontRight");
     private DcMotor backRightMotor;// = hardwareMap.dcMotor.get("backRight");
+    private DcMotor extension;
     public static DcMotor elbow;// = hardwareMap.dcMotor.get("backRight");
     private CRServo finger;
     private static int elbowPosition = -200;
-    private Servo wrist;
+
     double position = 0.312;
     GlobalState globalState = new GlobalState();
     private int tickTarget = 100;
@@ -106,6 +107,7 @@ public class autoScore extends LinearOpMode {
         backLeftMotor = hardwareMap.dcMotor.get("backLeft");
         frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         backRightMotor = hardwareMap.dcMotor.get("backRight");
+        extension = hardwareMap.dcMotor.get("extension");
 
         frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -125,7 +127,7 @@ public class autoScore extends LinearOpMode {
 
         elbow = hardwareMap.dcMotor.get("elbow");
         finger = hardwareMap.crservo.get("finger");
-        wrist = hardwareMap.servo.get("wrist");
+
 
         // elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         elbow.setDirection(DcMotor.Direction.REVERSE);
@@ -149,7 +151,7 @@ public class autoScore extends LinearOpMode {
         driveSpeed = 0.3;
 
         //always starts from zero. Left is positive, Right is negative.
-        MoveStraightTicks(1115, driveSpeed);
+        MoveStraightTicks(-191, driveSpeed);
         int elbowTarget = -300;
         elbow.setTargetPosition(elbowTarget);
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -176,12 +178,20 @@ public class autoScore extends LinearOpMode {
             sleep(10);
         }
         sleep(100);
+        runtime.reset();
+        while (runtime.seconds() < 3) {
+            extension.setPower(0.9);
+        }
 
         runtime.reset();
         while (runtime.seconds() < 3) {
             finger.setPower(0.9);
         }
         finger.setPower(0);
+        runtime.reset();
+        while (runtime.seconds() < 3) {
+            extension.setPower(0.9);
+        }
 
         //sometimes a little sleep time helps things from being to jittery.
         sleep(10);
