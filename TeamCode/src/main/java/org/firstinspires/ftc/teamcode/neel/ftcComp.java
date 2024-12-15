@@ -195,7 +195,7 @@ public class ftcComp extends LinearOpMode {
                 extension.setPower(-0.9);
                 HoldPosition = extension.getCurrentPosition();
             }
-            else {
+             else {
                 extension.setPower(0);
                 HoldArmStill(HoldPosition, extension);
             }
