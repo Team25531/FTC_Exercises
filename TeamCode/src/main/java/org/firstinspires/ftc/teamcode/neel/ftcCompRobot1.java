@@ -5,10 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@TeleOp(name = "FtcCompRobot1" ,group = "Ftc Comp")
+@TeleOp(name = "FtcCompRobot1", group = "Ftc Comp")
 //we need to add the DcMotors
 public class ftcCompRobot1 extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
@@ -26,35 +26,34 @@ public class ftcCompRobot1 extends LinearOpMode {
             28 // number of encoder ticks per rotation of the bare motor
                     * 250047.0 / 4913.0 // This is the exact gear ratio of the 50.9:1 Yellow Jacket gearbox
                     * 100.0 / 20.0 // This is the external gear reduction, a 20T pinion gear that drives a 100T hub-mount gear
-                    * 1/360.0; // we want ticks per degree, not per rotation
+                    * 1 / 360.0; // we want ticks per degree, not per rotation
 
 
-    final double ARM_COLLAPSED_INTO_ROBOT  = 0;
-    final double ARM_COLLECT               = 250 * ARM_TICKS_PER_DEGREE;
-    final double ARM_CLEAR_BARRIER         = 230 * ARM_TICKS_PER_DEGREE;
-    final double ARM_SCORE_SPECIMEN        = 160 * ARM_TICKS_PER_DEGREE;
-    final double ARM_SCORE_SAMPLE_IN_LOW   = 160 * ARM_TICKS_PER_DEGREE;
-    final double ARM_ATTACH_HANGING_HOOK   = 120 * ARM_TICKS_PER_DEGREE;
-    final double ARM_WINCH_ROBOT           = 15  * ARM_TICKS_PER_DEGREE;
+    final double ARM_COLLAPSED_INTO_ROBOT = 0;
+    final double ARM_COLLECT = 250 * ARM_TICKS_PER_DEGREE;
+    final double ARM_CLEAR_BARRIER = 230 * ARM_TICKS_PER_DEGREE;
+    final double ARM_SCORE_SPECIMEN = 160 * ARM_TICKS_PER_DEGREE;
+    final double ARM_SCORE_SAMPLE_IN_LOW = 160 * ARM_TICKS_PER_DEGREE;
+    final double ARM_ATTACH_HANGING_HOOK = 120 * ARM_TICKS_PER_DEGREE;
+    final double ARM_WINCH_ROBOT = 15 * ARM_TICKS_PER_DEGREE;
 
     /* Variables to store the speed the intake servo should be set at to intake, and deposit game elements. */
-    final double INTAKE_COLLECT    = -1.0;
-    final double INTAKE_OFF        =  0.0;
-    final double INTAKE_DEPOSIT    =  0.5;
+    final double INTAKE_COLLECT = -1.0;
+    final double INTAKE_OFF = 0.0;
+    final double INTAKE_DEPOSIT = 0.5;
 
     /* Variables to store the positions that the wrist should be set to when folding in, or folding out. */
-    final double WRIST_FOLDED_IN   = 0.8333;
-    final double WRIST_FOLDED_OUT  = 0.5;
+    final double WRIST_FOLDED_IN = 0.8333;
+    final double WRIST_FOLDED_OUT = 0.5;
 
     /* A number in degrees that the triggers can adjust the arm position by */
     final double FUDGE_FACTOR = 15 * ARM_TICKS_PER_DEGREE;
 
     /* Variables that are used to set the arm to a specific position */
-    double armPosition = (int)ARM_COLLAPSED_INTO_ROBOT;
+    double armPosition = (int) ARM_COLLAPSED_INTO_ROBOT;
     double armPositionFudgeFactor;
     int extensionPosition;
-    int HoldElbowPosition;
-
+    int holdPosition = 0;
 
 
     @Override
@@ -77,17 +76,20 @@ public class ftcCompRobot1 extends LinearOpMode {
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        extension.setDirection(DcMotor.Direction.REVERSE);
 
         elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         position = 0;//remove
         double addposition = 0.001;
         double addedcurrentPosition = position;
+        boolean endGame = false;
+
         double subposition = -0.001;
         double subcurrentPosition = position;
         int armPosition = 0;
         double armMovePos = 0.001;
-        boolean gravityCondition = true;
-
+        //   boolean gravityCondition = true;
+        int elbowHoldPosition = 0;
         elbow.setDirection(DcMotor.Direction.REVERSE);
         //make it so that motors don't fall automaticly
         elbow.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -95,13 +97,12 @@ public class ftcCompRobot1 extends LinearOpMode {
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-
-
-
+        extension.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        extension.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         //waiting for start
         waitForStart();
-        //  elbow.setTargetPosition(0);
-        //  elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setTargetPosition(0);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         //  elbow.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
 
@@ -121,7 +122,7 @@ public class ftcCompRobot1 extends LinearOpMode {
             double speedModifier = Math.abs(1.5);
             denominator *= speedModifier;
 
-            if (gamepad1.y) {
+            if (gamepad1.a) {
                 denominator *= 2.5;
             }
 
@@ -136,36 +137,27 @@ public class ftcCompRobot1 extends LinearOpMode {
             backRightMotor.setPower(backRightPower);
 
 
-
-
-
-
-
             runtime.reset();
 
 
-            telemetry.addData("Currently goal",HoldElbowPosition );
+            telemetry.addData("Currently goal", holdPosition);
             telemetry.addData("Currently   at", elbow.getCurrentPosition());
-            telemetry.addData("Gravity code is now ", gravityCondition);
+            //  telemetry.addData("Gravity code is now ", gravityCondition);
 
             if (gamepad1.right_bumper) {
                 elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 elbow.setPower(-0.9);
-                HoldElbowPosition = elbow.getCurrentPosition();
+                holdPosition = elbow.getCurrentPosition();
             } else if (gamepad1.right_trigger > 0) {
                 elbow.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
                 elbow.setPower(0.9);
                 telemetry.addData("currently at :", elbow.getCurrentPosition());
-                HoldElbowPosition = elbow.getCurrentPosition();
+                holdPosition = elbow.getCurrentPosition();
             } else {
-                elbow.setPower(0);
-                if (gravityCondition) {
-                    HoldArmStill(HoldElbowPosition, elbow);
-                }
+                HoldArmStill(holdPosition, elbow);
             }
 
             telemetry.update();
-
 
             //code for moving the finger aka the rubber tire with while loops
             if (gamepad1.left_bumper) {
@@ -179,48 +171,53 @@ public class ftcCompRobot1 extends LinearOpMode {
                 finger.setPower(0);
             }
 
-            if (gamepad1.a) {
-                if (gravityCondition) {
-                    gravityCondition = false;
-                }
-
-            }
-
+            extensionPosition = extension.getCurrentPosition();
+            telemetry.addData("extension", extensionPosition);
             if (gamepad1.dpad_up) {
-
-                extension.setPower(0.9);
-                extensionPosition = extension.getCurrentPosition();
-            }
-            else if (gamepad1.dpad_down){
-
-                extension.setPower(-0.9);
-                extensionPosition = extension.getCurrentPosition();
-            }
-            else {
+                //use 1117 to hit 42inches
+                //use 1360 to hit full extension
+                if (extensionPosition > 1360) {
+                    extension.setPower(0);
+                } else {
+                    extension.setPower(0.5);
+                }
+            } else if (gamepad1.dpad_down) {
+                if (extensionPosition < 10) {
+                    extension.setPower(0);
+                } else {
+                    extension.setPower(-0.5);
+                }
+            } else {
                 extension.setPower(0);
-
             }
+            //need to add a limit to the extension length when
+            //elbow is over vertical, to stay in the 42in limit
+            //during inspection.
 
             if (gamepad1.y) {
-                HoldArmStill(-2720, elbow);
+                holdPosition = -2720;
             }
-
-
-
         }
-
-    } public void HoldArmStill(int posToHold, DcMotor motor) {
-        int tolerance = 4;
-        int currentPosition = motor.getCurrentPosition();
-        if ((Math.abs(currentPosition - posToHold)) < tolerance) {
-            return;
-        }
-        motor.setTargetPosition(posToHold);
-        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        motor.setPower(Math.abs(0.8));
     }
 
-    public void basketDrop(int posToHold, DcMotor motor){
+    public void HoldArmStill(int posToHold, DcMotor motor) {
+//-4868
+        motor.setTargetPosition(posToHold);
+        motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        telemetry.addData("goal", posToHold);
+
+        int current = motor.getCurrentPosition();
+        telemetry.addData("current", current);
+        if (posToHold <= current) {
+            motor.setPower(0.5);
+        } else {
+            motor.setPower(-0.5);
+        }
+        // motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        motor.setPower(Math.abs(0.9));
+    }
+
+    public void basketDrop(int posToHold, DcMotor motor) {
         motor.setTargetPosition(posToHold);
         motor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
     }
