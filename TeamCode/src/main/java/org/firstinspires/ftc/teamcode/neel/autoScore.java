@@ -114,10 +114,18 @@ public class autoScore extends LinearOpMode {
         frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        frontLeftMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        extension.setDirection(DcMotor.Direction.REVERSE);
+
+//      commenting out original direction.
+//        frontLeftMotor.setDirection(DcMotor.Direction.FORWARD);
+//        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+//        frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
+//        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -151,7 +159,7 @@ public class autoScore extends LinearOpMode {
         driveSpeed = 0.3;
 
         //always starts from zero. Left is positive, Right is negative.
-        MoveStraightTicks(-191, driveSpeed);
+        MoveStraightTicks(1110 , driveSpeed);
         int elbowTarget = -300;
         elbow.setTargetPosition(elbowTarget);
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -169,7 +177,7 @@ public class autoScore extends LinearOpMode {
 
         MoveStraightTicks(670, driveSpeed);
 
-        elbowTarget = -3500;
+        elbowTarget = -2720;
         elbow.setTargetPosition(elbowTarget);
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         elbow.setPower(-0.3);
@@ -180,18 +188,19 @@ public class autoScore extends LinearOpMode {
         sleep(100);
         runtime.reset();
         while (runtime.seconds() < 3) {
-            extension.setPower(0.9);
+            extension.setPower(0.5);
         }
-
         runtime.reset();
+        MoveStraightTicks(400, driveSpeed);
         while (runtime.seconds() < 3) {
             finger.setPower(0.9);
         }
         finger.setPower(0);
         runtime.reset();
-        while (runtime.seconds() < 3) {
-            extension.setPower(0.9);
+        while (runtime.seconds() < 2) {
+            extension.setPower(-0.5);
         }
+
 
         //sometimes a little sleep time helps things from being to jittery.
         sleep(10);
@@ -212,8 +221,13 @@ public class autoScore extends LinearOpMode {
         holdHeading(driveSpeed, heading, 1);
 
         sleep(10);
+        elbowTarget = -3380  ;
+        elbow.setTargetPosition(elbowTarget);
+        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        elbow.setPower(-0.3);
 
-        MoveStraightTicks(780, driveSpeed);
+
+        MoveStraightTicks(1567, driveSpeed);
         sleep(10);
 
         requestOpModeStop();

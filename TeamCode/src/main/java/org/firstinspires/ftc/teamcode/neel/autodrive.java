@@ -56,7 +56,7 @@ public class autodrive extends LinearOpMode {
         backLeftMotor.setDirection(DcMotor.Direction.FORWARD);
         frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
-        while (opModeIsActive() && (runtime.seconds() < 2.9 )) {
+        while (opModeIsActive() && (runtime.seconds() < 4 )) {
             frontLeftMotor.setPower(0.3);
             backLeftMotor.setPower(0.3);
             backRightMotor.setPower(0.3);
