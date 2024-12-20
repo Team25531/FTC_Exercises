@@ -162,9 +162,9 @@ public class AutoScoreTestSideways extends LinearOpMode {
         //always starts from zero. Left is positive, Right is negative.
         MoveStraightTicks(200, driveSpeed);
         sleep(2000);
-        MoveStraightRightTicks(2000,driveSpeed);
-        sleep(2000);
-        MoveStraightLeftTicks(2000,driveSpeed);
+        MoveStraightRightTicks(1000,driveSpeed);
+       // sleep(2000);
+       // MoveStraightLeftTicks(2000,driveSpeed);
         //        int elbowTarget = -300;
 //        elbow.setTargetPosition(elbowTarget);
 //        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
