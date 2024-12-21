@@ -24,6 +24,7 @@ package org.firstinspires.ftc.teamcode.neel;
 
 
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -69,7 +70,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 
 
 @TeleOp(name="GoBuilda Test", group="Robot")
-//@Disabled
+@Disabled
 public class goBuildaCode extends LinearOpMode {
 
     /* Declare OpMode members. */

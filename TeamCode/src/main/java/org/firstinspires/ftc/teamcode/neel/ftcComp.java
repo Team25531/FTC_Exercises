@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.neel;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -10,6 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @TeleOp(name = "FtcComp", group = "Ftc Comp")
 //we need to add the DcMotors
+@Disabled
 public class ftcComp extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");
