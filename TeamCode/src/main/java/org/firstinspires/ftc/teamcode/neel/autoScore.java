@@ -148,6 +148,8 @@ public class autoScore extends LinearOpMode {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
         imu.resetYaw();
 
+
+
         while (opModeInInit()) {
             sendTelemetry(true);
         }
@@ -156,7 +158,7 @@ public class autoScore extends LinearOpMode {
         waitForStart();
 
         double driveSpeed = 0.5;
-        driveSpeed = 0.3;
+        driveSpeed = 0.5;
 
         //always starts from zero. Left is positive, Right is negative.
         MoveStraightTicks(1110 , driveSpeed);
@@ -164,6 +166,7 @@ public class autoScore extends LinearOpMode {
         elbow.setTargetPosition(elbowTarget);
         elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         elbow.setPower(-0.3);
+
 
         sleep(10);
 
@@ -191,44 +194,47 @@ public class autoScore extends LinearOpMode {
             extension.setPower(0.5);
         }
         runtime.reset();
-        MoveStraightTicks(400, driveSpeed);
-        while (runtime.seconds() < 3) {
+        MoveStraightTicks(335, driveSpeed);
+      while (runtime.seconds() < 3) {
             finger.setPower(0.9);
         }
         finger.setPower(0);
         runtime.reset();
+        MoveStraightTicks(-100, driveSpeed);
         while (runtime.seconds() < 2) {
             extension.setPower(-0.5);
         }
+//
+//
+//        //sometimes a little sleep time helps things from being to jittery.
+//        sleep(10);
+//
+//        heading = -135;
+//        turnToHeading(driveSpeed, heading);
+//        holdHeading(driveSpeed, heading, 1);
+//
+//        sleep(10);
+//
+//        //NOTE: Reverse might not work properly right now, needs more testing.
+//        //BE PREPARED TO STOP THE ROBOT WHEN TRYING TO REVERSE, IT MIGHT ACCELERATE QUICKLY AND FAIL TO STOP BY ITSELF
+//        MoveStraightTicks(1742, driveSpeed);
+//        sleep(10);
+//
+//        heading = -90;
+//        turnToHeading(driveSpeed, heading);
+//        holdHeading(driveSpeed, heading, 1);
+//
+//        MoveStraightTicks(1670,driveSpeed);
+//        sleep(10);
+//
+//        sleep(10);
+//        elbowTarget = -3380  ;
+//        elbow.setTargetPosition(elbowTarget);
+//        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+//        elbow.setPower(-0.3);
 
 
-        //sometimes a little sleep time helps things from being to jittery.
-        sleep(10);
 
-        heading = -135;
-        turnToHeading(driveSpeed, heading);
-        holdHeading(driveSpeed, heading, 1);
-
-        sleep(10);
-
-        //NOTE: Reverse might not work properly right now, needs more testing.
-        //BE PREPARED TO STOP THE ROBOT WHEN TRYING TO REVERSE, IT MIGHT ACCELERATE QUICKLY AND FAIL TO STOP BY ITSELF
-        MoveStraightTicks(1742, driveSpeed);
-        sleep(10);
-
-        heading = -90;
-        turnToHeading(driveSpeed, heading);
-        holdHeading(driveSpeed, heading, 1);
-
-        sleep(10);
-        elbowTarget = -3380  ;
-        elbow.setTargetPosition(elbowTarget);
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setPower(-0.3);
-
-
-        MoveStraightTicks(1567, driveSpeed);
-        sleep(10);
 
         requestOpModeStop();
 
