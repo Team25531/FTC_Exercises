@@ -174,9 +174,10 @@ public class ftcCompRobot1 extends LinearOpMode {
             extensionPosition = extension.getCurrentPosition();
             telemetry.addData("extension", extensionPosition);
             if (gamepad1.dpad_up) {
-                //use 1117 to hit 42inches
+                //use 950 to hit <42inches
                 //use 1360 to hit full extension
-                if (extensionPosition > 1360) {
+                //normal value 1360
+                if (extensionPosition > 950) {
                     extension.setPower(0);
                 } else {
                     extension.setPower(0.5);
@@ -195,7 +196,7 @@ public class ftcCompRobot1 extends LinearOpMode {
             //during inspection.
 
             if (gamepad1.y) {
-                holdPosition = -2720;
+                holdPosition = -2758;
             }
         }
     }
