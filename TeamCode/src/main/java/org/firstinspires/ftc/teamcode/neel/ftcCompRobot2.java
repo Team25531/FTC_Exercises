@@ -55,7 +55,6 @@ public class ftcCompRobot2 extends LinearOpMode {
     int HoldPosition;
 
 
-
     @Override
     public void runOpMode() throws InterruptedException {
 

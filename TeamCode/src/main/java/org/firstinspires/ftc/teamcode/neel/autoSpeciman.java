@@ -23,9 +23,9 @@ import org.firstinspires.ftc.teamcode.Aaron.GlobalState;
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 
-@Autonomous(name = "auto Score", group = "auto")
+@Autonomous(name = "autoSpeciman", group = "auto")
 //we need to add the DcMotors
-public class autoScore extends LinearOpMode {
+public class autoSpeciman extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// `= hardwareMap.dcMotor.get("frontLeft");
     private DcMotor backLeftMotor;// = hardwareMap.dcMotor.get("backLeft");
@@ -171,83 +171,48 @@ public class autoScore extends LinearOpMode {
         elbow.setPower(-0.3);
 
 
-        MoveStraightTicks(-660, driveSpeed);
-
-
+        MoveStraightTicks(915, driveSpeed);
         sleep(10);
 
-        double heading = -53.1;
-
+        double heading = -85.4;
         turnToHeading(driveSpeed, heading);
-        holdHeading(driveSpeed, heading, 0.1);
-
-        //this sets the current forward direction of the robot to zero, so the next turn command starts from zero.
-        resetHeadingIMU();
-        sleep(100);
-        MoveStraightTicks(600, driveSpeed);
-        sleep(100);
-
-        int elbowTarget2 = -2700;
-
-        elbow.setTargetPosition(elbowTarget2);
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        elbow.setPower(-0.3);
-        sleep(6000);
-        elbow.setPower(0);
-
-
-
-        runtime.reset();
-
-
-        runtime.reset();
-
-      while (runtime.seconds() < 3) {
-            finger.setPower(0.9);
-        }
-        finger.setPower(0);
-        runtime.reset();
+        holdHeading(driveSpeed, heading, 1);
         sleep(10);
-        MoveStraightTicks(-400, driveSpeed);
-        sleep(100);
 
-        double heading2 = -128.7;
+        MoveStraightTicks(1299, driveSpeed);
+        sleep(10);
 
+        double heading2 = 81.1;
         turnToHeading(driveSpeed, heading2);
-        holdHeading(driveSpeed, heading2, 0.1);
+        holdHeading(driveSpeed, heading2, 1);
+        sleep(20);
 
-        resetHeadingIMU();
+        MoveStraightTicks(1014, driveSpeed);
+        sleep(10);
 
-        int elbowTarget3 = -4874;
+        int heading3 = -90;
+        turnToHeading(driveSpeed, heading3);
+        holdHeading(driveSpeed, heading3, 1);
+        sleep(1);
 
-        elbow.setTargetPosition(elbowTarget3);
-        elbow.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            elbow.setPower(0.4);
+        MoveStraightTicks(300, driveSpeed);
 
-        elbow.setPower(0);
-
-        runtime.reset();
-
-        sleep(1000);
-
-        //this sets the current forward direction of the robot to zero, so the next turn command starts from zero.
-        resetHeadingIMU();
-
-
-
-        MoveStraightTicks(1900, driveSpeed);
-        sleep(100);
-
-        double heading3 =  -89.3;
 
         turnToHeading(driveSpeed, heading3);
-        holdHeading(driveSpeed, heading3, 0.1);
+        holdHeading(driveSpeed, heading3, 1);
 
-        //this sets the current forward direction of the robot to zero, so the next turn command starts from zero.
-        resetHeadingIMU();
-        sleep(1000);
-        MoveStraightTicks(200, driveSpeed);
-        sleep(100);
+
+        MoveStraightTicks(18, driveSpeed);
+        sleep(10);
+
+        //straight 915
+        //turn -85.4
+        //forward 1099
+        //turn 81.1
+        //straight 1014
+        //turn -74.1
+        //forward 1525
+
 
 
 
@@ -262,9 +227,7 @@ public class autoScore extends LinearOpMode {
 //        //sometimes a little sleep time helps things from being to jittery.
 //        sleep(10);
 //
-//        heading = -135;
-//        turnToHeading(driveSpeed, heading);
-//        holdHeading(driveSpeed, heading, 1);
+
 //
 //        sleep(10);
 //
