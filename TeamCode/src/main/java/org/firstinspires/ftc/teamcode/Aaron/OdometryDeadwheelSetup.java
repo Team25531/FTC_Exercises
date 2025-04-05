@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Aaron;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -21,6 +22,7 @@ import java.util.Locale;
 
 @TeleOp(name = "OdometryDeadwheelSetup", group = "Aaron")
 //we need to add the DcMotors
+@Disabled
 public class OdometryDeadwheelSetup extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
     private DcMotor frontLeftMotor;// = hardwareMap.dcMotor.get("frontLeft");
