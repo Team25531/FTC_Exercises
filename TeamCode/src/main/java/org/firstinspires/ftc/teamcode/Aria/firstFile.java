@@ -6,4 +6,4 @@ public class firstFile {
 
 
 }
-setPower(5);
+//setPower(5);
