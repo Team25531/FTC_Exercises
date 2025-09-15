@@ -1,3 +1,4 @@
+package org.firstinspires.ftc.teamcode.neel;
 /*
 Copyright (c) 2024 Limelight Vision
 
@@ -30,7 +31,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
 TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
 THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package org.firstinspires.ftc.robotcontroller.external.samples;
+
 
 import com.qualcomm.hardware.limelightvision.LLResult;
 import com.qualcomm.hardware.limelightvision.LLResultTypes;
@@ -66,9 +67,9 @@ import java.util.List;
  *   and the ip address the Limelight device assigned the Control Hub and which is displayed in small text
  *   below the name of the Limelight on the top level configuration screen.
  */
-@TeleOp(name = "Sensor: Limelight3A", group = "Sensor")
+@TeleOp(name = "limelightTest", group = "Sensor")
 
-public class SensorLimelight3A extends LinearOpMode {
+public class limelightTest extends LinearOpMode {
 
     private Limelight3A limelight;
 
@@ -78,6 +79,9 @@ public class SensorLimelight3A extends LinearOpMode {
         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
         telemetry.setMsTransmissionInterval(11);
+
+        limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
+
 
         limelight.pipelineSwitch(0);
 
@@ -91,63 +95,25 @@ public class SensorLimelight3A extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            LLStatus status = limelight.getStatus();
-            telemetry.addData("Name", "%s",
-                    status.getName());
-            telemetry.addData("LL", "Temp: %.1fC, CPU: %.1f%%, FPS: %d",
-                    status.getTemp(), status.getCpu(),(int)status.getFps());
-            telemetry.addData("Pipeline", "Index: %d, Type: %s",
-                    status.getPipelineIndex(), status.getPipelineType());
-
             LLResult result = limelight.getLatestResult();
-            if (result.isValid()) {
-                // Access general information
-                Pose3D botpose = result.getBotpose();
-                double captureLatency = result.getCaptureLatency();
-                double targetingLatency = result.getTargetingLatency();
-                double parseLatency = result.getParseLatency();
-                telemetry.addData("LL Latency", captureLatency + targetingLatency);
-                telemetry.addData("Parse Latency", parseLatency);
-                telemetry.addData("PythonOutput", java.util.Arrays.toString(result.getPythonOutput()));
+            if (result != null && result.isValid()) {
+                double tx = result.getTx(); // How far left or right the target is (degrees)
+                double ty = result.getTy(); // How far up or down the target is (degrees)
+                double ta = result.getTa(); // How big the target looks (0%-100% of the image)
 
-                telemetry.addData("tx", result.getTx());
-                telemetry.addData("txnc", result.getTxNC());
-                telemetry.addData("ty", result.getTy());
-                telemetry.addData("tync", result.getTyNC());
-
-                telemetry.addData("Botpose", botpose.toString());
-
-                // Access barcode results
-                List<LLResultTypes.BarcodeResult> barcodeResults = result.getBarcodeResults();
-                for (LLResultTypes.BarcodeResult br : barcodeResults) {
-                    telemetry.addData("Barcode", "Data: %s", br.getData());
-                }
-
-                // Access classifier results
-                List<LLResultTypes.ClassifierResult> classifierResults = result.getClassifierResults();
-                for (LLResultTypes.ClassifierResult cr : classifierResults) {
-                    telemetry.addData("Classifier", "Class: %s, Confidence: %.2f", cr.getClassName(), cr.getConfidence());
-                }
-
-                // Access detector results
-                List<LLResultTypes.DetectorResult> detectorResults = result.getDetectorResults();
-                for (LLResultTypes.DetectorResult dr : detectorResults) {
-                    telemetry.addData("Detector", "Class: %s, Area: %.2f", dr.getClassName(), dr.getTargetArea());
-                }
-
-                // Access fiducial results
-                List<LLResultTypes.FiducialResult> fiducialResults = result.getFiducialResults();
-                for (LLResultTypes.FiducialResult fr : fiducialResults) {
-                    telemetry.addData("Fiducial", "ID: %d, Family: %s, X: %.2f, Y: %.2f", fr.getFiducialId(), fr.getFamily(), fr.getTargetXDegrees(), fr.getTargetYDegrees());
-                }
-
-                // Access color results
-                List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
-                for (LLResultTypes.ColorResult cr : colorResults) {
-                    telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
-                }
+                telemetry.addData("Target X", tx);
+                telemetry.addData("Target Y", ty);
+                telemetry.addData("Target Area", ta);
             } else {
-                telemetry.addData("Limelight", "No data available");
+                telemetry.addData("Limelight", "No Targets");
+            }
+            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
+            for (LLResultTypes.FiducialResult fiducial : fiducials) {
+                int id = fiducial.getFiducialId(); // The ID number of the fiducial
+//                double x = detection.getTargetXDegrees(); // Where it is (left-right)
+//                double y = detection.getTargetYDegrees(); // Where it is (up-down)
+//                double StrafeDistance_3D = fiducial.getRobotPoseTargetSpace().getY();
+                telemetry.addData("Fiducial " + id, "is " + " meters away");
             }
 
             telemetry.update();
