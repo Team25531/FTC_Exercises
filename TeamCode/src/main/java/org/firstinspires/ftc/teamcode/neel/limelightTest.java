@@ -41,31 +41,21 @@ import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import org.json.JSONObject;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.Scanner;
+
 import org.firstinspires.ftc.robotcore.external.navigation.Pose3D;
 
 import java.util.List;
 
 /*
- * This OpMode illustrates how to use the Limelight3A Vision Sensor.
- *
- * @see <a href="https://limelightvision.io/">Limelight</a>
- *
- * Notes on configuration:
- *
- *   The device presents itself, when plugged into a USB port on a Control Hub as an ethernet
- *   interface.  A DHCP server running on the Limelight automatically assigns the Control Hub an
- *   ip address for the new ethernet interface.
- *
- *   Since the Limelight is plugged into a USB port, it will be listed on the top level configuration
- *   activity along with the Control Hub Portal and other USB devices such as webcams.  Typically
- *   serial numbers are displayed below the device's names.  In the case of the Limelight device, the
- *   Control Hub's assigned ip address for that ethernet interface is used as the "serial number".
- *
- *   Tapping the Limelight's name, transitions to a new screen where the user can rename the Limelight
- *   and specify the Limelight's ip address.  Users should take care not to confuse the ip address of
- *   the Limelight itself, which can be configured through the Limelight settings page via a web browser,
- *   and the ip address the Limelight device assigned the Control Hub and which is displayed in small text
- *   below the name of the Limelight on the top level configuration screen.
+ // Pipeline 0 = Green
+  Pipeline 1 = purple
+   Pipeline 9 = april tag detection.
  */
 @TeleOp(name = "limelightTest", group = "Sensor")
 
@@ -76,18 +66,14 @@ public class limelightTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException
     {
-        limelight = hardwareMap.get(Limelight3A.class, "limelight");
+         limelight = hardwareMap.get(Limelight3A.class, "limelight");
 
-        telemetry.setMsTransmissionInterval(11);
+        telemetry.setMsTransmissionInterval(2000);
 
-        limelight.setPollRateHz(100); // This sets how often we ask Limelight for data (100 times per second)
 
 
         limelight.pipelineSwitch(0);
 
-        /*
-         * Starts polling for data.  If you neglect to call start(), getLatestResult() will return null.
-         */
         limelight.start();
 
         telemetry.addData(">", "Robot Ready.  Press Play.");
@@ -95,29 +81,61 @@ public class limelightTest extends LinearOpMode {
         waitForStart();
 
         while (opModeIsActive()) {
-            LLResult result = limelight.getLatestResult();
-            if (result != null && result.isValid()) {
-                double tx = result.getTx(); // How far left or right the target is (degrees)
-                double ty = result.getTy(); // How far up or down the target is (degrees)
-                double ta = result.getTa(); // How big the target looks (0%-100% of the image)
+            String detectedColor = "UNKNOWN";
 
-                telemetry.addData("Target X", tx);
-                telemetry.addData("Target Y", ty);
-                telemetry.addData("Target Area", ta);
-            } else {
-                telemetry.addData("Limelight", "No Targets");
+            LLResult result = limelight.getLatestResult();
+            List<LLResultTypes.ColorResult> colorResults = result.getColorResults();
+            for (LLResultTypes.ColorResult cr : colorResults) {
+                telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
             }
-            List<LLResultTypes.FiducialResult> fiducials = result.getFiducialResults();
-            for (LLResultTypes.FiducialResult fiducial : fiducials) {
-                int id = fiducial.getFiducialId(); // The ID number of the fiducial
-//                double x = detection.getTargetXDegrees(); // Where it is (left-right)
-//                double y = detection.getTargetYDegrees(); // Where it is (up-down)
-//                double StrafeDistance_3D = fiducial.getRobotPoseTargetSpace().getY();
-                telemetry.addData("Fiducial " + id, "is " + " meters away");
+            if (gamepad1.dpad_down) {
+                limelight.pipelineSwitch(1);
+
             }
+            else if (gamepad1.dpad_up){
+                limelight.pipelineSwitch(0);
+            }
+
 
             telemetry.update();
+
+//            try {
+//
+//                URL url = new URL(limelight + "/json");
+//                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+//                conn.setRequestMethod("GET");
+//
+//                Scanner scanner = new Scanner(conn.getInputStream());
+//                StringBuilder response = new StringBuilder();
+//                while (scanner.hasNext()) {
+//                    response.append(scanner.nextLine());
+//                }
+//                scanner.close();
+//
+//                JSONObject json = new JSONObject(response.toString());
+//
+//                // "pID" tells us which pipeline is active
+//                int pipeline = json.getInt("pID");
+//
+//                if (pipeline == 0) {
+//                    detectedColor = "GREEN";
+//                } else if (pipeline == 1) {
+//                    detectedColor = "PURPLE";
+//                }
+//
+//            } catch (Exception e) {
+//                detectedColor = "ERROR: " + e.getMessage();
+//            }
+//
+//            telemetry.addData("Detected Color", detectedColor);
+//            telemetry.update();
+
+//            sleep(100); // small delay
         }
-        limelight.stop();
+
+
+
+        }
+        ;
     }
-}
+

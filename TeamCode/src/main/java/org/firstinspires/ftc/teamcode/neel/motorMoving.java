@@ -16,6 +16,11 @@ public class motorMoving extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     private DcMotor test;
+    double motorTestDirection = 1;
+
+    boolean motorON = false;
+
+    boolean motorDirection = false;
 
 
     @Override
@@ -42,23 +47,36 @@ public class motorMoving extends LinearOpMode {
 
             runtime.reset();
 
-            if (gamepad1.dpad_up) {
 
-               test.setPower(10);
+            if (gamepad1.y) {
+
+               test.setPower(-1 * motorTestDirection);
+
                 //debug
-                telemetry.addData("dpadUP", 0);
+                telemetry.addData("y", 0);
                 telemetry.update();
+
+                motorON = true;
+                telemetry.addData("Motor on",0);
 
 
 
                 //makes arm go up
             }
+            if (gamepad1.x){
+                test.setPower(-0.8 * motorTestDirection);
 
+            }
+            if (gamepad1.a){
+                test.setPower(-0.6 * motorTestDirection);
 
+            }
+            if (gamepad1.b){
+                test.setPower(-0.4 * motorTestDirection);
+
+            }
 
         }
-
-
 
 
     }
