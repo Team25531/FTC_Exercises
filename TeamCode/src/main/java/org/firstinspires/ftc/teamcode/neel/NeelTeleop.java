@@ -5,7 +5,7 @@ package org.firstinspires.ftc.teamcode.neel;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.gamepad1;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.hardwareMap;
 import static org.firstinspires.ftc.robotcore.external.BlocksOpModeCompanion.telemetry;
-
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -17,79 +17,87 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 @TeleOp(name = "NeelTeleop", group = "Ftc Comp")
+public class NeelTeleop extends OpMode {
 
-//we need to add the DcMotors
-public void init() {
-    telemetry.addData("Status", "Initialized");
+    private ElapsedTime runtime = new ElapsedTime();
 
-    // Initialize the hardware variables. Note that the strings used here as parameters
-    // to 'get' must correspond to the names assigned during the robot configuration
-    // step (using the FTC Robot Controller app on the phone).
-    leftDrive  = hardwareMap.get(DcMotor.class, "left_drive");
-    rightDrive = hardwareMap.get(DcMotor.class, "right_drive");
+    DcMotor frontLeftMotor = null;
+    DcMotor backLeftMotor = null;
+    DcMotor frontRightMotor = null;
+    DcMotor backRightMotor = null;
 
-    // To drive forward, most robots need the motor on one side to be reversed, because the axles point in opposite directions.
-    // Pushing the left stick forward MUST make robot go forward. So adjust these two lines based on your first test drive.
-    // Note: The settings here assume direct drive on left and right wheels.  Gear Reduction or 90 Deg drives may require direction flips
-    leftDrive.setDirection(DcMotor.Direction.REVERSE);
-    rightDrive.setDirection(DcMotor.Direction.FORWARD);
+    //we need to add the DcMotors
+    public void init() {
+        telemetry.addData("Status", "Initialized");
 
-    // Tell the driver that initialization is complete.
-    telemetry.addData("Status", "Initialized");
+        DcMotor frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
+        DcMotor backLeftMotor = hardwareMap.dcMotor.get("backLeft");
+        DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
+        DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
+        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        // Tell the driver that initialization is complete.
+        telemetry.addData("Status", "Initialized");
+    }
+
+    /*
+     * Code to run REPEATEDLY after the driver hits INIT, but before they hit START
+     */
+    @Override
+    public void init_loop() {
+    }
+
+    /*
+     * Code to run ONCE when the driver hits START
+     */
+    @Override
+
+    public void start() {
+        runtime.reset();
+    }
+
+    /*
+     * Code to run REPEATEDLY after the driver hits START but before they hit STOP
+     */
+    @Override
+    public void loop() {
+        double y = -gamepad1.left_stick_y; // Remember, Y stick value is reversed
+        double x = gamepad1.left_stick_x * 1.1; // Counteract imperfect strafing
+        double rx = gamepad1.right_stick_x;
+
+        // Denominator is the largest motor power (absolute value) or 1
+        // This ensures all the powers maintain the same ratio,
+        // but only if at least one is out of the range [-1, 1]
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+
+        double speedModifier = Math.abs(1.5);
+        denominator *= speedModifier;
+
+        if (gamepad1.y) {
+            denominator *= 2.5;
+        }
+
+        double frontLeftPower = (y + x + rx) / denominator;
+        double backLeftPower = (y - x + rx) / denominator;
+        double frontRightPower = (y - x - rx) / denominator;
+        double backRightPower = (y + x - rx) / denominator;
+
+        frontLeftMotor.setPower(frontLeftPower);
+        backLeftMotor.setPower(backLeftPower);
+        frontRightMotor.setPower(frontRightPower);
+        backRightMotor.setPower(backRightPower);
+
+
+        runtime.reset();
+    }
+
+    /*
+     * Code to run ONCE after the driver hits STOP
+     */
+    @Override
+    public void stop() {
+    }
 }
-
-/*
- * Code to run REPEATEDLY after the driver hits INIT, but before they hit START
- */
-@Override
-public void init_loop() {
-}
-
-/*
- * Code to run ONCE when the driver hits START
- */
-@Override
-public void start() {
-    runtime.reset();
-}
-
-/*
- * Code to run REPEATEDLY after the driver hits START but before they hit STOP
- */
-@Override
-public void loop() {
-    // Setup a variable for each drive wheel to save power level for telemetry
-    double leftPower;
-    double rightPower;
-
-    // Choose to drive using either Tank Mode, or POV Mode
-    // Comment out the method that's not used.  The default below is POV.
-
-    // POV Mode uses left stick to go forward, and right stick to turn.
-    // - This uses basic math to combine motions and is easier to drive straight.
-    double drive = -gamepad1.left_stick_y;
-    double turn  =  gamepad1.right_stick_x;
-    leftPower    = Range.clip(drive + turn, -1.0, 1.0) ;
-    rightPower   = Range.clip(drive - turn, -1.0, 1.0) ;
-
-    // Tank Mode uses one stick to control each wheel.
-    // - This requires no math, but it is hard to drive forward slowly and keep straight.
-    // leftPower  = -gamepad1.left_stick_y ;
-    // rightPower = -gamepad1.right_stick_y ;
-
-    // Send calculated power to wheels
-    leftDrive.setPower(leftPower);
-    rightDrive.setPower(rightPower);
-
-    // Show the elapsed game time and wheel power.
-    telemetry.addData("Status", "Run Time: " + runtime.toString());
-    telemetry.addData("Motors", "left (%.2f), right (%.2f)", leftPower, rightPower);
-}
-
-/*
- * Code to run ONCE after the driver hits STOP
- */
-@Override
-public void stop() {
-}
-
