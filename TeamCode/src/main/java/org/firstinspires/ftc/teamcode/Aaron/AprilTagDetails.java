@@ -37,7 +37,7 @@ public class AprilTagDetails extends LinearOpMode {
     @Override
     public void runOpMode() {
 
-        intTagProcessor();
+        initializeTagProcessor();
 
         telemetry.addData(">", "Use scrcpy to view the camera output live");
         telemetry.addData(">", "Press START to start OpMode");
@@ -59,7 +59,7 @@ public class AprilTagDetails extends LinearOpMode {
         visionPortal.close();
     }
 
-    private void intTagProcessor() {
+    private void initializeTagProcessor() {
 
         aprilTag = new AprilTagProcessor.Builder()
                 .setDrawTagOutline(true)
@@ -110,6 +110,7 @@ public class AprilTagDetails extends LinearOpMode {
         for (AprilTagDetection detection : currentDetections) {
             if (detection.id == tagID) {
                 range = (int) detection.ftcPose.range;
+                break;
             }
         }
         return range;
