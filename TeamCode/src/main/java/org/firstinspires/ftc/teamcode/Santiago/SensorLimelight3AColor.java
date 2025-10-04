@@ -123,10 +123,10 @@ public class SensorLimelight3AColor extends LinearOpMode {
                     telemetry.addData("Color", "X: %.2f, Y: %.2f", cr.getTargetXDegrees(), cr.getTargetYDegrees());
                 }
                 if(gamepad1.dpad_down) {
-                limelight.pipelineSwitch(1)
+                limelight.pipelineSwitch(1);
                 }
                 else if(gamepad1.dpad_up) {
-                    limelight.pipelineSwitch(0)
+                    limelight.pipelineSwitch(0);
                 }
             } else {
                 telemetry.addData("Limelight", "No data available");

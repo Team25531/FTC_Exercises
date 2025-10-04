@@ -16,8 +16,8 @@ public class motorMoving extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     private DcMotor test;
-    double motorTestDirection = 1;
-
+    double motorTestDirection = -1;
+    private CRServo intake;
     boolean motorON = false;
 
     boolean motorDirection = false;
@@ -29,6 +29,7 @@ public class motorMoving extends LinearOpMode {
         waitForStart();
 
         DcMotor test = hardwareMap.dcMotor.get("test");
+        intake = hardwareMap.crservo.get("intake");
 
 
         //reseting variable called runtime
@@ -74,6 +75,13 @@ public class motorMoving extends LinearOpMode {
             if (gamepad1.b){
                 test.setPower(-0.4 * motorTestDirection);
 
+            }
+
+            if (gamepad1.dpad_down){
+                intake.setPower(0.8);
+            }
+            if(gamepad1.dpad_up){
+                intake.setPower(-0.8);
             }
 
         }

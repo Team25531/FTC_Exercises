@@ -1,0 +1,41 @@
+@startuml
+'https://plantuml.com/state-diagram
+
+scale 300 width
+[*] --> AlignRobot
+AlignRobot --> IntializeMotor
+IntializeMotor --> PressPlay
+PressPlay : Wait for Start
+PressPlay --> Outtake
+RobotMovement --> Intake
+Intake -->Storage
+Storage -->Outtake
+
+state Outtake {
+  [*] --> RevUpMotor
+   RevUpMotor--> ShootBall
+   ShootBall --> wait3sec
+   wait3sec --> repeaet2moretimes
+}
+
+ state RobotMovement {
+    [*] --> ScanMosaic
+    ScanMosaic --> turnRobotUntilMosiacColorFound
+    turnRobotUntilMosiacColorFound --> MoveFowardToMosiacColor
+    MoveFowardToMosiacColor --> intake
+    intake --> IfBallNotThere
+    IfBallNotThere --> RepeatFromRobotTurn
+    RepeatFromRobotTurn --> IFballThere
+    IFballThere --> RepeatUntil3BallsInstorage
+  }
+
+state Intake {
+  [*] --> turnOnServo
+  turnOnservo --> KeepBallInStorage
+
+ }
+
+
+
+
+@enduml
