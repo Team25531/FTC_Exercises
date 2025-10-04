@@ -1,0 +1,45 @@
+@startuml
+'https://plantuml.com/state-diagram
+
+scale 350 width
+
+[*] --> Waiting
+state Waiting{
+ Waiting --> Moving
+ Waiting --> Shooting
+ Waiting --> ScanningForBalls
+ Waiting --> ScanningForAprilTags
+}
+
+state Moving {
+ Moving --> Waiting
+ Moving --> Shooting
+ Moving --> Moving
+ Moving --> ScanningForAprilTags
+ Moving --> ScanningForBalls
+
+}
+
+state Shooting {
+ Shooting --> Waiting
+ Shooting --> Shooting
+ Shooting --> Moving
+ Shooting --> ScanningForAprilTags
+ Shooting --> ScanningForBalls
+}
+
+state ScanningForBalls {
+ ScanningForBalls --> Waiting
+ ScanningForBalls --> Shooting
+ ScanningForBalls --> Moving
+ ScanningForBalls --> ScanningForAprilTags
+
+}
+
+state ScanningForAprilTags {
+ ScanningForAprilTags --> Waiting
+ ScanningForAprilTags --> Shooting
+ ScanningForAprilTags --> Moving
+ ScanningForAprilTags --> ScanningForBalls
+}
+@enduml
