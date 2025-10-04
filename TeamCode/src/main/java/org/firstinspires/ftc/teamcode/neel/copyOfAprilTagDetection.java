@@ -26,7 +26,7 @@ in the variable WEBCAM_NAME
  */
 
 @SuppressLint("DefaultLocale")
-@TeleOp(name = "AprilTagDetails", group = "Aaron")
+@TeleOp(name = "copyOfAprilTagDetection", group = "Neel")
 //makes the group name and the name of the thing on the control hub
 //@Disabled
 public class copyOfAprilTagDetection extends LinearOpMode {
