@@ -1,12 +1,12 @@
-package org.firstinspires.ftc.teamcode.Aaron;
+package org.firstinspires.ftc.teamcode.Aaron.y2024;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
+
+import org.firstinspires.ftc.teamcode.Aaron.Controller;
 
 
 @TeleOp(name = "Aaron: ExpHubTest", group = "Aaron")
@@ -20,7 +20,35 @@ public class ExpHubTest extends LinearOpMode {
 
 
 
-        private Gamepad gamepad;
+    enum State{Start, Run, Walk, Jump, Stop}
+    State state;
+
+    public void StateMachine()
+    {
+        state = State.Start;
+
+        LOOP:
+        while(true)
+        {
+            switch (state){
+                case Start:
+                    telemetry.addLine("state: start");
+                    telemetry.addLine("slf");
+                    break;
+                case Jump:
+                    break;
+
+                default:
+                    break LOOP;
+
+
+
+            }
+        }
+    }
+
+
+    private Gamepad gamepad;
         private int xBut, yBut, aBut, bBut;
 
 //        public Pad(Gamepad g) {
