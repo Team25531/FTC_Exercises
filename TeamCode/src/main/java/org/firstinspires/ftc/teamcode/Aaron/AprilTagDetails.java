@@ -28,7 +28,7 @@ in the variable WEBCAM_NAME
 @TeleOp(name = "AprilTagDetails", group = "Aaron")
 //@Disabled
 public class AprilTagDetails extends LinearOpMode {
-    public static final int GOAL_TAG_ID = 585;
+    public static final int GOAL_TAG_ID = 22;
     public static final String WEBCAM_NAME = "Webcam 1";
 
     private AprilTagProcessor aprilTag;
