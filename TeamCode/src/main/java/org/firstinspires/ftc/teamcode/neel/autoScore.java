@@ -17,8 +17,8 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-import org.firstinspires.ftc.teamcode.Aaron.BackgroundElbowMove;
-import org.firstinspires.ftc.teamcode.Aaron.GlobalState;
+import org.firstinspires.ftc.teamcode.Aaron.y2024.BackgroundElbowMove;
+import org.firstinspires.ftc.teamcode.Aaron.y2024.GlobalState;
 
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
