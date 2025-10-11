@@ -30,7 +30,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 @TeleOp(name = "NeelGetMotorSpeed", group = "Neel")
 //@Disabled
 public class getMotorSpeed extends LinearOpMode {
-    public static final int GOAL_TAG_ID = 585;
+    public static final int GOAL_TAG_ID = 24;
     public static final String WEBCAM_NAME = "Webcam 1";
 
     private AprilTagProcessor aprilTag;
@@ -72,7 +72,7 @@ public class getMotorSpeed extends LinearOpMode {
         frontRightMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         //  waitForStart();
         // intTagProcessor();
-
+        intTagProcessor();
         telemetry.addData(">", "OpMode to display velocity of a motor.");
         telemetry.addData(">", "Press START to start OpMode");
 //        telemetry.addData(">", "Use scrcpy to view the camera output live");
@@ -112,6 +112,21 @@ public class getMotorSpeed extends LinearOpMode {
                 telemetry.addData("targetVelocity", targetVelocity);
                 //frontRightMotor.setPower(targetVelocity);
 //.3 250
+                displayTagInfo();
+                double rangeToTarget = getDistanceToTag(GOAL_TAG_ID);
+
+                double angleToTarget = getAngleToTag(GOAL_TAG_ID);
+                telemetry.addData("Current distance",rangeToTarget);
+                telemetry.addData("current AngelToTarget", angleToTarget);
+                curTarget = 0;
+                if (rangeToTarget < 76){
+                    curTarget = targetY;
+                }
+
+                if (rangeToTarget > 100){
+                    curTarget = targetA;
+                }
+
                 if (gamepad1.a) {
                     curTarget = targetA;
                     telemetry.addData("motorTargetSetTo1", curTarget);
@@ -250,6 +265,20 @@ public class getMotorSpeed extends LinearOpMode {
         }
 
     }
+    private int getAngleToTag(int tagID) {
+
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        int range = 0;
+
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.id == tagID) {
+                range = (int) detection.ftcPose.bearing;
+                break;
+            }
+        }
+        return range;
+    }
+
 
     private int getDistanceToTag(int tagID) {
 
