@@ -21,7 +21,7 @@ public class NeelTeleop extends LinearOpMode {
     private DcMotor frontRightMotor;// = hardwareMap.dcMotor.get("frontRight");
     private DcMotor backRightMotor;// = hardwareMap.dcMotor.get("backRight");
 
-
+    private CRServo intake;
     double position = 0.312;
     final double ARM_TICKS_PER_DEGREE =
             28 // number of encoder ticks per rotation of the bare motor
@@ -64,7 +64,7 @@ public class NeelTeleop extends LinearOpMode {
         DcMotor frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         DcMotor backRightMotor = hardwareMap.dcMotor.get("backRight");
 
-
+        CRServo intake = hardwareMap.crservo.get("intake");
         //setting direction for motors
 
 
@@ -133,7 +133,12 @@ public class NeelTeleop extends LinearOpMode {
 
 
             runtime.reset();
-
+        if (gamepad1.dpad_down){
+            intake.setPower (-0.7);
+        }
+        if (gamepad1.dpad_up){
+            intake.setPower(0.7);
+        }
         }
     }
 }
