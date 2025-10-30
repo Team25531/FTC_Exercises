@@ -1,0 +1,35 @@
+@startuml
+scale 450 width
+WaitForStart -> findB
+state findB{
+state lookAround
+lookAround : scan clockwise for first ball of the color we want
+lookAround -> travelToBall
+state intakeBall{
+intakeBall -> isIntakeFull
+isIntakeFull --> isIntakeFull
+isIntakeFull : loop until hopper is full
+isIntakeFull --> intakeIsFull
+}
+
+}
+WaitForStart ->findB
+
+
+state shootBallsInHopper
+state findBall
+
+
+shootBallsInHopper -> ballsRemaining
+ballsRemaining -> shootBallsInHopper
+ballsRemaining -> findBall
+findBall -> lookAround
+lookAround : Find closest balls
+lookAround -> driveToBall
+driveToBall : Plot route so that intake 6 inches past ball location
+driveToBall -> intake
+intake -> hasFullHopper
+
+
+
+@enduml
