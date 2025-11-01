@@ -98,7 +98,27 @@ public class FtcCompReorg extends LinearOpMode {
         //only compute velocity if we're actually shooting.
         if (isShooting && !shooterNeedsReset) {
             //todo: set these range values
+
             if (distanceToTarget > 55 && distanceToTarget < 129) {
+
+
+//                int targetY = 1050;
+//                int targetX = 1025;
+//                int targetZ = 1000;
+//                int targetA = 1350;
+//                if (distanceToTarget > 125 && distanceToTarget < 129) {
+//                    goalVelocity = targetA;
+//                }
+//                if (distanceToTarget < 70 && distanceToTarget > 65) {
+//                    goalVelocity = targetY;
+//                }
+//                if (distanceToTarget < 65 && distanceToTarget > 60) {
+//                    goalVelocity = targetX;
+//                }
+//                if (distanceToTarget < 60 && distanceToTarget > 55) {
+//                    goalVelocity = targetZ;
+//                }
+
                 goalVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
                 telemetry.addData("SHOOT, curDist", distanceToTarget);
             } else {
