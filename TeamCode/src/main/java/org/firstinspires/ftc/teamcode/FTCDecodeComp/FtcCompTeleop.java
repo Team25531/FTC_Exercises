@@ -43,7 +43,10 @@ public class FtcCompTeleop extends LinearOpMode {
     private VisionPortal visionPortal;
 
 
-    int targetY = 1200;
+    int targetY = 1050;
+    int targetX = 1025;
+
+    int targetZ = 1000;
     int targetA = 1350;
     int curTarget = 0;
     double Minrange = 0;
@@ -105,7 +108,7 @@ public class FtcCompTeleop extends LinearOpMode {
 
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
-        frontRightMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
 
 
@@ -146,23 +149,29 @@ public class FtcCompTeleop extends LinearOpMode {
             distanceToTarget = getDistanceToTag(GOAL_TAG_ID );
             telemetry.addData("At distance to long range shoot",distanceToTarget);
             telemetry.addData("At angle to shoot",turnToTarget);
-           if (gamepad1.left_trigger > 0) {
-               if (distanceToTarget > 125){
+            if (gamepad1.left_trigger > 0) {
+                if (distanceToTarget > 125 && distanceToTarget < 129){
                     curTarget = targetA;
-                   telemetry.addData("At distance to long range shoot",distanceToTarget);
-               }
-               if (distanceToTarget < 75 && distanceToTarget > 0){
-                   curTarget = targetY;
-               }
-               if (turnToTarget < -1 || turnToTarget > 1) {
-                   if (turnToTarget < -1) {
-                       rx = 0.3;
-                   }
-                   else {
-                       rx = -0.3;
-                   }
-               }
-           }
+
+                }
+                if (distanceToTarget < 70 && distanceToTarget > 65){
+                    curTarget = targetY;
+                }
+                if (distanceToTarget < 65 && distanceToTarget > 60){
+                    curTarget = targetX;
+                }
+                if (distanceToTarget < 60 && distanceToTarget > 55){
+                    curTarget = targetZ;
+                }
+                if (turnToTarget < -1 || turnToTarget > 1) {
+                    if (turnToTarget < -1) {
+                        rx = 0.3;
+                    }
+                    else {
+                        rx = -0.3;
+                    }
+                }
+            }
 
             // Denominator is the l
             //
@@ -240,11 +249,12 @@ public class FtcCompTeleop extends LinearOpMode {
             if (currentVelocity < Maxrange && currentVelocity > Minrange) {
                 runtime.reset();
                 int timeToSpeed = (int) runtime.milliseconds();
-                while (timeToSpeed < 1750){
+                while (timeToSpeed <2500){
                     storageWheel.setPower(-1);
                     timeToSpeed = (int) runtime.milliseconds();
                 }
-                if (timeToSpeed > 1750) {
+                storageWheel.setPower(0);
+                if (timeToSpeed > 2500) {
                     storageWheel.setPower(0);
                 }
 
@@ -253,10 +263,16 @@ public class FtcCompTeleop extends LinearOpMode {
             }
 
             if (gamepad1.x){
-                 intake.setPower(0);
+                intake.setPower(0);
             }
 
             telemetry.update();
+
+            if (gamepad1.left_bumper){
+                curTarget = 600;
+                storageWheel.setPower(0);
+
+            }
 
 
 
@@ -331,7 +347,7 @@ public class FtcCompTeleop extends LinearOpMode {
         builder.setCamera(hardwareMap.get(WebcamName.class, WEBCAM_NAME));
 
         builder.setCameraResolution(new Size(640, 480));
-       builder.addProcessor(aprilTag);
+        builder.addProcessor(aprilTag);
         visionPortal = builder.build();
 
         visionPortal.setProcessorEnabled(aprilTag, true);
