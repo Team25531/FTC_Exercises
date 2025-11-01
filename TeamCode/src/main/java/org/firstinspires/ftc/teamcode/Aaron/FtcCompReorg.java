@@ -65,7 +65,6 @@ public class FtcCompReorg extends LinearOpMode {
             checkToResetState();
             checkSetIdleState();
             setGoalVelocity();
-            //this needs to happen a second time here to set some variables needed below.
             runOuttakeMotor();
             doShooting();
 
@@ -74,12 +73,18 @@ public class FtcCompReorg extends LinearOpMode {
     }
 
     private void doShooting() {
+        if (!isShooting) return;
+
         //if we're using auto aim and it isn't yet at the target then let steering keep going.
         if (isAutoAimEnabled && !isAimedAtTarget) return;
-        if (isShooting && isAtGoalVelocity && !shooterNeedsReset) {
+
+        //if we are at goal, then run the storageWheel.
+        if (isAtGoalVelocity && !shooterNeedsReset) {
             storageTimer.reset();
+            storageWheel.setPower(-1);
+            //todo: determine correct duration for this timer.
             while (opModeIsActive() & storageTimer.milliseconds() < 3000 && !shooterNeedsReset) {
-                storageWheel.setPower(-1);
+                sleep(1);
                 //todo: delete this telemetry.
                 telemetry.addData("storeTimer", storageTimer.milliseconds());
                 telemetry.update();
@@ -91,7 +96,9 @@ public class FtcCompReorg extends LinearOpMode {
     }
 
     private void setGoalVelocity() {
+        //only compute velocity if we're actually shooting.
         if (isShooting && !shooterNeedsReset) {
+            //todo: set these range values
             if (distanceToTarget > 55 && distanceToTarget < 129) {
                 goalVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
                 telemetry.addData("SHOOT, curDist", distanceToTarget);
@@ -105,7 +112,6 @@ public class FtcCompReorg extends LinearOpMode {
     }
 
     private void checkSetIdleState() {
-        //Set Idle state
         if (gamepad1.left_bumper) {
             SetIdleState();
         }
@@ -137,7 +143,8 @@ public class FtcCompReorg extends LinearOpMode {
     }
 
     private void autoAimOnOff() {
-        if (gamepad1.yWasPressed()){
+        //toggle autoAim on off if something is wonky.
+        if (gamepad1.yWasPressed()) {
             isAutoAimEnabled = !isAutoAimEnabled;
         }
         telemetry.addData("isAutoAimEnabled", isAutoAimEnabled);
@@ -174,7 +181,6 @@ public class FtcCompReorg extends LinearOpMode {
         outtake.setPower(currentPower);
     }
 
-
     private void SetIdleState() {
         goalVelocity = IDLE_VELOCITY; //min speed for Outtake wheel
         storageWheel.setPower(0); //stop the storage wheel
@@ -193,10 +199,12 @@ public class FtcCompReorg extends LinearOpMode {
         //if shooting and the camera is working then override driver input
         //and try to steer towards the target.
         if (isShooting && isAutoAimEnabled && !shooterNeedsReset) {
-            if (angleToTarget < -1) rx = 0.3;
-            if (angleToTarget > 1) rx = -0.3;
             isAimedAtTarget = !(angleToTarget < -1 || angleToTarget > 1);
-            telemetry.addData("isAimedAtTarget",isAimedAtTarget);
+            if (!isAimedAtTarget) {
+                if (angleToTarget < -1) rx = 0.3;
+                if (angleToTarget > 1) rx = -0.3;
+            }
+            telemetry.addData("isAimedAtTarget", isAimedAtTarget);
         }
 
         double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
