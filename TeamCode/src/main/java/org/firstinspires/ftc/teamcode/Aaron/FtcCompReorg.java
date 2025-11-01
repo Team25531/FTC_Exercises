@@ -49,7 +49,6 @@ public class FtcCompReorg extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-        //useOuttake = false;
         initializeMotors();
         initializeTagProcessor();
         SetIdleState();
