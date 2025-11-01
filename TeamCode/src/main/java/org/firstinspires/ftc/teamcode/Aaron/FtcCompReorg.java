@@ -22,7 +22,7 @@ import java.util.List;
 @TeleOp(name = "FtcCompReorg", group = "Aaron")
 public class FtcCompReorg extends LinearOpMode {
     private ElapsedTime storageTimer = new ElapsedTime();
-    private DcMotorEx frontLeftMotor;
+    private DcMotor frontLeftMotor;
     private DcMotor backLeftMotor;
     private DcMotor frontRightMotor;
     private DcMotor backRightMotor;
@@ -213,22 +213,22 @@ public class FtcCompReorg extends LinearOpMode {
         double backRightPower = (y + x - rx) / denominator;
 
         //todo: enable this.
-        //frontLeftMotor.setPower(frontLeftPower);
+        frontLeftMotor.setPower(frontLeftPower);
         backLeftMotor.setPower(backLeftPower);
         frontRightMotor.setPower(frontRightPower);
         backRightMotor.setPower(backRightPower);
     }
 
     private void initializeMotors() {
-        frontLeftMotor = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
         backLeftMotor = hardwareMap.dcMotor.get("backLeft");
         frontRightMotor = hardwareMap.dcMotor.get("frontRight");
         backRightMotor = hardwareMap.dcMotor.get("backRight");
         intake = hardwareMap.crservo.get("intake");
         storageWheel = hardwareMap.crservo.get("storageWheel");
-
+        outtake = hardwareMap.get(DcMotorEx.class, "outtake");
         //TODO: fix this to pull the correct object.
-        outtake = hardwareMap.get(DcMotorEx.class, "frontLeft");
+        //outtake = hardwareMap.get(DcMotorEx.class, "frontLeft");
 
         frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
