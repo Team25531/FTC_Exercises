@@ -31,7 +31,7 @@ public class FtcCompReorg extends LinearOpMode {
     private CRServo storageWheel;
     private AprilTagProcessor aprilTag;
     public static final String WEBCAM_NAME = "Webcam 1";
-    public static final int TARGET_TAG_ID = 585;//24;
+    public static final int TARGET_TAG_ID = 24;
     public static final int IDLE_VELOCITY = 600;
     private VisionPortal visionPortal;
     int goalVelocity = 0;
@@ -252,7 +252,7 @@ public class FtcCompReorg extends LinearOpMode {
                 break;
             }
         }
-        return 65;//range;
+        return range;
     }
 
     private int getAngleToTag(int tagID) {
