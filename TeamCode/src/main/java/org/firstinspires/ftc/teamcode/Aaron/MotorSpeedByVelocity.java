@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Aaron;
 
 import android.annotation.SuppressLint;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,7 +11,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 @SuppressLint("DefaultLocale")
 @TeleOp(name = "MotorSpeedByVelocity", group = "Aaron")
-//@Disabled
+@Disabled
 public class MotorSpeedByVelocity extends LinearOpMode {
 
 

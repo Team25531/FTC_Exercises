@@ -18,8 +18,8 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-
-@Autonomous(name = "AutoDriveWithElbow", group = "auto")
+//@Autonomous(name="Blue Alliance Auto", group="Pushbot", preselectTeleOp="BlueAllianceTeleOp")
+@Autonomous(name = "AutoDriveWithElbow", group = "auto", preselectTeleOp="FtcCompTeleop")
 @Disabled
 public class AutoDriveWithElbow extends LinearOpMode {
     ElapsedTime timer = new ElapsedTime();

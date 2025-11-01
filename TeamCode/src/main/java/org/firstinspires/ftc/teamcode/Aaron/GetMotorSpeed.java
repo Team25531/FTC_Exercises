@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 import android.util.Size;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -26,9 +27,9 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @SuppressLint("DefaultLocale")
 @TeleOp(name = "GetMotorSpeed", group = "Aaron")
-//@Disabled
+@Disabled
 public class GetMotorSpeed extends LinearOpMode {
-    public static final int GOAL_TAG_ID = 585;
+    public static final int GOAL_TAG_ID = 22;
     public static final String WEBCAM_NAME = "Webcam 1";
 
     private AprilTagProcessor aprilTag;
@@ -38,7 +39,7 @@ public class GetMotorSpeed extends LinearOpMode {
     private DcMotorEx backRightMotor;
     private DcMotorEx frontLeftMotor;
     private DcMotorEx frontRightMotor;
-   // private DcMotorEx motor;
+    // private DcMotorEx motor;
     //     frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
 //        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
 //        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
@@ -66,7 +67,7 @@ public class GetMotorSpeed extends LinearOpMode {
         // disables the default velocity control
         // this does NOT disable the encoder from counting,
         // but lets us simply send raw motor power.
-        frontRightMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+        //frontRightMotor.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
         //  waitForStart();
         // intTagProcessor();
 
@@ -75,9 +76,13 @@ public class GetMotorSpeed extends LinearOpMode {
 //        telemetry.addData(">", "Use scrcpy to view the camera output live");
 //        telemetry.addData(">", "Press START to start OpMode");
         telemetry.update();
-
+        int targetA = 400;
+        int targetY = 2000;
+        int curGoal = 0;
+        int range = 10;
+        int ticksPerRev = 1440;
         waitForStart();
-        double targetVelocity = .3;
+        double targetVelocity = 0;
 
         if (opModeIsActive()) {
             frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -87,22 +92,43 @@ public class GetMotorSpeed extends LinearOpMode {
                 c.update();
                 // motor.setVelocity(300);
                 // runMotorAtTargetVelocity(targetVelocity);
-                telemetry.addData("cur velocity fun", getCurrentMotorVelocity());
-                telemetry.addData("cur velocity mot", frontRightMotor.getVelocity());
-                telemetry.addData("cur velocity deg", frontRightMotor.getVelocity(AngleUnit.DEGREES));
-                telemetry.addData("cur ticks", frontRightMotor.getCurrentPosition());
+                // telemetry.addData("cur velocity fun", getCurrentMotorVelocity());
+                telemetry.addData("Curr Ticks/sec:", frontRightMotor.getVelocity());
+                //    frontRightMotor.setVelocity(1440);
+                //  telemetry.addData("cur velocity deg", frontRightMotor.getVelocity(AngleUnit.DEGREES));
+                //    telemetry.addData("cur ticks", frontRightMotor.getCurrentPosition());
 //                telemetry.addData(" ticks", frontRightMotor.);
 
-                double elapsedSeconds = runtime.seconds();
-                double rpm = (frontRightMotor.getCurrentPosition() / elapsedSeconds) * 1;
+//                double elapsedSeconds = runtime.seconds();
+//                double ticksPerSecond = (frontRightMotor.getCurrentPosition() / elapsedSeconds) * 1;
+//                telemetry.addData("Ticks/Sec", ticksPerSecond);
+//
+//                double RPM = frontRightMotor.getCurrentPosition() / (elapsedSeconds * ticksPerRev);
+//                telemetry.addData("RPMs", RPM);
+//                telemetry.addLine(String.format("RPM: %6.2f", RPM));
 
-                telemetry.addData("RPM", rpm);
+                double ratio = frontRightMotor.getVelocity() / ticksPerRev;
+                telemetry.addLine(String.format("Curr RPM: %6.2f", ratio));
 
-                if (c.dpadDownOnce()) targetVelocity -= .1;
-                if (c.dpadUpOnce()) targetVelocity += .1;
-                targetVelocity = Range.clip(targetVelocity, -1, 1);
+                if (c.B()) {
+                    targetVelocity = 0;
+                }
+                if (c.A()) {
+                    targetVelocity = targetA;
+                }
+                if (c.Y()) {
+                    targetVelocity = targetY;
+                }
+//                if (c.dpadDownOnce()) targetVelocity -= .1;
+//                if (c.dpadUpOnce()) targetVelocity += .1;
+
+                //              targetVelocity = Range.clip(targetVelocity, -1, 1);
+
                 telemetry.addData("targetVelocity", targetVelocity);
-                frontRightMotor.setPower(targetVelocity);
+
+                frontRightMotor.setVelocity(targetVelocity);
+
+                // frontRightMotor.setPower(targetVelocity);
 //.3 250
 //.4 340
 //.5 425
