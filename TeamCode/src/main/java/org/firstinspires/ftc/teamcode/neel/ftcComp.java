@@ -62,10 +62,11 @@ public class ftcComp extends LinearOpMode {
             checkIfShooting();
             double ve;
 
-                ve = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
+                ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
                 telemetry.addData("current velocity", ve);
 
             doDriving();
+
             autoAimOnOff();
             controlIntake();
             checkToResetState();
@@ -93,7 +94,7 @@ public class ftcComp extends LinearOpMode {
             while (opModeIsActive() & storageTimer.milliseconds() < 3000 && !shooterNeedsReset) {
                 sleep(1);
                 //todo: delete this telemetry.
-                telemetry.addData("storeTimer", storageTimer.milliseconds());
+                telemetry.addData("velocity",goalVelocity);
                 telemetry.update();
             }
             shooterNeedsReset = true;
@@ -106,48 +107,66 @@ public class ftcComp extends LinearOpMode {
         //only compute velocity if we're actually shooting.
         if (isShooting && !shooterNeedsReset) {
             //todo: set these range values
-            if (distanceToTarget > 55 && distanceToTarget < 129) {
-//               int targetY = 1050;
-//                int targetX = 1025;
-//                int targetZ = 1000;
-//                int targetA = 1350;
-//                if (distanceToTarget == 125 ) {
-//                    goalVelocity = 1350;
-//                }
-//                if (distanceToTarget == 70 ) {
-//                    goalVelocity = 1095;
-//                }
-//                if (distanceToTarget == 65) {
-//                    goalVelocity = 1080;
-//                }
-//                if (distanceToTarget == 60) {
-//                    goalVelocity = 1040;             }
-                goalVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
-                telemetry.addData("SHOOT, curDist", distanceToTarget);
-            } else {
-                telemetry.addData("NO SHOOT, curDist", distanceToTarget);
+            if (distanceToTarget > 55 && distanceToTarget < 140) {
+
+                if(distanceToTarget == 133){
+                    goalVelocity = 1425;
+                }
+                if(distanceToTarget == 132){
+                    goalVelocity = 1420;
+                }
+                if (distanceToTarget == 131){
+                    goalVelocity = 1417;
+                }
+                if (distanceToTarget == 63){
+                    goalVelocity = 1030;
+                }
+                if (distanceToTarget == 70){
+                    goalVelocity = 1080;
+                }
+                if (distanceToTarget == 135){
+                    goalVelocity = 1435;
+                }
+                if (distanceToTarget == 137){
+                    goalVelocity = 1440;
+                }
+                if (distanceToTarget == 139){
+                    goalVelocity = 1445;
+                }
+                if (distanceToTarget == 72){
+                    goalVelocity = 1083;
+                }
+
+
+               //goalVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
+
+
             }
-        } else {
             SetIdleState();
         }
         telemetry.addData("goalVelocity", goalVelocity);
     }
 
     private void checkSetIdleState() {
-        if (gamepad1.leftBumperWasPressed()) {
-             if(IDLE_VELOCITY == 600){
-                 IDLE_VELOCITY = 0;
-                 return;
-             }
-             if(IDLE_VELOCITY == 0){
-                 IDLE_VELOCITY = 600;
-                 return;
-                 //61 1018
-             }
 
-        }
+//        if (gamepad1.leftBumperWasPressed()) {
+//             if(IDLE_VELOCITY == 600){
+//                 IDLE_VELOCITY = 0;
+//                 goalVelocity = IDLE_VELOCITY;
+//                 return;
+//             }
+//             if(IDLE_VELOCITY == 0){
+//                 IDLE_VELOCITY = 600;
+//                 goalVelocity = IDLE_VELOCITY;
+//                 return;
+//                 //61 1018
+//
+//             }
+
+//        }
     }
-    //DATA POINTS //61 1018 //79 1107//65 1080//60 1040
+    //DATA POINTS //61 1018 //79 1200//65 1080//60 1040//68 1110// 70 1150// 125 1350
+    //NEW DATA ///
     private void checkToResetState() {
         //Try to stop anything that isn't responding to other commands.
         if (gamepad1.right_bumper) {
@@ -217,7 +236,8 @@ public class ftcComp extends LinearOpMode {
 
     private void SetIdleState() {
         goalVelocity = IDLE_VELOCITY; //min speed for Outtake wheel
-        storageWheel.setPower(0); //stop the storage wheel
+        storageWheel.setPower(0);
+        //stop the storage wheel
     }
 
     private void doDriving() {
