@@ -107,7 +107,7 @@ public class ftcComp extends LinearOpMode {
 
     private void setGoalVelocity() {
         //only compute velocity if we're actually shooting.
-        int tempVelocity = 1426;
+        int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
 //            tempVelocity = 1350;
@@ -141,8 +141,8 @@ public class ftcComp extends LinearOpMode {
 //                if (distanceToTarget == 72) {
 //                    tempVelocity = 1083;
 //                }
-        //    tempVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
-
+           // tempVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
