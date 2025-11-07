@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.neel;
 
 import android.util.Size;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -20,6 +21,7 @@ import java.util.List;
 
 
 @TeleOp(name = "FtcCompRed", group = "RedFtcComp")
+@Disabled
 public class ftcComp extends LinearOpMode {
     private ElapsedTime storageTimer = new ElapsedTime();
     private DcMotor frontLeftMotor;

@@ -58,6 +58,7 @@ import java.util.List;
    Pipeline 9 = april tag detection.
  */
 @TeleOp(name = "limelightTest", group = "Sensor")
+@Disabled
 
 public class limelightTest extends LinearOpMode {
 

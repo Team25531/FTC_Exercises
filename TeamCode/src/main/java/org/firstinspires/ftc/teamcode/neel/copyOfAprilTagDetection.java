@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.neel;
 import android.annotation.SuppressLint;
 import android.util.Size;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -27,6 +28,7 @@ in the variable WEBCAM_NAME
 
 @SuppressLint("DefaultLocale")
 @TeleOp(name = "copyOfAprilTagDetection", group = "Neel")
+@Disabled
 //makes the group name and the name of the thing on the control hub
 //@Disabled
 public class copyOfAprilTagDetection extends LinearOpMode {

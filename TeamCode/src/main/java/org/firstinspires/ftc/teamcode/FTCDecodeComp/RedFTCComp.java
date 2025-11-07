@@ -1,8 +1,7 @@
-package org.firstinspires.ftc.teamcode.Aaron;
+package org.firstinspires.ftc.teamcode.FTCDecodeComp;
 
 import android.util.Size;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -19,9 +18,9 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
-@Disabled
-@TeleOp(name = "FtcCompReorg", group = "Aaron")
-public class FtcCompReorg extends LinearOpMode {
+
+@TeleOp (name = " Red FTC Comp", group = " Red Ftc Comp")
+public class RedFTCComp extends LinearOpMode {
     private ElapsedTime storageTimer = new ElapsedTime();
     private DcMotor frontLeftMotor;
     private DcMotor backLeftMotor;
@@ -33,12 +32,15 @@ public class FtcCompReorg extends LinearOpMode {
     private AprilTagProcessor aprilTag;
     public static final String WEBCAM_NAME = "Webcam 1";
     public static final int TARGET_TAG_ID = 24;
-    public static final int IDLE_VELOCITY = 600;
+    public static int IDLE_VELOCITY = 600;
     private VisionPortal visionPortal;
     int goalVelocity = 0;
     double range = 0.05;
     double distanceToTarget = 0;
     double angleToTarget = 0;
+    double currentVelocity=0;
+    double currentPower = 0;
+    boolean isIdleEnabled = false;
 
     //boolean useOuttake = true;
     boolean isShooting = false;
@@ -59,7 +61,13 @@ public class FtcCompReorg extends LinearOpMode {
             if (isStopRequested()) return;
 
             checkIfShooting();
+            double ve;
+
+            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
+            telemetry.addData("current velocity", ve);
+
             doDriving();
+
             autoAimOnOff();
             controlIntake();
             checkToResetState();
@@ -74,7 +82,6 @@ public class FtcCompReorg extends LinearOpMode {
 
     private void doShooting() {
         if (!isShooting) return;
-
         //if we're using auto aim and it isn't yet at the target then let steering keep going.
         if (isAutoAimEnabled && !isAimedAtTarget) return;
 
@@ -86,7 +93,9 @@ public class FtcCompReorg extends LinearOpMode {
             while (opModeIsActive() & storageTimer.milliseconds() < 3000 && !shooterNeedsReset) {
                 sleep(1);
                 //todo: delete this telemetry.
-                telemetry.addData("storeTimer", storageTimer.milliseconds());
+                runOuttakeMotor();
+                telemetry.addData("velocity", goalVelocity);
+                telemetry.addData("curPower", currentPower);
                 telemetry.update();
             }
             shooterNeedsReset = true;
@@ -95,48 +104,79 @@ public class FtcCompReorg extends LinearOpMode {
         telemetry.addData("shooterNeedsReset", shooterNeedsReset);
     }
 
+
     private void setGoalVelocity() {
         //only compute velocity if we're actually shooting.
+        int tempVelocity = goalVelocity;
+        if (distanceToTarget > 40 && distanceToTarget < 140) {
+            telemetry.addData("in loop", 0);
+//            tempVelocity = 1350;
+
+            //75,1250  // 88 1315//70
+//                if (distanceToTarget == 133) {
+//                    tempVelocity = 1425;
+//                }
+//                if (distanceToTarget == 132) {
+//                    tempVelocity = 1420;
+//                }
+//                if (distanceToTarget == 131) {
+//                    tempVelocity = 1417;
+//                }
+//                if (distanceToTarget == 63) {
+//                    tempVelocity = 1030;
+//                }
+//                if (distanceToTarget == 70) {
+//                    telemetry.addData("getting velocity", 0);
+//                    tempVelocity = 1330;
+//                }
+//                if (distanceToTarget == 135) {
+//                    tempVelocity = 1435;
+//                }
+//                if (distanceToTarget == 137) {
+//                    tempVelocity = 1440;
+//                }
+//                if (distanceToTarget == 139) {
+//                    tempVelocity = 1445;
+//                }
+//                if (distanceToTarget == 72) {
+//                    tempVelocity = 1083;
+//                }
+           // tempVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
+            telemetry.addData("tempVelocity", tempVelocity);
+        }
+
         if (isShooting && !shooterNeedsReset) {
-            //todo: set these range values
-
-            if (distanceToTarget > 55 && distanceToTarget < 129) {
-
-
-                int targetY = 1050;
-                int targetX = 1025;
-                int targetZ = 1000;
-                int targetA = 1350;
-                if (distanceToTarget > 125 && distanceToTarget < 129) {
-                    goalVelocity = targetA;
-                }
-                if (distanceToTarget < 70 && distanceToTarget > 65) {
-                    goalVelocity = targetY;
-                }
-                if (distanceToTarget < 65 && distanceToTarget > 60) {
-                    goalVelocity = targetX;
-                }
-                if (distanceToTarget < 60 && distanceToTarget > 55) {
-                    goalVelocity = targetZ;
-                }
-
-                goalVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
-                telemetry.addData("SHOOT, curDist", distanceToTarget);
-            } else {
-                telemetry.addData("NO SHOOT, curDist", distanceToTarget);
-            }
+            goalVelocity = tempVelocity;
         } else {
             SetIdleState();
         }
+
+
         telemetry.addData("goalVelocity", goalVelocity);
     }
 
     private void checkSetIdleState() {
-        if (gamepad1.left_bumper) {
-            SetIdleState();
+
+        if (gamepad1.leftBumperWasPressed()) {
+            if (IDLE_VELOCITY == 600) {
+                IDLE_VELOCITY = 0;
+                goalVelocity = IDLE_VELOCITY;
+                return;
+            }
+            if (IDLE_VELOCITY == 0) {
+                IDLE_VELOCITY = 600;
+                goalVelocity = IDLE_VELOCITY;
+                return;
+                //61 1018
+
+            }
+
         }
     }
 
+    //DATA POINTS //61 1018 //79 1200//65 1080//60 1040//68 1110// 70 1150// 125 1350
+    //NEW DATA ///
     private void checkToResetState() {
         //Try to stop anything that isn't responding to other commands.
         if (gamepad1.right_bumper) {
@@ -181,8 +221,8 @@ public class FtcCompReorg extends LinearOpMode {
     }
 
     private void runOuttakeMotor() {
-        double currentVelocity = outtake.getVelocity();
-        double currentPower = outtake.getPower();
+         currentVelocity = outtake.getVelocity();
+         currentPower = outtake.getPower();
         telemetry.addData("curVelocity", currentVelocity);
         telemetry.addData("curPower", currentPower);
 
@@ -197,13 +237,17 @@ public class FtcCompReorg extends LinearOpMode {
         }
         isAtGoalVelocity = (currentVelocity < maxRange && currentVelocity > minRange);
         telemetry.addData("isAtGoalVelocity", isAtGoalVelocity);
+        if (isAtGoalVelocity) {
+            return;
+        }
 
         outtake.setPower(currentPower);
     }
 
     private void SetIdleState() {
         goalVelocity = IDLE_VELOCITY; //min speed for Outtake wheel
-        storageWheel.setPower(0); //stop the storage wheel
+        storageWheel.setPower(0);
+        //stop the storage wheel
     }
 
     private void doDriving() {

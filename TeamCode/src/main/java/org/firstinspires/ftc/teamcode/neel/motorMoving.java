@@ -10,6 +10,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+@Disabled
+
 @TeleOp(name = "Neel: TEST ", group = "Neel")
 
 public class motorMoving extends LinearOpMode {

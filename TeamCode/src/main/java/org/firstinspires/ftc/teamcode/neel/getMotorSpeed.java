@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.util.Log;
 import android.util.Size;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -28,6 +29,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 @SuppressLint("DefaultLocale")
 @TeleOp(name = "NeelGetMotorSpeed", group = "Neel")
+@Disabled
 //@Disabled
 public class getMotorSpeed extends LinearOpMode {
     public static final int GOAL_TAG_ID = 24;

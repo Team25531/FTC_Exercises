@@ -70,6 +70,7 @@ import static com.qualcomm.hardware.rev.RevHubOrientationOnRobot.xyzOrientation;
  *
  * Finally, edit this OpMode to use at least one angle around an axis to orient your Hub.
  */
+@Disabled
 @TeleOp(name = "SampleIMUauto", group = "Sensor")
    // Comment this out to add to the OpMode list
 public class SampleIMUauto extends LinearOpMode

@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.neel;
 import android.annotation.SuppressLint;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
@@ -22,7 +23,7 @@ import org.firstinspires.ftc.teamcode.Aaron.y2024.GlobalState;
 
 import com.qualcomm.robotcore.hardware.Gyroscope;
 import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
-
+@Disabled
 @Autonomous(name = "autosample", group = "auto")
 //we need to add the DcMotors
 public class sampleAuto extends LinearOpMode {
