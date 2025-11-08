@@ -68,6 +68,7 @@ public class RedFTCComp extends LinearOpMode {
 
             doDriving();
 
+            reverse();
             autoAimOnOff();
             controlIntake();
             checkToResetState();
@@ -242,6 +243,13 @@ public class RedFTCComp extends LinearOpMode {
         }
 
         outtake.setPower(currentPower);
+    }
+
+    private void reverse(){
+        if(gamepad1.aWasPressed()){
+            storageWheel.setPower(-1);
+            outtake.setPower(-0.6);
+        }
     }
 
     private void SetIdleState() {

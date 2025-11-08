@@ -69,10 +69,10 @@ public class RedCloseAuto extends LinearOpMode {
 
             if (isStopRequested()) return;
             while(distanceToTarget <= 55){
-                frontLeftMotor.setPower(-0.1);
-                frontRightMotor.setPower(-0.1);
-                backRightMotor.setPower(-0.1);
-                backLeftMotor.setPower(-0.1);
+                frontLeftMotor.setPower(-0.2);
+                frontRightMotor.setPower(-0.2);
+                backRightMotor.setPower(-0.2);
+                backLeftMotor.setPower(-0.2);
                 setGoalVelocity();
                 distanceToTarget = getDistanceToTag(24);
 
@@ -85,7 +85,7 @@ public class RedCloseAuto extends LinearOpMode {
                 frontRightMotor.setPower(0);
                 backRightMotor.setPower(0);
                 backLeftMotor.setPower(0);
-
+                intake.setPower(-1);
                 setGoalVelocity();
                 runOuttakeMotor();
                 checkIfShooting();
@@ -106,7 +106,7 @@ public class RedCloseAuto extends LinearOpMode {
             storageTimer.reset();
             storageWheel.setPower(-1);
             //todo: determine correct duration for this timer.
-            while (opModeIsActive() & storageTimer.milliseconds() < 3000 && !shooterNeedsReset) {
+            while (opModeIsActive() & storageTimer.milliseconds() < 4000 && !shooterNeedsReset) {
                 sleep(1);
                 //todo: delete this telemetry.
                 runOuttakeMotor();

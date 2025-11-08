@@ -20,7 +20,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 
 
-@Autonomous(name = " Red FTC Comp Close", group = " Red Ftc Comp")
+@Autonomous(name = " Blue FTC Comp Close", group = "Blue Ftc Comp")
 public class BlueCloseAuto extends LinearOpMode {
     private ElapsedTime storageTimer = new ElapsedTime();
     private DcMotor frontLeftMotor;
