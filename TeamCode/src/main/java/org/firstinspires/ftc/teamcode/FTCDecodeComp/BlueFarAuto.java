@@ -20,8 +20,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 
 
-@Autonomous(name = " Blue FTC Comp Close", group = " Blue Ftc Comp")
-public class BlueCloseAuto extends LinearOpMode {
+@Autonomous(name = " Blue FTC Comp Far", group = " Blue Ftc Comp")
+public class BlueFarAuto extends LinearOpMode {
     private ElapsedTime storageTimer = new ElapsedTime();
     private DcMotor frontLeftMotor;
     private DcMotor backLeftMotor;
@@ -68,51 +68,45 @@ public class BlueCloseAuto extends LinearOpMode {
 
 
             if (isStopRequested()) return;
-            while(distanceToTarget <= 55){
-                frontLeftMotor.setPower(-0.2);
-                frontRightMotor.setPower(-0.2);
-                backRightMotor.setPower(-0.2);
-                backLeftMotor.setPower(-0.2);
-                setGoalVelocity();
-                distanceToTarget = getDistanceToTag(20);
 
-            }
             distanceToTarget = getDistanceToTag(20);
             shooterNeedsReset = false;
 
-            if(distanceToTarget >= 55){
-                frontLeftMotor.setPower(0);
-                frontRightMotor.setPower(0);
-                backRightMotor.setPower(0);
-                backLeftMotor.setPower(0);
-                intake.setPower(-1);
-                setGoalVelocity();
-                runOuttakeMotor();
-                checkIfShooting();
+            setGoalVelocity();
+            checkIfShooting();
+            runOuttakeMotor();
 
-                doShooting();
 
-                if (shooterNeedsReset) {
+            doShooting();
+            //want to wait but is working so dont want to fix.
+            intake.setPower(-1);
+            telemetry.addData("intake", intake.getPower());
+            checkIfShooting();
+            runOuttakeMotor();
+
+
+            doShooting();
+            if (shooterNeedsReset) {
+                distanceToTarget = getDistanceToTag(20);
+                while(distanceToTarget>=97){
+                    frontLeftMotor.setPower(0.2);
+                    frontRightMotor.setPower(0.2);
+                    backRightMotor.setPower(0.2);
+                    backLeftMotor.setPower(0.2);
                     distanceToTarget = getDistanceToTag(20);
-                    while(distanceToTarget<= 97){
-                        frontLeftMotor.setPower(-0.2);
-                        frontRightMotor.setPower(-0.2);
-                        backRightMotor.setPower(-0.2);
-                        backLeftMotor.setPower(-0.2);
-                        distanceToTarget = getDistanceToTag(20);
-                    }
-                    while(distanceToTarget>=97){
-
-                        frontLeftMotor.setPower(0);
-                        frontRightMotor.setPower(0);
-                        backRightMotor.setPower(0);
-                        backLeftMotor.setPower(0);
-                        distanceToTarget = getDistanceToTag(20);
-                    }
                 }
+                while(distanceToTarget<=97){
 
-
+                    frontLeftMotor.setPower(0);
+                    frontRightMotor.setPower(0);
+                    backRightMotor.setPower(0);
+                    backLeftMotor.setPower(0);
+                    distanceToTarget = getDistanceToTag(20);
+                }
             }
+
+            distanceToTarget = getDistanceToTag(20);
+
 
             telemetry.update();
         }
@@ -124,7 +118,7 @@ public class BlueCloseAuto extends LinearOpMode {
             storageTimer.reset();
             storageWheel.setPower(-1);
             //todo: determine correct duration for this timer.
-            while (opModeIsActive() & storageTimer.milliseconds() < 4000 && !shooterNeedsReset) {
+            while (opModeIsActive() & storageTimer.milliseconds() < 2500 && !shooterNeedsReset) {
                 sleep(1);
                 //todo: delete this telemetry.
                 runOuttakeMotor();
@@ -148,7 +142,7 @@ public class BlueCloseAuto extends LinearOpMode {
     private void setGoalVelocity() {
         //only compute velocity if we're actually shooting.
         int tempVelocity = goalVelocity;
-        if (distanceToTarget > 40 && distanceToTarget < 140) {
+        if (distanceToTarget > 40 && distanceToTarget < 160) {
             telemetry.addData("in loop", 0);
             tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
             telemetry.addData("tempVelocity", tempVelocity);
@@ -298,5 +292,6 @@ public class BlueCloseAuto extends LinearOpMode {
 
         visionPortal.setProcessorEnabled(aprilTag, true);
     }
+
 
 }

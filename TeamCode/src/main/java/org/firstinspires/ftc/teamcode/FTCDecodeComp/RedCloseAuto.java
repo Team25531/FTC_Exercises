@@ -91,7 +91,25 @@ public class RedCloseAuto extends LinearOpMode {
                 checkIfShooting();
 
                 doShooting();
-                distanceToTarget = getDistanceToTag(24);
+
+                if (shooterNeedsReset) {
+                    distanceToTarget = getDistanceToTag(24);
+                    while(distanceToTarget<= 97){
+                        frontLeftMotor.setPower(-0.2);
+                        frontRightMotor.setPower(-0.2);
+                        backRightMotor.setPower(-0.2);
+                        backLeftMotor.setPower(-0.2);
+                        distanceToTarget = getDistanceToTag(24);
+                    }
+                    while(distanceToTarget>=97){
+
+                        frontLeftMotor.setPower(0);
+                        frontRightMotor.setPower(0);
+                        backRightMotor.setPower(0);
+                        backLeftMotor.setPower(0);
+                        distanceToTarget = getDistanceToTag(24);
+                    }
+                }
 
 
             }
