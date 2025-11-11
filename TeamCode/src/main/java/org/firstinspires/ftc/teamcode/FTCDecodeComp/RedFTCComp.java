@@ -48,6 +48,7 @@ public class RedFTCComp extends LinearOpMode {
     boolean isAtGoalVelocity = false;
     boolean shooterNeedsReset = false;
     boolean isAimedAtTarget = false;
+    boolean isFeeding = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -74,6 +75,7 @@ public class RedFTCComp extends LinearOpMode {
             checkToResetState();
             checkSetIdleState();
             setGoalVelocity();
+            checkFeeding();
             runOuttakeMotor();
             doShooting();
 
@@ -222,13 +224,17 @@ public class RedFTCComp extends LinearOpMode {
     }
 
     private void runOuttakeMotor() {
-         currentVelocity = outtake.getVelocity();
-         currentPower = outtake.getPower();
+        currentVelocity = outtake.getVelocity();
         telemetry.addData("curVelocity", currentVelocity);
-        telemetry.addData("curPower", currentPower);
+
+        // Use setVelocity to command the motor controller to achieve the target velocity.
+        // This is much faster and more stable than manually adjusting power.
+        outtake.setVelocity(goalVelocity);
 
         double minRange = goalVelocity - (goalVelocity * range);
         double maxRange = goalVelocity + (goalVelocity * range);
+
+        currentVelocity = outtake.getVelocity();
 
         if (currentVelocity < minRange) {
             currentPower = currentPower + 0.001;
@@ -236,8 +242,17 @@ public class RedFTCComp extends LinearOpMode {
         if (currentVelocity > maxRange) {
             currentPower = currentPower - 0.001;
         }
+
+        //while (currentVelocity <  minRange || currentVelocity > maxRange){
+            //outtake.setVelocity(goalVelocity);
+
+            currentVelocity = outtake.getVelocity();
+
+        //}
+
         isAtGoalVelocity = (currentVelocity < maxRange && currentVelocity > minRange);
         telemetry.addData("isAtGoalVelocity", isAtGoalVelocity);
+
         if (isAtGoalVelocity) {
             return;
         }
