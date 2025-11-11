@@ -43,6 +43,8 @@ public class RedFarAuto extends LinearOpMode {
     double currentPower = 0;
     boolean isIdleEnabled = false;
 
+    boolean isDrivingToTarget = false;
+
     //boolean useOuttake = true;
     boolean isShooting = false;
     boolean isAutoAimEnabled = true;
@@ -68,9 +70,9 @@ public class RedFarAuto extends LinearOpMode {
 
 
             if (isStopRequested()) return;
-
-            distanceToTarget = getDistanceToTag(24);
-            shooterNeedsReset = false;
+            if(!isDrivingToTarget) {
+                distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+                shooterNeedsReset = false;
 
                 setGoalVelocity();
                 checkIfShooting();
@@ -83,29 +85,41 @@ public class RedFarAuto extends LinearOpMode {
                 telemetry.addData("intake", intake.getPower());
                 checkIfShooting();
                 runOuttakeMotor();
-
+                telemetry.addData("distance to target", distanceToTarget);
 
                 doShooting();
-            if (shooterNeedsReset) {
-                distanceToTarget = getDistanceToTag(24);
+            }
+
+            if (isDrivingToTarget) {
+
+                outtake.setPower(0);
+
+                distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
                 while(distanceToTarget>=97){
                     frontLeftMotor.setPower(0.2);
                     frontRightMotor.setPower(0.2);
                     backRightMotor.setPower(0.2);
                     backLeftMotor.setPower(0.2);
-                    distanceToTarget = getDistanceToTag(24);
+                    distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+
+                    telemetry.addData("distance to target",distanceToTarget);
                 }
-                while(distanceToTarget<=97){
+                distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+                if(distanceToTarget<97){
 
                     frontLeftMotor.setPower(0);
                     frontRightMotor.setPower(0);
                     backRightMotor.setPower(0);
                     backLeftMotor.setPower(0);
-                    distanceToTarget = getDistanceToTag(24);
+                    distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+
+                telemetry.addData("distance to target",distanceToTarget);
                 }
             }
 
-            distanceToTarget = getDistanceToTag(24);
+            distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+
+            telemetry.addData("distance to target",distanceToTarget);
 
 
             telemetry.update();
@@ -127,6 +141,7 @@ public class RedFarAuto extends LinearOpMode {
                 telemetry.update();
             }
             shooterNeedsReset = true;
+            isDrivingToTarget = true;
         }
         telemetry.addData("shooterNeedsReset", shooterNeedsReset);
     }
