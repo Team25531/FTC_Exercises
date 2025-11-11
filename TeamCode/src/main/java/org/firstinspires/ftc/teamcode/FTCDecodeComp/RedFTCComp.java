@@ -88,24 +88,24 @@ public class RedFTCComp extends LinearOpMode {
         //if we're using auto aim and it isn't yet at the target then let steering keep going.
         if (isAutoAimEnabled && !isAimedAtTarget) return;
 
-        //if we are at goal, then run the storageWheel.
-        if (isAtGoalVelocity && !shooterNeedsReset) {
+        //if we are at goal, and not already feeding, then start feeding.
+        if (isAtGoalVelocity && !shooterNeedsReset && !isFeeding) {
             storageTimer.reset();
             storageWheel.setPower(-1);
-            //todo: determine correct duration for this timer.
-            while (opModeIsActive() & storageTimer.milliseconds() < 3000 && !shooterNeedsReset) {
-                sleep(1);
-                //todo: delete this telemetry.
-                runOuttakeMotor();
-                telemetry.addData("velocity", goalVelocity);
-                telemetry.addData("curPower", currentPower);
-                telemetry.update();
-            }
-            shooterNeedsReset = true;
-            SetIdleState();
+            isFeeding = true;
         }
-        telemetry.addData("shooterNeedsReset", shooterNeedsReset);
     }
+
+    private void checkFeeding() {
+        // Stop feeding if the timer is up OR if the driver releases the trigger.
+        if (isFeeding && (storageTimer.milliseconds() > 3000 || !isShooting)) {
+            isFeeding = false;
+            shooterNeedsReset = true;
+            SetIdleState(); // This also sets storageWheel power to 0 and resets goal velocity
+        }
+    }
+
+
 
 
     private void setGoalVelocity() {
@@ -113,38 +113,6 @@ public class RedFTCComp extends LinearOpMode {
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
-//            tempVelocity = 1350;
-
-            //75,1250  // 88 1315//70
-//                if (distanceToTarget == 133) {
-//                    tempVelocity = 1425;
-//                }
-//                if (distanceToTarget == 132) {
-//                    tempVelocity = 1420;
-//                }
-//                if (distanceToTarget == 131) {
-//                    tempVelocity = 1417;
-//                }
-//                if (distanceToTarget == 63) {
-//                    tempVelocity = 1030;
-//                }
-//                if (distanceToTarget == 70) {
-//                    telemetry.addData("getting velocity", 0);
-//                    tempVelocity = 1330;
-//                }
-//                if (distanceToTarget == 135) {
-//                    tempVelocity = 1435;
-//                }
-//                if (distanceToTarget == 137) {
-//                    tempVelocity = 1440;
-//                }
-//                if (distanceToTarget == 139) {
-//                    tempVelocity = 1445;
-//                }
-//                if (distanceToTarget == 72) {
-//                    tempVelocity = 1083;
-//                }
-           // tempVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
             tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
             telemetry.addData("tempVelocity", tempVelocity);
         }
@@ -229,19 +197,20 @@ public class RedFTCComp extends LinearOpMode {
 
         // Use setVelocity to command the motor controller to achieve the target velocity.
         // This is much faster and more stable than manually adjusting power.
-        outtake.setVelocity(goalVelocity);
 
+        //temp
+        goalVelocity = goalVelocity - 25;
         double minRange = goalVelocity - (goalVelocity * range);
         double maxRange = goalVelocity + (goalVelocity * range);
 
         currentVelocity = outtake.getVelocity();
 
-        if (currentVelocity < minRange) {
-            currentPower = currentPower + 0.001;
-        }
-        if (currentVelocity > maxRange) {
-            currentPower = currentPower - 0.001;
-        }
+//        if (currentVelocity < minRange) {
+//            currentPower = currentPower + 0.001;
+//        }
+//        if (currentVelocity > maxRange) {
+//            currentPower = currentPower - 0.001;
+//        }
 
         //while (currentVelocity <  minRange || currentVelocity > maxRange){
             //outtake.setVelocity(goalVelocity);
@@ -256,8 +225,8 @@ public class RedFTCComp extends LinearOpMode {
         if (isAtGoalVelocity) {
             return;
         }
-
-        outtake.setPower(currentPower);
+        outtake.setVelocity(goalVelocity);
+        //outtake.setPower(currentPower);
     }
 
     private void reverse(){
