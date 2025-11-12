@@ -200,8 +200,7 @@ public class RedFTCComp extends LinearOpMode {
         // Use setVelocity to command the motor controller to achieve the target velocity.
         // This is much faster and more stable than manually adjusting power.
 
-        //temp
-        goalVelocity = goalVelocity;
+        
         double minRange = goalVelocity - (goalVelocity * range);
         double maxRange = goalVelocity + (goalVelocity * range);
 
