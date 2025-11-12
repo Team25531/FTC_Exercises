@@ -64,7 +64,7 @@ public class RedFTCComp extends LinearOpMode {
             checkIfShooting();
             double ve;
 
-            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
+            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51 ) ;
             telemetry.addData("current velocity", ve);
 
             doDriving();
@@ -113,7 +113,9 @@ public class RedFTCComp extends LinearOpMode {
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
+
+            //subtracting 25 from the tempVelocity to correct for new setVelocity function we use now
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)) - 25);
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
@@ -199,7 +201,7 @@ public class RedFTCComp extends LinearOpMode {
         // This is much faster and more stable than manually adjusting power.
 
         //temp
-        goalVelocity = goalVelocity - 25;
+        goalVelocity = goalVelocity;
         double minRange = goalVelocity - (goalVelocity * range);
         double maxRange = goalVelocity + (goalVelocity * range);
 
@@ -232,7 +234,7 @@ public class RedFTCComp extends LinearOpMode {
     private void reverse(){
         if(gamepad1.aWasPressed()){
             storageWheel.setPower(-1);
-            outtake.setPower(-0.6);
+            outtake.setVelocity(-700);
         }
     }
 
@@ -291,6 +293,8 @@ public class RedFTCComp extends LinearOpMode {
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        outtake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
