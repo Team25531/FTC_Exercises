@@ -115,7 +115,7 @@ public class RedFTCComp extends LinearOpMode {
             telemetry.addData("in loop", 0);
 
             //subtracting 25 from the tempVelocity to correct for new setVelocity function we use now
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)) - 25);
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
@@ -200,9 +200,9 @@ public class RedFTCComp extends LinearOpMode {
         // Use setVelocity to command the motor controller to achieve the target velocity.
         // This is much faster and more stable than manually adjusting power.
 
-        
+
         double minRange = goalVelocity - (goalVelocity * range);
-        double maxRange = goalVelocity + (goalVelocity * range);
+        double maxRange = goalVelocity ;//+ (goalVelocity * range);
 
         currentVelocity = outtake.getVelocity();
 
@@ -226,7 +226,7 @@ public class RedFTCComp extends LinearOpMode {
         if (isAtGoalVelocity) {
             return;
         }
-        outtake.setVelocity(goalVelocity);
+        outtake.setVelocity(goalVelocity-25);
         //outtake.setPower(currentPower);
     }
 
