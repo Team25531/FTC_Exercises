@@ -21,6 +21,7 @@
 
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Color;
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -29,6 +30,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
+import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
@@ -110,6 +113,18 @@ public class ConceptVisionColorSensorSantiagoTest extends LinearOpMode
          *  or
          *      .setCamera(BuiltinCameraDirection.BACK)    ... for a Phone Camera
          */
+
+        ColorBlobLocatorProcessor colorLocator = new ColorBlobLocatorProcessor.Builder()
+                .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // use a predefined color match
+                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+                .setDrawContours(true)   // Show contours on the Stream Preview
+                .setBlurSize(5)          // Smooth the transitions between different colors in image
+                .setCircleFitColor(Color.rgb(255, 255, 0))
+                .build();
+
+
+
         VisionPortal portal = new VisionPortal.Builder()
                 .addProcessor(colorSensor)
                 .setCameraResolution(new Size(320, 240))
@@ -123,8 +138,7 @@ public class ConceptVisionColorSensorSantiagoTest extends LinearOpMode
         while (opModeIsActive() || opModeInInit())
         {
             telemetry.addLine("Preview on/off: 3 dots, Camera Stream\n");
-            .setBoxFitColor(0);
-            .setCircleFitColor(Color.rgb(255, 255, 0));
+
             // Request the most recent color analysis.  This will return the closest matching
             // colorSwatch and the predominant color in the RGB, HSV and YCrCb color spaces.
             // The color space values are returned as three-element int[] arrays as follows:
