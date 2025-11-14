@@ -21,6 +21,7 @@
 
 package org.firstinspires.ftc.teamcode.Santiago;
 
+import android.graphics.Color;
 import android.util.Size;
 
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -30,6 +31,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.opencv.ColorBlobLocatorProcessor;
+import org.firstinspires.ftc.vision.opencv.ColorRange;
 import org.firstinspires.ftc.vision.opencv.ImageRegion;
 import org.firstinspires.ftc.vision.opencv.PredominantColorProcessor;
 
@@ -97,6 +100,15 @@ public class ConceptVisionColorSensorSantiagoTest extends LinearOpMode
                         PredominantColorProcessor.Swatch.YELLOW,
                         PredominantColorProcessor.Swatch.BLACK,
                         PredominantColorProcessor.Swatch.WHITE)
+                .build();
+
+        ColorBlobLocatorProcessor colorLocator = new ColorBlobLocatorProcessor.Builder()
+                .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // use a predefined color match
+                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+                .setDrawContours(true)   // Show contours on the Stream Preview
+                .setBlurSize(5)          // Smooth the transitions between different colors in image
+                .setCircleFitColor(Color.rgb(255, 0, 255))
                 .build();
 
         /*
