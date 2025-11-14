@@ -102,15 +102,6 @@ public class ConceptVisionColorSensorSantiagoTest extends LinearOpMode
                         PredominantColorProcessor.Swatch.WHITE)
                 .build();
 
-        ColorBlobLocatorProcessor colorLocator = new ColorBlobLocatorProcessor.Builder()
-                .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // use a predefined color match
-                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-                .setDrawContours(true)   // Show contours on the Stream Preview
-                .setBlurSize(5)          // Smooth the transitions between different colors in image
-                .setCircleFitColor(Color.rgb(255, 0, 255))
-                .build();
-
         /*
          * Build a vision portal to run the Color Sensor process.
          *
