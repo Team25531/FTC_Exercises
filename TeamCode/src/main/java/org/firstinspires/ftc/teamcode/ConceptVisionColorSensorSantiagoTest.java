@@ -123,7 +123,8 @@ public class ConceptVisionColorSensorSantiagoTest extends LinearOpMode
         while (opModeIsActive() || opModeInInit())
         {
             telemetry.addLine("Preview on/off: 3 dots, Camera Stream\n");
-
+            .setBoxFitColor(0);
+            .setCircleFitColor(Color.rgb(255, 255, 0));
             // Request the most recent color analysis.  This will return the closest matching
             // colorSwatch and the predominant color in the RGB, HSV and YCrCb color spaces.
             // The color space values are returned as three-element int[] arrays as follows:
