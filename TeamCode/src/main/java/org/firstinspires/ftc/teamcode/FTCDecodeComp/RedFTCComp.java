@@ -114,13 +114,15 @@ public class RedFTCComp extends LinearOpMode {
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
 
-            //subtracting 25 from the tempVelocity to correct for new setVelocity function we use now
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
+
+
+            tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166));
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
         if (isShooting && !shooterNeedsReset) {
             goalVelocity = tempVelocity;
+
         } else {
             SetIdleState();
         }
@@ -226,7 +228,7 @@ public class RedFTCComp extends LinearOpMode {
         if (isAtGoalVelocity) {
             return;
         }
-        outtake.setVelocity(goalVelocity-25);
+        outtake.setVelocity(goalVelocity);
         //outtake.setPower(currentPower);
     }
 
