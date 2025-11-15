@@ -24,7 +24,6 @@ package org.firstinspires.ftc.teamcode.Santiago;
 import android.graphics.Color;
 import android.util.Size;
 
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -129,22 +128,7 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
          *        OPENING:    Will Erode and then Dilate which will make small noise blobs go away
          *        CLOSING:    Will Dilate and then Erode which will tend to fill in any small holes in blob edges.
          */
-        ColorBlobLocatorProcessor colorLocator = new ColorBlobLocatorProcessor.Builder()
-                .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
-                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-//                .setRoi(ImageRegion.entireFrame())
-                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
-                .setDrawContours(true)   // Show contours on the Stream Preview
-                .setBoxFitColor(0)       // Disable the drawing of rectangles
-                .setCircleFitColor(Color.rgb(255, 255, 0)) // Draw a circle
-                .setBlurSize(5)          // Smooth the transitions between different colors in image
 
-                // the following options have been added to fill in perimeter holes.
-                .setDilateSize(15)       // Expand blobs to fill any divots on the edges
-                .setErodeSize(15)        // Shrink blobs back to original size
-                .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
-
-                .build();
         /*
          * Build a vision portal to run the Color Locator process.
          *
@@ -158,11 +142,8 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
          *  or
          *      .setCamera(BuiltinCameraDirection.BACK)    ... for a Phone Camera
          */
-        VisionPortal portal = new VisionPortal.Builder()
-                .addProcessor(colorLocator)
-                .setCameraResolution(new Size(320, 240))
-                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
-                .build();
+
+        ColorBlobLocatorProcessor colorLocator = initBallFinderCamera();
 
         telemetry.setMsTransmissionInterval(100);   // Speed up telemetry updates for debugging.
         telemetry.setDisplayFormat(Telemetry.DisplayFormat.MONOSPACE);
@@ -237,10 +218,49 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
                 Circle circleFit = b.getCircle();
                 telemetry.addLine(String.format("%5.3f      %3d     (%3d,%3d)",
                            b.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
+                telemetry.addData("Distance:", findDistance(circleFit.getRadius()));
             }
+
+            //y=0.0382x^2 +4.0427x-127.07
 
             telemetry.update();
             sleep(100); // Match the telemetry update interval.
         }
     }
+
+    private ColorBlobLocatorProcessor initBallFinderCamera() {
+        ColorBlobLocatorProcessor colorLocator = new ColorBlobLocatorProcessor.Builder()
+                .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
+                .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
+//                .setRoi(ImageRegion.entireFrame())
+                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+                .setDrawContours(true)   // Show contours on the Stream Preview
+                .setBoxFitColor(0)       // Disable the drawing of rectangles
+                .setCircleFitColor(Color.rgb(55, 55, 255)) // Draw a circle
+                .setBlurSize(5)          // Smooth the transitions between different colors in image
+                // the following options have been added to fill in perimeter holes.
+                .setDilateSize(15)       // Expand blobs to fill any divots on the edges
+                .setErodeSize(15)        // Shrink blobs back to original size
+                .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
+                .build();
+
+
+
+        VisionPortal portal = new VisionPortal.Builder()
+                .addProcessor(colorLocator)
+                .setCameraResolution(new Size(320, 240))
+                .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .build();
+
+        return colorLocator;
+    }
+
+
+    private double findDistance(float radius) {
+        double distance = 0;
+        distance = (0.0382*radius*radius) + (4.0427*radius) - 127.07;
+        return distance;
+    }
+
+
 }
