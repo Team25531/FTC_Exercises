@@ -2,15 +2,20 @@ package org.firstinspires.ftc.teamcode.FTCDecodeComp;
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -18,8 +23,8 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
-
-@TeleOp (name = " Red FTC Comp", group = " Red Ftc Comp")
+@Config
+@TeleOp(name = "Red FTC Comp", group = "Red Ftc Comp")
 public class RedFTCComp extends LinearOpMode {
     private ElapsedTime storageTimer = new ElapsedTime();
     private DcMotor frontLeftMotor;
@@ -29,6 +34,8 @@ public class RedFTCComp extends LinearOpMode {
     private DcMotorEx outtake;
     private CRServo intake;
     private CRServo storageWheel;
+
+    private VoltageSensor myControlHubVoltageSensor;
     private AprilTagProcessor aprilTag;
     public static final String WEBCAM_NAME = "Webcam 1";
     public static final int TARGET_TAG_ID = 24;
@@ -38,7 +45,7 @@ public class RedFTCComp extends LinearOpMode {
     double range = 0.05;
     double distanceToTarget = 0;
     double angleToTarget = 0;
-    double currentVelocity=0;
+    double currentVelocity = 0;
     double currentPower = 0;
     boolean isIdleEnabled = false;
 
@@ -52,11 +59,12 @@ public class RedFTCComp extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-
+        FtcDashboard dashboard = FtcDashboard.getInstance();
         initializeMotors();
         initializeTagProcessor();
         SetIdleState();
         waitForStart();
+
 
         while (opModeIsActive()) {
             if (isStopRequested()) return;
@@ -64,10 +72,20 @@ public class RedFTCComp extends LinearOpMode {
             checkIfShooting();
             double ve;
 
-            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51 ) ;
+            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
             telemetry.addData("current velocity", ve);
 
             doDriving();
+
+            TelemetryPacket packet = new TelemetryPacket();
+
+            packet.put("robotVoltage", myControlHubVoltageSensor.getVoltage());
+            packet.put("getVelocity", outtake.getVelocity());
+            packet.put("isShooting",isShooting);
+            packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
+
+
+            dashboard.sendTelemetryPacket(packet);
 
             reverse();
             autoAimOnOff();
@@ -106,14 +124,11 @@ public class RedFTCComp extends LinearOpMode {
     }
 
 
-
-
     private void setGoalVelocity() {
         //only compute velocity if we're actually shooting.
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
-
 
 
             tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166));
@@ -204,7 +219,7 @@ public class RedFTCComp extends LinearOpMode {
 
 
         double minRange = goalVelocity - (goalVelocity * range);
-        double maxRange = goalVelocity ;//+ (goalVelocity * range);
+        double maxRange = goalVelocity;//+ (goalVelocity * range);
 
         currentVelocity = outtake.getVelocity();
 
@@ -216,9 +231,9 @@ public class RedFTCComp extends LinearOpMode {
 //        }
 
         //while (currentVelocity <  minRange || currentVelocity > maxRange){
-            //outtake.setVelocity(goalVelocity);
+        //outtake.setVelocity(goalVelocity);
 
-            currentVelocity = outtake.getVelocity();
+        currentVelocity = outtake.getVelocity();
 
         //}
 
@@ -232,8 +247,8 @@ public class RedFTCComp extends LinearOpMode {
         //outtake.setPower(currentPower);
     }
 
-    private void reverse(){
-        if(gamepad1.aWasPressed()){
+    private void reverse() {
+        if (gamepad1.aWasPressed()) {
             storageWheel.setPower(-1);
             outtake.setVelocity(-700);
         }
@@ -287,6 +302,7 @@ public class RedFTCComp extends LinearOpMode {
         intake = hardwareMap.crservo.get("intake");
         storageWheel = hardwareMap.crservo.get("storageWheel");
         outtake = hardwareMap.get(DcMotorEx.class, "outtake");
+        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         //TODO: fix this to pull the correct object.
         //outtake = hardwareMap.get(DcMotorEx.class, "frontLeft");
 
