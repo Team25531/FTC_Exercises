@@ -258,7 +258,7 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
 
     private double findDistance(float radius) {
         double distance = 0;
-        distance = (0.0382*radius*radius) + (4.0427*radius) - 127.07;
+        distance = (0.0388*radius*radius) - (3.8876*radius) + 116.9;
         return distance;
     }
 
