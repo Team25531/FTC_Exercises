@@ -68,7 +68,7 @@ import java.util.List;
  */
 
 
-@TeleOp(name = "Concept: Vision Color-Locator (Circle) Santiago", group = "Santiago")
+@TeleOp(name = "Concept: Vision Color-Locator (Circle) Santiago3", group = "Santiago")
 public class ConceptVisionColorLocator_Circle extends LinearOpMode {
     @Override
     public void runOpMode() {
@@ -150,7 +150,7 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
 
         // WARNING:  To view the stream preview on the Driver Station, this code runs in INIT mode.
         while (opModeIsActive() || opModeInInit()) {
-            telemetry.addData("preview on/off", "... Camera Stream\n");
+//            telemetry.addData("preview on/off", "... Camera Stream\n");
 
             // Read the current list
             List<ColorBlobLocatorProcessor.Blob> blobs = colorLocator.getBlobs();
@@ -194,13 +194,18 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
 
             ColorBlobLocatorProcessor.Util.filterByCriteria(
                     ColorBlobLocatorProcessor.BlobCriteria.BY_CIRCULARITY,
-                    0.6, 1, blobs);     /* filter out non-circular blobs.
+                    0.6, 1, blobs);
+            /* filter out non-circular blobs.
                     * NOTE: You may want to adjust the minimum value depending on your use case.
                     * Circularity values will be affected by shadows, and will therefore vary based
                     * on the location of the camera on your robot and venue lighting. It is strongly
                     * encouraged to test your vision on the competition field if your event allows
                     * sensor calibration time.
                     */
+
+            ColorBlobLocatorProcessor.Util.filterByCriteria(
+                    ColorBlobLocatorProcessor.BlobCriteria.BY_DENSITY, 0.3, 1, blobs
+            );
 
             /*
              * The list of Blobs can be sorted using the same Blob attributes as listed above.
@@ -210,20 +215,41 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
              *      ColorBlobLocatorProcessor.BlobCriteria.BY_CONTOUR_AREA, SortOrder.DESCENDING, blobs);
              */
 
-            telemetry.addLine("Circularity Radius Center");
+//            telemetry.addLine("Circularity Radius Center");
 
             // Display the Blob's circularity, and the size (radius) and center location of its circleFit.
             for (ColorBlobLocatorProcessor.Blob b : blobs) {
 
                 Circle circleFit = b.getCircle();
-                telemetry.addLine(String.format("%5.3f      %3d     (%3d,%3d)",
-                           b.getCircularity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
-                telemetry.addData("Distance:", findDistance(circleFit.getRadius()));
-            }
+                if (circleFit.getY() >= 175) {
+                    telemetry.clearAll();
+                }
+                else {
+                    if (circleFit.getX()<=145 ) {
+                        //turn to the left slowly
+                    }
+                    else if (circleFit.getX()>145&&circleFit.getX()<175) {
+                        //go forward until y > 175
+                        //turn on intake and pick up the ball
+                    }
+                    else {
+                        //turn to the right slowly
+                    }
 
+
+
+                    //if x between
+                    telemetry.addLine(String.format("%5.3f    D%5.3f    R%3d    (%3d,%3d)",
+                            b.getCircularity(), b.getDensity(), (int) circleFit.getRadius(), (int) circleFit.getX(), (int) circleFit.getY()));
+                    telemetry.addLine("Distance: " + findDistance(circleFit.getRadius()));
+                }
+            }
+            telemetry.update();
             //y=0.0382x^2 +4.0427x-127.07
 
-            telemetry.update();
+//            telemetry.update();
+
+
             sleep(100); // Match the telemetry update interval.
         }
     }
@@ -232,8 +258,8 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
         ColorBlobLocatorProcessor colorLocator = new ColorBlobLocatorProcessor.Builder()
                 .setTargetColorRange(ColorRange.ARTIFACT_PURPLE)   // Use a predefined color match
                 .setContourMode(ColorBlobLocatorProcessor.ContourMode.EXTERNAL_ONLY)
-//                .setRoi(ImageRegion.entireFrame())
-                .setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
+                .setRoi(ImageRegion.entireFrame())
+                //.setRoi(ImageRegion.asUnityCenterCoordinates(-0.75, 0.75, 0.75, -0.75))
                 .setDrawContours(true)   // Show contours on the Stream Preview
                 .setBoxFitColor(0)       // Disable the drawing of rectangles
                 .setCircleFitColor(Color.rgb(55, 55, 255)) // Draw a circle
@@ -244,12 +270,12 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
                 .setMorphOperationType(ColorBlobLocatorProcessor.MorphOperationType.CLOSING)
                 .build();
 
-
-
         VisionPortal portal = new VisionPortal.Builder()
                 .addProcessor(colorLocator)
                 .setCameraResolution(new Size(320, 240))
                 .setCamera(hardwareMap.get(WebcamName.class, "Webcam 1"))
+                .setLiveViewContainerId(0)
+
                 .build();
 
         return colorLocator;
@@ -258,9 +284,7 @@ public class ConceptVisionColorLocator_Circle extends LinearOpMode {
 
     private double findDistance(float radius) {
         double distance = 0;
-        distance = (0.0388*radius*radius) - (3.8876*radius) + 116.9;
-        return distance;
+    distance = 0.0071*radius*radius - 1.3406*radius + 73.781;
+    return distance;
     }
-
-
 }
