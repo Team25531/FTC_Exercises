@@ -11,7 +11,7 @@
  *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY, EXPRESS OR
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
  * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
@@ -30,6 +30,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -80,59 +81,82 @@ public class AutoTest extends LinearOpMode {
 
             // Check if any blobs were found after filtering
             if (!blobs.isEmpty()) {
-                // The blobs are sorted by area by default, so the first one is the largest.
+                // --- BALL IS DETECTED ---
                 ColorBlobLocatorProcessor.Blob largestBlob = blobs.get(0);
                 Circle circleFit = largestBlob.getCircle();
                 double currentRadius = circleFit.getRadius();
+                double ballCenterX = circleFit.getX();
 
-                // Calculate the distance to the largest blob for telemetry purposes only.
-                double distance = findDistance((float) currentRadius);
+                // Center of the camera view (320 / 2 = 160)
+                double cameraCenterX = 160.0;
+                // How close to the center is "good enough" (in pixels)
+                double centeringTolerance = 20.0;
 
-                // Display info for the largest blob
-                telemetry.addLine(String.format("%5.3f      %3.0f     (%3.0f,%3.0f)",
-                        largestBlob.getCircularity(), currentRadius, circleFit.getX(), circleFit.getY()));
-                telemetry.addData("Calculated Distance:", "%.2f inches", distance);
+                // Check if the ball is centered in the camera's view
+                if (Math.abs(ballCenterX - cameraCenterX) > centeringTolerance) {
+                    // --- STATE: CENTERING ON BALL ---
+                    // The ball is visible but not in the center, so we need to turn.
+                    telemetry.addLine("Ball detected. Centering...");
 
-                // --- Driving Logic ---
-                // STEP 1: Find this value by running the OpMode and placing the robot
-                // at the desired distance. Read the "Current Radius" from telemetry
-                // and put that number here.
-                double targetRadius = 25.6; // <-- REPLACE THIS WITH YOUR CALIBRATED VALUE
+                    // A simple proportional turn. The farther the ball is from the center, the faster we turn.
+                    double turnError = cameraCenterX - ballCenterX;
+                    double kP_turn = 0.005; // Proportional constant for turning. Tune if needed.
+                    double turnSpeed = turnError * kP_turn;
 
-                // Using a slower speed to prevent overshooting the target.
-                double driveSpeed = 0.2;
+                    // Constrain the turn speed to a maximum
+                    double maxTurnSpeed = 0.3;
+                    turnSpeed = Range.clip(turnSpeed, -maxTurnSpeed, maxTurnSpeed);
 
-                boolean shouldMove = currentRadius < targetRadius;
+                    telemetry.addData("Ball Center X", "%.2f", ballCenterX);
+                    telemetry.addData("Turn Speed", "%.2f", turnSpeed);
 
-                // Add diagnostic telemetry to see the decision-making process
-                telemetry.addData("Current Radius", "%.2f", currentRadius);
-                telemetry.addData("Target Radius", "%.2f", targetRadius);
-                telemetry.addData("Should Move?", shouldMove);
 
-                // Drive forward if the ball's radius is smaller than our target radius.
-                // Otherwise, stop.
-                if (shouldMove) {
-                    // Drive forward
-                    frontRightMotor.setPower(driveSpeed);
-                    frontLeftMotor.setPower(driveSpeed);
-                    backRightMotor.setPower(driveSpeed);
-                    backLeftMotor.setPower(driveSpeed);
+                    // Apply power to turn the robot. Negative speed turns left, positive turns right.
+                    frontLeftMotor.setPower(-turnSpeed);
+                    backLeftMotor.setPower(-turnSpeed);
+                    frontRightMotor.setPower(turnSpeed);
+                    backRightMotor.setPower(turnSpeed);
+
                 } else {
-                    // Stop if we are close enough
-                    frontRightMotor.setPower(0);
-                    frontLeftMotor.setPower(0);
-                    backRightMotor.setPower(0);
-                    backLeftMotor.setPower(0);
-                }
+                    // --- STATE: APPROACHING BALL ---
+                    // The ball is centered, now we can drive towards it.
+                    telemetry.addLine("Ball is centered. Approaching...");
 
+                    // --- Driving Logic from your code ---
+                    double targetRadius = 25.6; // <-- This is your calibrated stopping radius.
+                    double driveSpeed = 0.2;
+                    boolean shouldMove = currentRadius < targetRadius;
+
+                    telemetry.addData("Current Radius", "%.2f", currentRadius);
+                    telemetry.addData("Target Radius", "%.2f", targetRadius);
+                    telemetry.addData("Should Move?", shouldMove);
+
+                    if (shouldMove) {
+                        // Drive forward
+                        frontRightMotor.setPower(driveSpeed);
+                        frontLeftMotor.setPower(driveSpeed);
+                        backRightMotor.setPower(driveSpeed);
+                        backLeftMotor.setPower(driveSpeed);
+                    } else {
+                        // Stop if we are close enough
+                        frontRightMotor.setPower(0);
+                        frontLeftMotor.setPower(0);
+                        backRightMotor.setPower(0);
+                        backLeftMotor.setPower(0);
+                    }
+                }
             } else {
+                // --- STATE: SEARCHING FOR BALL ---
                 telemetry.addLine("(No blobs found)");
-                telemetry.addLine("Robot will not move if it can't see the ball.");
-                // Stop if no ball is detected
-                frontRightMotor.setPower(0);
-                frontLeftMotor.setPower(0);
-                backRightMotor.setPower(0);
-                backLeftMotor.setPower(0);
+                telemetry.addLine("Searching for ball... Turning right.");
+
+                double turnSpeed = 0.3;
+
+                // Turn the robot to the right to search
+                frontLeftMotor.setPower(turnSpeed);
+                backLeftMotor.setPower(turnSpeed);
+                frontRightMotor.setPower(-turnSpeed);
+                backRightMotor.setPower(-turnSpeed);
             }
 
             telemetry.update();
