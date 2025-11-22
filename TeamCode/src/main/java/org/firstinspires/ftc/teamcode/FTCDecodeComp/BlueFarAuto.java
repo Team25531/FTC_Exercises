@@ -20,7 +20,7 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 import java.util.List;
 
 
-@Autonomous(name = " Blue FTC Comp Far", group = " Blue Ftc Comp")
+@Autonomous(name = "Blue FTC Comp Far", group = "Blue Ftc Comp")
 public class BlueFarAuto extends LinearOpMode {
     private ElapsedTime storageTimer = new ElapsedTime();
     private DcMotor frontLeftMotor;
@@ -42,6 +42,8 @@ public class BlueFarAuto extends LinearOpMode {
     double currentVelocity=0;
     double currentPower = 0;
     boolean isIdleEnabled = false;
+
+    boolean isDrivingToTarget = false;
 
     //boolean useOuttake = true;
     boolean isShooting = false;
@@ -68,44 +70,56 @@ public class BlueFarAuto extends LinearOpMode {
 
 
             if (isStopRequested()) return;
+            if(!isDrivingToTarget) {
+                distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+                shooterNeedsReset = false;
 
-            distanceToTarget = getDistanceToTag(20);
-            shooterNeedsReset = false;
-
-            setGoalVelocity();
-            checkIfShooting();
-            runOuttakeMotor();
-
-
-            doShooting();
-            //want to wait but is working so dont want to fix.
-            intake.setPower(-1);
-            telemetry.addData("intake", intake.getPower());
-            checkIfShooting();
-            runOuttakeMotor();
+                setGoalVelocity();
+                checkIfShooting();
+                runOuttakeMotor();
 
 
-            doShooting();
-            if (shooterNeedsReset) {
-                distanceToTarget = getDistanceToTag(20);
+                doShooting();
+                //want to wait but is working so dont want to fix.
+                intake.setPower(-1);
+                telemetry.addData("intake", intake.getPower());
+                checkIfShooting();
+                runOuttakeMotor();
+                telemetry.addData("distance to target", distanceToTarget);
+
+                doShooting();
+            }
+
+            if (isDrivingToTarget) {
+
+                outtake.setPower(0);
+
+                distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
                 while(distanceToTarget>=97){
                     frontLeftMotor.setPower(0.2);
                     frontRightMotor.setPower(0.2);
                     backRightMotor.setPower(0.2);
                     backLeftMotor.setPower(0.2);
-                    distanceToTarget = getDistanceToTag(20);
+                    distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+
+                    telemetry.addData("distance to target",distanceToTarget);
                 }
-                while(distanceToTarget<=97){
+                distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+                if(distanceToTarget<97){
 
                     frontLeftMotor.setPower(0);
                     frontRightMotor.setPower(0);
                     backRightMotor.setPower(0);
                     backLeftMotor.setPower(0);
-                    distanceToTarget = getDistanceToTag(20);
+                    distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+
+                    telemetry.addData("distance to target",distanceToTarget);
                 }
             }
 
-            distanceToTarget = getDistanceToTag(20);
+            distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+
+            telemetry.addData("distance to target",distanceToTarget);
 
 
             telemetry.update();
@@ -127,6 +141,7 @@ public class BlueFarAuto extends LinearOpMode {
                 telemetry.update();
             }
             shooterNeedsReset = true;
+            isDrivingToTarget = true;
         }
         telemetry.addData("shooterNeedsReset", shooterNeedsReset);
     }

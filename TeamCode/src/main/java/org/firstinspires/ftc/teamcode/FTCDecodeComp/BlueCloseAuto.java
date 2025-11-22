@@ -109,10 +109,10 @@ public class BlueCloseAuto extends LinearOpMode {
 
                         double Runtime = getRuntime();
                         if(Runtime< 2){
-                            frontLeftMotor.setPower(0.3);
-                            frontRightMotor.setPower(-0.2);
-                            backRightMotor.setPower(0.3);
-                            backLeftMotor.setPower(-0.2);
+                            frontLeftMotor.setPower(-0.2);
+                            frontRightMotor.setPower(0.3);
+                            backRightMotor.setPower(-0.2);
+                            backLeftMotor.setPower(0.3);
 
 
                         }
