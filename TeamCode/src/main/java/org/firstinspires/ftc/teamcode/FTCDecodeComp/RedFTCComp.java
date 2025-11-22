@@ -137,7 +137,7 @@ public class RedFTCComp extends LinearOpMode {
 
     private void checkFeeding() {
         // Stop feeding if the timer is up OR if the driver releases the trigger.
-        if (isFeeding && (storageTimer.milliseconds() > 3000 || !isShooting)) {
+        if (isFeeding && (storageTimer.milliseconds() > 1000 || !isShooting)) {
             isFeeding = false;
             shooterNeedsReset = true;
 
@@ -152,7 +152,7 @@ public class RedFTCComp extends LinearOpMode {
             telemetry.addData("in loop", 0);
 
 
-            tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) + 125);
+            tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) + 147);
             telemetry.addData("tempVelocity", tempVelocity);
         }
 

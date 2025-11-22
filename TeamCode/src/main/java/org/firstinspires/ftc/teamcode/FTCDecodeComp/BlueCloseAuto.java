@@ -39,7 +39,7 @@ public class BlueCloseAuto extends LinearOpMode {
     double range = 0.05;
     double distanceToTarget = 0;
     double angleToTarget = 0;
-    double currentVelocity=0;
+    double currentVelocity = 0;
     double currentPower = 0;
     boolean isIdleEnabled = false;
 
@@ -68,7 +68,7 @@ public class BlueCloseAuto extends LinearOpMode {
 
 
             if (isStopRequested()) return;
-            while(distanceToTarget <= 55){
+            while (distanceToTarget <= 55) {
                 frontLeftMotor.setPower(-0.2);
                 frontRightMotor.setPower(-0.2);
                 backRightMotor.setPower(-0.2);
@@ -80,7 +80,9 @@ public class BlueCloseAuto extends LinearOpMode {
             distanceToTarget = getDistanceToTag(20);
             shooterNeedsReset = false;
 
-            if(distanceToTarget >= 55){
+            if (distanceToTarget >= 55) {
+
+
                 frontLeftMotor.setPower(0);
                 frontRightMotor.setPower(0);
                 backRightMotor.setPower(0);
@@ -94,19 +96,35 @@ public class BlueCloseAuto extends LinearOpMode {
 
                 if (shooterNeedsReset) {
                     distanceToTarget = getDistanceToTag(20);
-                    while(distanceToTarget<= 97){
-                        frontLeftMotor.setPower(-0.2);
+                    while (distanceToTarget <= 97 && distanceToTarget >= 30) {
+                        frontLeftMotor.setPower(0.3);
                         frontRightMotor.setPower(-0.2);
-                        backRightMotor.setPower(-0.2);
+                        backRightMotor.setPower(0.3);
                         backLeftMotor.setPower(-0.2);
                         distanceToTarget = getDistanceToTag(20);
                     }
-                    while(distanceToTarget>=97){
+                    distanceToTarget = getDistanceToTag(20);
+                    resetRuntime();
+                    while (distanceToTarget == 0) {
 
-                        frontLeftMotor.setPower(0);
-                        frontRightMotor.setPower(0);
-                        backRightMotor.setPower(0);
-                        backLeftMotor.setPower(0);
+                        double Runtime = getRuntime();
+                        if(Runtime< 2){
+                            frontLeftMotor.setPower(0.3);
+                            frontRightMotor.setPower(-0.2);
+                            backRightMotor.setPower(0.3);
+                            backLeftMotor.setPower(-0.2);
+
+
+                        }
+                        if(Runtime>1) {
+                            frontLeftMotor.setPower(0);
+                            frontRightMotor.setPower(0);
+                            backRightMotor.setPower(0);
+                            backLeftMotor.setPower(0);
+                            outtake.setPower(0);
+                            intake.setPower(0);
+
+                        }
                         distanceToTarget = getDistanceToTag(20);
                     }
                 }
@@ -163,13 +181,8 @@ public class BlueCloseAuto extends LinearOpMode {
     }
 
 
-
     //DATA POINTS //61 1018 //79 1200//65 1080//60 1040//68 1110// 70 1150// 125 1350
     //NEW DATA ///
-
-
-
-
 
 
     private void runOuttakeMotor() {
@@ -195,7 +208,6 @@ public class BlueCloseAuto extends LinearOpMode {
 
         outtake.setPower(currentPower);
     }
-
 
 
     private void doDriving() {

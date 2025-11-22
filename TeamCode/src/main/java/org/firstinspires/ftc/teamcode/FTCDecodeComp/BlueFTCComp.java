@@ -2,15 +2,22 @@ package org.firstinspires.ftc.teamcode.FTCDecodeComp;
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
@@ -18,10 +25,16 @@ import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
 
 import java.util.List;
 
-
-@TeleOp (name = " Blue FTC Comp", group = " Blue Ftc Comp")
+@Config
+@TeleOp(name = "Blue FTC Comp", group = "Blue Ftc Comp")
 public class BlueFTCComp extends LinearOpMode {
+
+    public static double NEW_P = 7.0;
+    public static double NEW_I = 0.0;
+    public static double NEW_D = 0.0;
+    public static double NEW_F = 15.0;
     private ElapsedTime storageTimer = new ElapsedTime();
+    private ElapsedTime outtakeInRangeTimer = new ElapsedTime();
     private DcMotor frontLeftMotor;
     private DcMotor backLeftMotor;
     private DcMotor frontRightMotor;
@@ -29,18 +42,25 @@ public class BlueFTCComp extends LinearOpMode {
     private DcMotorEx outtake;
     private CRServo intake;
     private CRServo storageWheel;
+
+    private VoltageSensor myControlHubVoltageSensor;
     private AprilTagProcessor aprilTag;
     public static final String WEBCAM_NAME = "Webcam 1";
     public static final int TARGET_TAG_ID = 20;
     public static int IDLE_VELOCITY = 600;
     private VisionPortal visionPortal;
     int goalVelocity = 0;
-    double range = 0.05;
+    double range = 0.02;
+    double minRange = 0;
+    double maxRange = 0;
+
     double distanceToTarget = 0;
     double angleToTarget = 0;
-    double currentVelocity=0;
+    double currentVelocity = 0;
     double currentPower = 0;
     boolean isIdleEnabled = false;
+
+
 
     //boolean useOuttake = true;
     boolean isShooting = false;
@@ -48,14 +68,17 @@ public class BlueFTCComp extends LinearOpMode {
     boolean isAtGoalVelocity = false;
     boolean shooterNeedsReset = false;
     boolean isAimedAtTarget = false;
+    boolean isFeeding = false;
+    boolean wasOuttakeInRangeBefore = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
-
+        FtcDashboard dashboard = FtcDashboard.getInstance();
         initializeMotors();
         initializeTagProcessor();
-        SetIdleState();
+
         waitForStart();
+
 
         while (opModeIsActive()) {
             if (isStopRequested()) return;
@@ -68,11 +91,30 @@ public class BlueFTCComp extends LinearOpMode {
 
             doDriving();
 
+            TelemetryPacket packet = new TelemetryPacket();
+
+            packet.put("robotVoltage", myControlHubVoltageSensor.getVoltage());
+            packet.put("getVelocity", outtake.getVelocity());
+            packet.put("Goal Velocity", goalVelocity);
+            packet.put("min", minRange);
+            packet.put("p", NEW_P);
+            packet.put("f", NEW_F);
+            packet.put("max", maxRange);
+            packet.put("isFeeding", isFeeding ? goalVelocity+100:0);
+            packet.put("isShooting",isShooting? goalVelocity+125:0);
+            packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
+            //Pid Original" 10,3,0 Modified :2.5,0.1,0.2
+
+
+            dashboard.sendTelemetryPacket(packet);
+
+            reverse();
             autoAimOnOff();
             controlIntake();
             checkToResetState();
-            checkSetIdleState();
+
             setGoalVelocity();
+            checkFeeding();
             runOuttakeMotor();
             doShooting();
 
@@ -85,23 +127,21 @@ public class BlueFTCComp extends LinearOpMode {
         //if we're using auto aim and it isn't yet at the target then let steering keep going.
         if (isAutoAimEnabled && !isAimedAtTarget) return;
 
-        //if we are at goal, then run the storageWheel.
-        if (isAtGoalVelocity && !shooterNeedsReset) {
+        //if we are at goal, and not already feeding, then start feeding.
+        if (isAtGoalVelocity && !shooterNeedsReset && !isFeeding) {
             storageTimer.reset();
             storageWheel.setPower(-1);
-            //todo: determine correct duration for this timer.
-            while (opModeIsActive() & storageTimer.milliseconds() < 3000 && !shooterNeedsReset) {
-                sleep(1);
-                //todo: delete this telemetry.
-                runOuttakeMotor();
-                telemetry.addData("velocity", goalVelocity);
-                telemetry.addData("curPower", currentPower);
-                telemetry.update();
-            }
-            shooterNeedsReset = true;
-            SetIdleState();
+            isFeeding = true;
         }
-        telemetry.addData("shooterNeedsReset", shooterNeedsReset);
+    }
+
+    private void checkFeeding() {
+        // Stop feeding if the timer is up OR if the driver releases the trigger.
+        if (isFeeding && (storageTimer.milliseconds() > 1000 || !isShooting)) {
+            isFeeding = false;
+            shooterNeedsReset = true;
+
+        }
     }
 
 
@@ -110,70 +150,25 @@ public class BlueFTCComp extends LinearOpMode {
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
-//            tempVelocity = 1350;
 
-            //75,1250  // 88 1315//70
-//                if (distanceToTarget == 133) {
-//                    tempVelocity = 1425;
-//                }
-//                if (distanceToTarget == 132) {
-//                    tempVelocity = 1420;
-//                }
-//                if (distanceToTarget == 131) {
-//                    tempVelocity = 1417;
-//                }
-//                if (distanceToTarget == 63) {
-//                    tempVelocity = 1030;
-//                }
-//                if (distanceToTarget == 70) {
-//                    telemetry.addData("getting velocity", 0);
-//                    tempVelocity = 1330;
-//                }
-//                if (distanceToTarget == 135) {
-//                    tempVelocity = 1435;
-//                }
-//                if (distanceToTarget == 137) {
-//                    tempVelocity = 1440;
-//                }
-//                if (distanceToTarget == 139) {
-//                    tempVelocity = 1445;
-//                }
-//                if (distanceToTarget == 72) {
-//                    tempVelocity = 1083;
-//                }
-            // tempVelocity = (int) ((0.0006 * Math.pow(distanceToTarget, 2)) + (4.8385 * distanceToTarget) + 721.11);
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
+
+            tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) + 147);
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
         if (isShooting && !shooterNeedsReset) {
             goalVelocity = tempVelocity;
+
         } else {
-            SetIdleState();
+            goalVelocity = 0;
+            storageWheel.setPower(0);
         }
 
 
         telemetry.addData("goalVelocity", goalVelocity);
     }
+//NEW DATA POINTS 52 1050 58
 
-    private void checkSetIdleState() {
-
-        if (gamepad1.leftBumperWasPressed()) {
-            if (IDLE_VELOCITY == 600) {
-                IDLE_VELOCITY = 0;
-                goalVelocity = IDLE_VELOCITY;
-                return;
-            }
-            if (IDLE_VELOCITY == 0) {
-                IDLE_VELOCITY = 600;
-                goalVelocity = IDLE_VELOCITY;
-                return;
-                //61 1018
-
-            }
-
-        }
-    }
 
     //DATA POINTS //61 1018 //79 1200//65 1080//60 1040//68 1110// 70 1150// 125 1350
     //NEW DATA ///
@@ -222,41 +217,57 @@ public class BlueFTCComp extends LinearOpMode {
 
     private void runOuttakeMotor() {
         currentVelocity = outtake.getVelocity();
-        currentPower = outtake.getPower();
         telemetry.addData("curVelocity", currentVelocity);
-        telemetry.addData("curPower", currentPower);
 
-        double minRange = goalVelocity - (goalVelocity * range);
-        double maxRange = goalVelocity + (goalVelocity * range);
+        // Use setVelocity to command the motor controller to achieve the target velocity.
+        // This is much faster and more stable than manually adjusting power.
 
-        if (currentVelocity < minRange) {
-            currentPower = currentPower + 0.001;
+        minRange = goalVelocity - (goalVelocity * range);
+        maxRange = goalVelocity;// + (goalVelocity * range);
+
+        boolean isOuttakeInRangeNow = (currentVelocity <= maxRange) && (currentVelocity > minRange);
+        outtake.setVelocityPIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
+
+        if (isOuttakeInRangeNow) {
+            if (!wasOuttakeInRangeBefore) {
+                outtakeInRangeTimer.reset();
+            }
         }
-        if (currentVelocity > maxRange) {
-            currentPower = currentPower - 0.001;
-        }
-        isAtGoalVelocity = (currentVelocity < maxRange && currentVelocity > minRange);
+
+        wasOuttakeInRangeBefore = isOuttakeInRangeNow;
+
+        isAtGoalVelocity = isOuttakeInRangeNow; // && outtakeInRangeTimer.milliseconds() > 150; // wait for a bit
         telemetry.addData("isAtGoalVelocity", isAtGoalVelocity);
+
         if (isAtGoalVelocity) {
             return;
         }
 
-        outtake.setPower(currentPower);
+        outtake.setVelocity(goalVelocity);
     }
 
-    private void SetIdleState() {
-        goalVelocity = IDLE_VELOCITY; //min speed for Outtake wheel
-        storageWheel.setPower(0);
-        //stop the storage wheel
+    private void reverse() {
+        if (gamepad1.aWasPressed()) {
+            storageWheel.setPower(-1);
+            outtake.setVelocity(-700);
+        }
     }
+
 
     private void doDriving() {
         double y = -gamepad1.left_stick_y;
         double x = gamepad1.left_stick_x * 1.1;
         double rx = gamepad1.right_stick_x;
 
-        angleToTarget = getAngleToTag(TARGET_TAG_ID);
         distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+
+        if (distanceToTarget > 100) {
+            angleToTarget = getAngleToTag(TARGET_TAG_ID) - 2;
+        }
+        else {
+            angleToTarget = getAngleToTag(TARGET_TAG_ID);
+        }
+
         telemetry.addData("dist  goal", distanceToTarget);
         telemetry.addData("angle goal", angleToTarget);
 
@@ -292,6 +303,7 @@ public class BlueFTCComp extends LinearOpMode {
         intake = hardwareMap.crservo.get("intake");
         storageWheel = hardwareMap.crservo.get("storageWheel");
         outtake = hardwareMap.get(DcMotorEx.class, "outtake");
+        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         //TODO: fix this to pull the correct object.
         //outtake = hardwareMap.get(DcMotorEx.class, "frontLeft");
 
@@ -299,6 +311,21 @@ public class BlueFTCComp extends LinearOpMode {
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        outtake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        PIDFCoefficients pidfValues = outtake.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("Flywheel PIDF",
+                "P=%.6f I=%.6f D=%.6f F=%.6f",
+                pidfValues.p, pidfValues.i, pidfValues.d, pidfValues.f);
+
+        outtake.setVelocityPIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
+
+        pidfValues = outtake.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("Flywheel PIDF",
+                "P=%.6f I=%.6f D=%.6f F=%.6f",
+                pidfValues.p, pidfValues.i, pidfValues.d, pidfValues.f);
+        telemetry.update();
 
         frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);

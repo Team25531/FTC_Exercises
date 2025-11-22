@@ -122,6 +122,8 @@ public class RedCloseAuto extends LinearOpMode {
                             backRightMotor.setPower(0);
                             backLeftMotor.setPower(0);
                             outtake.setPower(0);
+                            intake.setPower(0);
+
                         }
                         distanceToTarget = getDistanceToTag(24);
                     }
@@ -152,7 +154,6 @@ public class RedCloseAuto extends LinearOpMode {
         }
         telemetry.addData("shooterNeedsReset", shooterNeedsReset);
     }
-
     private void checkIfShooting() {
         //to shoot, hold down the left_trigger.
 
