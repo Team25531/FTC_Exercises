@@ -97,10 +97,10 @@ public class BlueCloseAuto extends LinearOpMode {
                 if (shooterNeedsReset) {
                     distanceToTarget = getDistanceToTag(20);
                     while (distanceToTarget <= 97 && distanceToTarget >= 30) {
-                        frontLeftMotor.setPower(0.3);
-                        frontRightMotor.setPower(-0.2);
-                        backRightMotor.setPower(0.3);
-                        backLeftMotor.setPower(-0.2);
+                        frontLeftMotor.setPower(-0.2);
+                        frontRightMotor.setPower(0.3);
+                        backRightMotor.setPower(-0.2);
+                        backLeftMotor.setPower(0.3);
                         distanceToTarget = getDistanceToTag(20);
                     }
                     distanceToTarget = getDistanceToTag(20);
