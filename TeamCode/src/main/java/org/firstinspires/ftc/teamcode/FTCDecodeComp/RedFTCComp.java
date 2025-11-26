@@ -47,7 +47,7 @@ public class RedFTCComp extends LinearOpMode {
     private AprilTagProcessor aprilTag;
     public static final String WEBCAM_NAME = "Webcam 1";
     public static final int TARGET_TAG_ID = 24;
-    public static int IDLE_VELOCITY = 600;
+    public static int IDLE_VELOCITY = 800;
     private VisionPortal visionPortal;
     int goalVelocity = 0;
     double range = 0.02;
@@ -70,6 +70,8 @@ public class RedFTCComp extends LinearOpMode {
     boolean isAimedAtTarget = false;
     boolean isFeeding = false;
     boolean wasOuttakeInRangeBefore = false;
+
+    boolean idleVelocity = true;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -115,8 +117,9 @@ public class RedFTCComp extends LinearOpMode {
 
             setGoalVelocity();
             checkFeeding();
-            runOuttakeMotor();
+           runOuttakeMotor();
             doShooting();
+            idleStateSet();
 
             telemetry.update();
         }
@@ -160,7 +163,7 @@ public class RedFTCComp extends LinearOpMode {
             goalVelocity = tempVelocity;
 
         } else {
-            goalVelocity = 0;
+            goalVelocity = IDLE_VELOCITY;
             storageWheel.setPower(0);
         }
 
@@ -179,6 +182,16 @@ public class RedFTCComp extends LinearOpMode {
             outtake.setPower(0);
             intake.setPower(0);
             storageWheel.setPower(0);
+        }
+    }
+
+    private void idleStateSet(){
+        if(gamepad1.leftBumperWasPressed()){
+            IDLE_VELOCITY = 0;
+            idleVelocity = false;
+        }
+        if(gamepad1.yWasPressed()){
+            IDLE_VELOCITY = 800;
         }
     }
 
@@ -276,8 +289,8 @@ public class RedFTCComp extends LinearOpMode {
         if (isShooting && isAutoAimEnabled && !shooterNeedsReset) {
             isAimedAtTarget = !(angleToTarget < -1 || angleToTarget > 1);
             if (!isAimedAtTarget) {
-                if (angleToTarget < -1) rx = 0.3;
-                if (angleToTarget > 1) rx = -0.3;
+                if (angleToTarget < -1) rx = 0.2;
+                if (angleToTarget > 1) rx = -0.2;
             }
             telemetry.addData("isAimedAtTarget", isAimedAtTarget);
         }

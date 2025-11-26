@@ -159,7 +159,7 @@ public class BlueFarAuto extends LinearOpMode {
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 160) {
             telemetry.addData("in loop", 0);
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)) + 25);
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
