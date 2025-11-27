@@ -29,24 +29,16 @@
 
 package org.firstinspires.ftc.teamcode.Aaron;
 
-import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.IMU;
-import com.qualcomm.robotcore.hardware.IntegratingGyroscope;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
-
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 
 /*
  *  This OpMode illustrates the concept of driving an autonomous path based on Gyro (IMU) heading and encoder counts.
@@ -118,9 +110,10 @@ public class RobotAutoDriveByGyroMecanumWheel extends LinearOpMode {
     private double turnSpeed = 0;
     private double leftSpeed = 0;
     private double rightSpeed = 0;
-    private int leftTarget = 0;
-    private int rightTarget = 0;
-
+    private int frontLeftTarget = 0;
+    private int backLeftTarget = 0;
+    private int frontRightTarget = 0;
+    private int backRightTarget = 0;
     // Calculate the COUNTS_PER_INCH for your specific drive train.
     // Go to your motor vendor website to determine your motor's COUNTS_PER_MOTOR_REV
     // For external drive gearing, set DRIVE_GEAR_REDUCTION as needed.
@@ -217,26 +210,31 @@ public class RobotAutoDriveByGyroMecanumWheel extends LinearOpMode {
         // Notes:   Reverse movement is obtained by setting a negative distance (not speed)
         //          holdHeading() is used after turns to let the heading stabilize
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
+        driveStraight(DRIVE_SPEED, 24, 0.0);    // Drive Forward 24"
 
-        driveStraight(DRIVE_SPEED, 30, 0.0);    // Drive Forward 24"
         turnToHeading(TURN_SPEED, 90.0);               // Turn  CW to -45 Degrees
         holdHeading(TURN_SPEED, 90.0, .5);   // Hold -45 Deg heading for a 1/2 second
         imu.resetYaw();
 
-        driveStraight(DRIVE_SPEED, 30, 0.0);    // Drive Forward 24"
-        turnToHeading(TURN_SPEED, 90.0);               // Turn  CW to -45 Degrees
-        holdHeading(TURN_SPEED, 90.0, .5);   // Hold -45 Deg heading for a 1/2 second
+        driveStraight(DRIVE_SPEED, 24, 0.0);
+
+        turnToHeading(TURN_SPEED, 90.0);
+        holdHeading(TURN_SPEED, 90.0, .5);
         imu.resetYaw();
 
-        driveStraight(DRIVE_SPEED, 30, 0.0);    // Drive Forward 24"
-        turnToHeading(TURN_SPEED, 90.0);               // Turn  CW to -45 Degrees
-        holdHeading(TURN_SPEED, 90.0, .5);   // Hold -45 Deg heading for a 1/2 second
+        driveStraight(DRIVE_SPEED, 24, 0.0);
+
+        turnToHeading(TURN_SPEED, 90.0);
+        holdHeading(TURN_SPEED, 90.0, .5);
         imu.resetYaw();
 
-        driveStraight(DRIVE_SPEED, 30, 0.0);    // Drive Forward 24"
-        turnToHeading(TURN_SPEED, 90.0);               // Turn  CW to -45 Degrees
-        holdHeading(TURN_SPEED, 90.0, .5);   // Hold -45 Deg heading for a 1/2 second
+        driveStraight(DRIVE_SPEED, 24, 0.0);
+
+        turnToHeading(TURN_SPEED, 90.0);
+        holdHeading(TURN_SPEED, 90.0, .5);
         imu.resetYaw();
+
+
 //        if (1==2) {
 //
 //            driveStraight(DRIVE_SPEED, 17.0, -45.0);  // Drive Forward 17" at -45 degrees (12"x and 12"y)
@@ -276,6 +274,15 @@ public class RobotAutoDriveByGyroMecanumWheel extends LinearOpMode {
         frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
+    private void ResetEncoders() {
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
+
     /*
      * ====================================================================================================
      * Driving "Helper" functions are below this line.
@@ -300,20 +307,22 @@ public class RobotAutoDriveByGyroMecanumWheel extends LinearOpMode {
     public void driveStraight(double maxDriveSpeed,
                               double distance,
                               double heading) {
-
+        ResetEncoders();
         // Ensure that the OpMode is still active
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
             int moveCounts = (int) (distance * COUNTS_PER_INCH);
-            leftTarget = frontLeftMotor.getCurrentPosition() + moveCounts;
-            rightTarget = frontRightMotor.getCurrentPosition() + moveCounts;
+            frontLeftTarget = frontLeftMotor.getCurrentPosition() + moveCounts;
+            backLeftTarget = backLeftMotor.getCurrentPosition() + moveCounts;
+            frontRightTarget = frontRightMotor.getCurrentPosition() + moveCounts;
+            backRightTarget = backRightMotor.getCurrentPosition() + moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            frontLeftMotor.setTargetPosition(leftTarget);
-            backLeftMotor.setTargetPosition(rightTarget);
-            frontRightMotor.setTargetPosition(rightTarget);
-            backRightMotor.setTargetPosition(rightTarget);
+            frontLeftMotor.setTargetPosition(frontLeftTarget);
+            backLeftMotor.setTargetPosition(backLeftTarget);
+            frontRightMotor.setTargetPosition(frontRightTarget);
+            backRightMotor.setTargetPosition(backRightTarget);
 
             frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -422,7 +431,7 @@ public class RobotAutoDriveByGyroMecanumWheel extends LinearOpMode {
             moveRobot(0, turnSpeed);
 
             // Display drive status for the driver.
-            sendTelemetry(false);
+            sendTelemetry(true);
         }
 
         // Stop all motion;
@@ -488,9 +497,16 @@ public class RobotAutoDriveByGyroMecanumWheel extends LinearOpMode {
 
         if (straight) {
             telemetry.addData("Motion", "Drive Straight");
-            telemetry.addData("Target Pos L:R", "%7d:%7d", leftTarget, rightTarget);
-            telemetry.addData("Actual Pos L:R", "%7d:%7d", frontLeftMotor.getCurrentPosition(),
+            telemetry.addData("FL:FR:BL:BR", "%7d:%7d:%7d:%7d", frontLeftTarget, frontRightTarget, backLeftTarget, backRightTarget);
+            telemetry.addData("FL:FR:BL:BR", "%7d:%7d:%7d:%7d", frontLeftMotor.getCurrentPosition(), frontRightMotor.getCurrentPosition(),
+                    backLeftMotor.getCurrentPosition(),
                     frontRightMotor.getCurrentPosition());
+            telemetry.addData("FL:FR:BL:BR", "%7d:%7d:%7d:%7d",
+                    frontLeftTarget - frontLeftMotor.getCurrentPosition(),
+                    frontRightTarget - frontRightMotor.getCurrentPosition(),
+                    backLeftTarget - backLeftMotor.getCurrentPosition(),
+                    backRightTarget - backRightMotor.getCurrentPosition());
+
         } else {
             telemetry.addData("Motion", "Turning");
         }
