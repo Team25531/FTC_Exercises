@@ -280,6 +280,8 @@ public class RedCloseAuto extends LinearOpMode {
         return range;
     }
 
+
+
     private int getAngleToTag(int tagID) {
 
         List<AprilTagDetection> currentDetections = aprilTag.getDetections();
