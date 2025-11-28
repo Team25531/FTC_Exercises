@@ -61,7 +61,6 @@ public class RedFTCComp extends LinearOpMode {
     boolean isIdleEnabled = false;
 
 
-
     //boolean useOuttake = true;
     boolean isShooting = false;
     boolean isAutoAimEnabled = true;
@@ -84,6 +83,14 @@ public class RedFTCComp extends LinearOpMode {
 
         while (opModeIsActive()) {
             if (isStopRequested()) return;
+            telemetry.addData("frontRight", frontRightMotor.getCurrentPosition());
+
+            telemetry.addData("backLeft", backLeftMotor.getCurrentPosition());
+
+            telemetry.addData("backRight", backRightMotor.getCurrentPosition());
+
+
+            telemetry.addData("frontLeft", frontLeftMotor.getCurrentPosition());
 
             checkIfShooting();
             double ve;
@@ -102,8 +109,9 @@ public class RedFTCComp extends LinearOpMode {
             packet.put("p", NEW_P);
             packet.put("f", NEW_F);
             packet.put("max", maxRange);
-            packet.put("isFeeding", isFeeding ? goalVelocity+100:0);
-            packet.put("isShooting",isShooting? goalVelocity+125:0);
+            packet.put("isFeeding", isFeeding ? goalVelocity + 100 : 0);
+            packet.put("isShooting", isShooting ? goalVelocity + 125 : 0);
+            packet.put("isAtGoalVelocity", isAtGoalVelocity ? goalVelocity + 150 : 0);
             packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
             //Pid Original" 10,3,0 Modified :2.5,0.1,0.2
 
@@ -117,7 +125,7 @@ public class RedFTCComp extends LinearOpMode {
 
             setGoalVelocity();
             checkFeeding();
-           runOuttakeMotor();
+            runOuttakeMotor();
             doShooting();
             idleStateSet();
 
@@ -142,7 +150,8 @@ public class RedFTCComp extends LinearOpMode {
         // Stop feeding if the timer is up OR if the driver releases the trigger.
         if (isFeeding && (storageTimer.milliseconds() > 1000 || !isShooting)) {
             isFeeding = false;
-            shooterNeedsReset = true;
+            // shooterNeedsReset = true;
+            storageWheel.setPower(0);
 
         }
     }
@@ -165,6 +174,9 @@ public class RedFTCComp extends LinearOpMode {
         } else {
             goalVelocity = IDLE_VELOCITY;
             storageWheel.setPower(0);
+            telemetry.addData("isShooting", isShooting);
+            telemetry.addData("shooterNEedsReset", shooterNeedsReset);
+            telemetry.update();
         }
 
 
@@ -185,12 +197,12 @@ public class RedFTCComp extends LinearOpMode {
         }
     }
 
-    private void idleStateSet(){
-        if(gamepad1.leftBumperWasPressed()){
+    private void idleStateSet() {
+        if (gamepad1.leftBumperWasPressed()) {
             IDLE_VELOCITY = 0;
             idleVelocity = false;
         }
-        if(gamepad1.yWasPressed()){
+        if (gamepad1.yWasPressed()) {
             IDLE_VELOCITY = 800;
         }
     }
@@ -235,21 +247,12 @@ public class RedFTCComp extends LinearOpMode {
         // Use setVelocity to command the motor controller to achieve the target velocity.
         // This is much faster and more stable than manually adjusting power.
 
-         minRange = goalVelocity - (goalVelocity * range);
-         maxRange = goalVelocity;// + (goalVelocity * range);
+        minRange = goalVelocity - (goalVelocity * range);
+        maxRange = goalVelocity;// + (goalVelocity * range);
 
-        boolean isOuttakeInRangeNow = (currentVelocity <= maxRange) && (currentVelocity > minRange);
         outtake.setVelocityPIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
 
-        if (isOuttakeInRangeNow) {
-            if (!wasOuttakeInRangeBefore) {
-                outtakeInRangeTimer.reset();
-            }
-        }
-
-        wasOuttakeInRangeBefore = isOuttakeInRangeNow;
-
-        isAtGoalVelocity = isOuttakeInRangeNow; // && outtakeInRangeTimer.milliseconds() > 150; // wait for a bit
+        isAtGoalVelocity = (currentVelocity <= maxRange) && (currentVelocity > minRange);
         telemetry.addData("isAtGoalVelocity", isAtGoalVelocity);
 
         if (isAtGoalVelocity) {
@@ -276,8 +279,7 @@ public class RedFTCComp extends LinearOpMode {
 
         if (distanceToTarget > 100) {
             angleToTarget = getAngleToTag(TARGET_TAG_ID) - 2;
-        }
-        else {
+        } else {
             angleToTarget = getAngleToTag(TARGET_TAG_ID);
         }
 
@@ -371,7 +373,7 @@ public class RedFTCComp extends LinearOpMode {
                 break;
             }
         }
-            return angle;
+        return angle;
     }
 
     private void initializeTagProcessor() {
