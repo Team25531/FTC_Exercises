@@ -106,7 +106,7 @@ import java.util.List;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "Auto Test", group = "Trying")
+@Autonomous(name = "auto Test", group = "Trying")
 //@Disabled
 public class autoTest extends LinearOpMode {
 
@@ -130,6 +130,10 @@ public class autoTest extends LinearOpMode {
     double angleToTarget = 0;
     double currentVelocity = 0;
     double currentPower = 0;
+    private int frontLeftTarget = 0;
+    private int backLeftTarget = 0;
+    private int frontRightTarget = 0;
+    private int backRightTarget = 0;
     boolean isIdleEnabled = false;
 
     //boolean useOuttake = true;
@@ -170,7 +174,7 @@ public class autoTest extends LinearOpMode {
 
     // These constants define the desired driving/control characteristics
     // They can/should be tweaked to suit the specific robot drive train.
-    static final double DRIVE_SPEED = 0.6;     // Max driving speed for better distance accuracy.
+    static double DRIVE_SPEED = 0.6;     // Max driving speed for better distance accuracy.
     static final double TURN_SPEED = 0.3;     // Max turn speed to limit turn rate.
     static final double HEADING_THRESHOLD = 1.0;    // How close must the heading get to the target before moving to next step.
     // Requiring more accuracy (a smaller number) will often make the turn take longer to get into the final position.
@@ -190,14 +194,15 @@ public class autoTest extends LinearOpMode {
 
 
         initializeMotors();
+        initializeTagProcessor();
 
         /* The next two lines define Hub orientation.
          * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
          *
          * To Do:  EDIT these two lines to match YOUR mounting configuration.
          */
-        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.UP;
-        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.BACKWARD;
+        RevHubOrientationOnRobot.LogoFacingDirection logoDirection = RevHubOrientationOnRobot.LogoFacingDirection.RIGHT;
+        RevHubOrientationOnRobot.UsbFacingDirection usbDirection = RevHubOrientationOnRobot.UsbFacingDirection.UP;
         RevHubOrientationOnRobot orientationOnRobot = new RevHubOrientationOnRobot(logoDirection, usbDirection);
 
         // Now initialize the IMU with this mounting orientation
@@ -253,39 +258,208 @@ public class autoTest extends LinearOpMode {
         //          holdHeading() is used after turns to let the heading stabilize
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
         //backing away from goal
-        driveStraight(DRIVE_SPEED, -55, 0.0);
-        // AIM HERE
-        //SHOOT HERE
-
-
         imu.resetYaw();
-//turn towards ball
-
-//        turnToHeading(TURN_SPEED, -45);
-//        holdHeading(TURN_SPEED, -45, .5);
-//        imu.resetYaw();
-        //drive to ball and pick up
-        //ADJUST DRIVE SPEED
-        //INTAKE
-//        driveStraight(DRIVE_SPEED, 55, 0.0);
+        shooterNeedsReset = false;
 
 
-//        imu.resetYaw()
-//      //go back to shooting line
-//        driveStraight(DRIVE_SPEED, -55, 0.0);
+        while (opModeIsActive()) {
 
-//        imu.resetYaw();
-        //angle to goal then shoot
-//        turnToHeading(TURN_SPEED, 45);
-//        holdHeading(TURN_SPEED, 45, .5);
-        //SHOOT NOW
-//        imu.resetYaw();
+            double ve;
+
+            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
+            telemetry.addData("current velocity", ve);
+
+            DRIVE_SPEED = 0.2;
+            if (isStopRequested()) return;
+            while (distanceToTarget <= 50) {
+                driveStraight(DRIVE_SPEED, -50, 0.0);
+                setGoalVelocity();
+                distanceToTarget = getDistanceToTag(24);
+
+            }
+            distanceToTarget = getDistanceToTag(24);
+            shooterNeedsReset = false;
+
+            if (distanceToTarget >= 50) {
+
+                frontLeftMotor.setPower(0);
+                frontRightMotor.setPower(0);
+                backRightMotor.setPower(0);
+                backLeftMotor.setPower(0);
+
+//                driveStraight(DRIVE_SPEED, 0, 0.0);
+                intake.setPower(-1);
+                setGoalVelocity();
+                runOuttakeMotor();
+                checkIfShooting();
+
+                doShooting();
+
+                if (shooterNeedsReset) {
+                    imu.resetYaw();
+                    distanceToTarget = getDistanceToTag(24);
+                    turnToHeading(TURN_SPEED, -60);
+                    holdHeading(TURN_SPEED, -60, .5);
+
+                    // 4. go very slowly towards the balls
+                    DRIVE_SPEED = 0.2;
+                    intake.setPower(-1);
+                    driveStraight(DRIVE_SPEED, 30, 0.0);
+                    imu.resetYaw();
+                    DRIVE_SPEED = 0.2;
+                    driveStraight(DRIVE_SPEED, -30, 0.0);
+                    imu.resetYaw();
+                    turnToHeading(TURN_SPEED, 60);
+                    holdHeading(TURN_SPEED, 60, .5);
+                    distanceToTarget = getDistanceToTag(24);
+                    resetRuntime();
+                }
+
+            }
+
+            telemetry.update();
+        }
 
 
+//        while (opModeIsActive()) {
+//            double ve;
+//
+//            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
+//            telemetry.addData("current velocity", ve);
+//
+//            if (isStopRequested()) return;
+//
+//            // Assume start from near the depot
+//            // 1. first go back 35 inches
+//            // 2. shoot two balls already loaded
+//            while (distanceToTarget <= 40) {
+//                driveStraight(DRIVE_SPEED, -40, 0.0);
+//                setGoalVelocity();
+//                distanceToTarget = getDistanceToTag(24);
+//                telemetry.addData("distanceToTarget", distanceToTarget);
+//                telemetry.update();
+//            }
+//
+//            distanceToTarget = getDistanceToTag(24);
+//
+//            if (distanceToTarget >=40)
+//            {
+//                driveStraight(DRIVE_SPEED, 0, 0.0);
+//
+//
+//                intake.setPower(-1);
+//                setGoalVelocity();
+//                runOuttakeMotor();
+//                checkIfShooting();
+//
+////                while (!isAimedAtTarget) {
+////                    telemetry.addData("Angle To Target: ", angleToTarget);
+////                    telemetry.update();
+////                    aimToTarget();
+////                }
+//
+//                doShooting();
+//
+//                if (shooterNeedsReset) {
+//                    resetRuntime();
+//                    double runtime = getRuntime();
+//                    while (runtime < 4) {
+//                        runtime = getRuntime();
+//                    }
+//            }
+//
+//            // Check distance again
+////            distanceToTarget = getDistanceToTag(24);
+////            shooterNeedsReset = false;
+////
+////            telemetry.addData("isAimed", isAimedAtTarget);
+////            telemetry.update();
+////            isShooting = true; // get ready for shooting
+//
+//
+////             correct the angle
+//
+//
+////            intake.setPower(-1);
+////            setGoalVelocity();
+////            runOuttakeMotor();
+////            checkIfShooting();
+////
+////            doShooting();
+//
+//
+//            }
+//            // ensure we're not moving while shooting.
+////            resetRuntime();
+////            double runtime = getRuntime();
+////            while (runtime < 4) {
+////                runtime = getRuntime();
+////            }
+////            imu.resetYaw();
+////
+////            // 3. Turn towards first row of balls
+////            turnToHeading(TURN_SPEED, -45);
+////            holdHeading(TURN_SPEED, -45, .5);
+////            imu.resetYaw();
+////
+////            // 4. go very slowly towards the balls
+////            DRIVE_SPEED = 0.2;
+////            intake.setPower(-1);
+////            driveStraight(DRIVE_SPEED, 35, 0.0);
+////            imu.resetYaw();
+////            DRIVE_SPEED = 0.6;
+////            driveStraight(DRIVE_SPEED, -35, 0.0);
+////            imu.resetYaw();
+////            turnToHeading(TURN_SPEED, 45);
+////            holdHeading(TURN_SPEED, 45, .5);
+////            imu.resetYaw();
+////            isShooting = true;
+////            while (!isAimedAtTarget) {
+////                telemetry.addData("Angle To Target: ", angleToTarget);
+////                telemetry.update();
+////
+////                aimToTarget();
+////            }
+////            intake.setPower(-1);
+////            setGoalVelocity();
+////            runOuttakeMotor();
+////            checkIfShooting();
+////
+////            doShooting();
+//
+//
+//        }
+////turn towards ball
+//
+//
+//        //drive to ball and pick up
+//        //ADJUST DRIVE SPEED
+//        //DRIVE_SPEED = 0.2
+//        //INTAKE
+//        //intake.setPower(-1)
+//        //driveStraight(DRIVE_SPEED, 55, 0.0);
+//
+//
+////        imu.resetYaw()
+////        //go back to shooting line
+////        DRIVE_SPEED = 0.6
+////        driveStraight(DRIVE_SPEED, -55, 0.0);
+//
+////        imu.resetYaw();
+//        //angle to goal then shoot
+////        turnToHeading(TURN_SPEED, 45);
+////        holdHeading(TURN_SPEED, 45, .5);
+//        //angle
+//        //angeToTarget();
+//        //SHOOT NOW
+//        //setGoalVelocity();
+//        //runOuttakeMotor();
+////        imu.resetYaw();
+//
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
-        sleep(1000);  // Pause to display last telemetry message.
+        //sleep(5000);  // Pause to display last telemetry message.
     }
 
 
@@ -304,6 +478,11 @@ public class autoTest extends LinearOpMode {
         backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
         frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
         backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        frontLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
     /*
      * ====================================================================================================
@@ -329,20 +508,22 @@ public class autoTest extends LinearOpMode {
     public void driveStraight(double maxDriveSpeed,
                               double distance,
                               double heading) {
-
+        ResetEncoders();
         // Ensure that the OpMode is still active
         if (opModeIsActive()) {
 
             // Determine new target position, and pass to motor controller
             int moveCounts = (int) (distance * COUNTS_PER_INCH);
-            leftTarget = frontLeftMotor.getCurrentPosition() + moveCounts;
-            rightTarget = frontRightMotor.getCurrentPosition() + moveCounts;
+            frontLeftTarget = frontLeftMotor.getCurrentPosition() + moveCounts;
+            backLeftTarget = backLeftMotor.getCurrentPosition() + moveCounts;
+            frontRightTarget = frontRightMotor.getCurrentPosition() + moveCounts;
+            backRightTarget = backRightMotor.getCurrentPosition() + moveCounts;
 
             // Set Target FIRST, then turn on RUN_TO_POSITION
-            frontLeftMotor.setTargetPosition(leftTarget);
-            backLeftMotor.setTargetPosition(rightTarget);
-            frontRightMotor.setTargetPosition(rightTarget);
-            backRightMotor.setTargetPosition(rightTarget);
+            frontLeftMotor.setTargetPosition(frontLeftTarget);
+            backLeftMotor.setTargetPosition(backLeftTarget);
+            frontRightMotor.setTargetPosition(frontRightTarget);
+            backRightMotor.setTargetPosition(backRightTarget);
 
             frontLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             backLeftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
@@ -381,6 +562,7 @@ public class autoTest extends LinearOpMode {
 
         }
     }
+
 
     /**
      * Spin on the central axis to point in a new direction.
@@ -457,6 +639,14 @@ public class autoTest extends LinearOpMode {
         // Stop all motion;
         moveRobot(0, 0);
     }
+
+    private void ResetEncoders() {
+        frontLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backLeftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        frontRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        backRightMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+    }
+
 
     // **********  LOW Level driving functions.  ********************
 
@@ -651,6 +841,49 @@ public class autoTest extends LinearOpMode {
             }
         }
         return range;
+    }
+
+    private void aimToTarget() {
+        double y = 0;
+        double x = 0;
+        double rx = 0;
+
+        telemetry.addData("isShooting: ", isShooting);
+        telemetry.addData("isAutoAimEnabled: ", isAutoAimEnabled);
+        telemetry.addData("shooterNeedsReset: ", shooterNeedsReset);
+        telemetry.update();
+
+        if (isShooting && isAutoAimEnabled && !shooterNeedsReset) {
+            angleToTarget = getAngleToTag(24);
+            isAimedAtTarget = (angleToTarget > -1 && angleToTarget < 1);
+            if (!isAimedAtTarget) {
+                if (angleToTarget < -1) rx = 0.3;
+                if (angleToTarget > 1) rx = -0.3;
+            }
+
+            telemetry.addData("isAimedAtTarget", isAimedAtTarget);
+        } else {
+            telemetry.addData("isShooting: ", isShooting);
+            telemetry.addData("isAutoAimEnabled: ", isAutoAimEnabled);
+            telemetry.addData("shooterNeedsReset: ", shooterNeedsReset);
+            telemetry.addData("WTF!!!!", 0);
+            telemetry.update();
+            while (true) {
+            }
+
+        }
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / denominator;
+        double backLeftPower = (y - x + rx) / denominator;
+        double frontRightPower = (y - x - rx) / denominator;
+        double backRightPower = (y + x - rx) / denominator;
+
+        //todo: enable this.
+        frontLeftMotor.setPower(frontLeftPower);
+        backLeftMotor.setPower(backLeftPower);
+        frontRightMotor.setPower(frontRightPower);
+        backRightMotor.setPower(backRightPower);
+
     }
 
 
