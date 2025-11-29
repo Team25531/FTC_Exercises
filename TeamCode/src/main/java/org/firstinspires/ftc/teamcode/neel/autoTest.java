@@ -262,63 +262,66 @@ public class autoTest extends LinearOpMode {
         shooterNeedsReset = false;
 
 
-        while (opModeIsActive()) {
+        DRIVE_SPEED = 0.2;
+        if (isStopRequested()) return;
 
-            double ve;
+        driveStraight(DRIVE_SPEED, -50, 0.0);
+        distanceToTarget = getDistanceToTag(24);
+        if (distanceToTarget < 50) {
+            int awayFromTarget = (int) (50 - distanceToTarget);
+            driveStraight(DRIVE_SPEED, -awayFromTarget, 0);
 
-            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
-            telemetry.addData("current velocity", ve);
+        }
+        setGoalVelocity();
 
-            DRIVE_SPEED = 0.2;
-            if (isStopRequested()) return;
-            while (distanceToTarget <= 50) {
-                driveStraight(DRIVE_SPEED, -50, 0.0);
-                setGoalVelocity();
-                distanceToTarget = getDistanceToTag(24);
 
-            }
-            distanceToTarget = getDistanceToTag(24);
-            shooterNeedsReset = false;
+        distanceToTarget = getDistanceToTag(24);
+        shooterNeedsReset = false;
 
-            if (distanceToTarget >= 50) {
+        if (distanceToTarget >= 50) {
 
-                frontLeftMotor.setPower(0);
-                frontRightMotor.setPower(0);
-                backRightMotor.setPower(0);
-                backLeftMotor.setPower(0);
+            frontLeftMotor.setPower(0);
+            frontRightMotor.setPower(0);
+            backRightMotor.setPower(0);
+            backLeftMotor.setPower(0);
 
 //                driveStraight(DRIVE_SPEED, 0, 0.0);
-                intake.setPower(-1);
-                setGoalVelocity();
-                runOuttakeMotor();
-                checkIfShooting();
-
+            intake.setPower(-1);
+            setGoalVelocity();
+            runOuttakeMotor();
+            checkIfShooting();
+            resetRuntime();
+            double runtime = getRuntime();
+            while (runtime <= 4) {
                 doShooting();
+                runtime = getRuntime();
+                telemetry.addData("Motor running", -0);
+                telemetry.update();
+            }
+            if (shooterNeedsReset) {
+                imu.resetYaw();
+                distanceToTarget = getDistanceToTag(24);
+                turnToHeading(TURN_SPEED, -60);
+                holdHeading(TURN_SPEED, -60, .5);
 
-                if (shooterNeedsReset) {
-                    imu.resetYaw();
-                    distanceToTarget = getDistanceToTag(24);
-                    turnToHeading(TURN_SPEED, -60);
-                    holdHeading(TURN_SPEED, -60, .5);
-
-                    // 4. go very slowly towards the balls
-                    DRIVE_SPEED = 0.2;
-                    intake.setPower(-1);
-                    driveStraight(DRIVE_SPEED, 30, 0.0);
-                    imu.resetYaw();
-                    DRIVE_SPEED = 0.2;
-                    driveStraight(DRIVE_SPEED, -30, 0.0);
-                    imu.resetYaw();
-                    turnToHeading(TURN_SPEED, 60);
-                    holdHeading(TURN_SPEED, 60, .5);
-                    distanceToTarget = getDistanceToTag(24);
-                    resetRuntime();
-                }
-
+                // 4. go very slowly towards the balls
+                DRIVE_SPEED = 0.2;
+                intake.setPower(-1);
+                driveStraight(DRIVE_SPEED, 30, 0.0);
+                imu.resetYaw();
+                DRIVE_SPEED = 0.2;
+                driveStraight(DRIVE_SPEED, -30, 0.0);
+                imu.resetYaw();
+                turnToHeading(TURN_SPEED, 60);
+                holdHeading(TURN_SPEED, 60, .5);
+                distanceToTarget = getDistanceToTag(24);
+                resetRuntime();
             }
 
-            telemetry.update();
         }
+
+        telemetry.update();
+
 
 
 //        while (opModeIsActive()) {
@@ -457,10 +460,10 @@ public class autoTest extends LinearOpMode {
 ////        imu.resetYaw();
 //
 
-        telemetry.addData("Path", "Complete");
+        telemetry.addData("Path","Complete");
         telemetry.update();
-        //sleep(5000);  // Pause to display last telemetry message.
-    }
+    //sleep(5000);  // Pause to display last telemetry message.
+}
 
 
     private void initializeMotors() {
