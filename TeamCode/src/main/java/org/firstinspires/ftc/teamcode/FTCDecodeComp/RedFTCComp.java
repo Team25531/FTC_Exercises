@@ -202,7 +202,7 @@ public class RedFTCComp extends LinearOpMode {
             IDLE_VELOCITY = 0;
             idleVelocity = false;
         }
-        if (gamepad1.yWasPressed()) {
+        if (gamepad1.bWasPressed()) {
             IDLE_VELOCITY = 800;
         }
     }
