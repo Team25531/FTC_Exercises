@@ -262,7 +262,7 @@ public class autoTest extends LinearOpMode {
         shooterNeedsReset = false;
 
 
-        DRIVE_SPEED = 0.2;
+        DRIVE_SPEED = 0.3;
         if (isStopRequested()) return;
 
         driveStraight(DRIVE_SPEED, -50, 0.0);
@@ -280,48 +280,63 @@ public class autoTest extends LinearOpMode {
 
         if (distanceToTarget >= 50) {
 
-            frontLeftMotor.setPower(0);
-            frontRightMotor.setPower(0);
-            backRightMotor.setPower(0);
-            backLeftMotor.setPower(0);
 
 //                driveStraight(DRIVE_SPEED, 0, 0.0);
             intake.setPower(-1);
+            checkIfShooting();
             setGoalVelocity();
             runOuttakeMotor();
-            checkIfShooting();
+
             resetRuntime();
             double runtime = getRuntime();
-            while (runtime <= 4) {
+            while (runtime <= 6) {
+                runOuttakeMotor();
                 doShooting();
                 runtime = getRuntime();
                 telemetry.addData("Motor running", -0);
                 telemetry.update();
             }
-            if (shooterNeedsReset) {
-                imu.resetYaw();
-                distanceToTarget = getDistanceToTag(24);
-                turnToHeading(TURN_SPEED, -60);
-                holdHeading(TURN_SPEED, -60, .5);
 
-                // 4. go very slowly towards the balls
-                DRIVE_SPEED = 0.2;
-                intake.setPower(-1);
-                driveStraight(DRIVE_SPEED, 30, 0.0);
-                imu.resetYaw();
-                DRIVE_SPEED = 0.2;
-                driveStraight(DRIVE_SPEED, -30, 0.0);
-                imu.resetYaw();
-                turnToHeading(TURN_SPEED, 60);
-                holdHeading(TURN_SPEED, 60, .5);
-                distanceToTarget = getDistanceToTag(24);
-                resetRuntime();
+            storageWheel.setPower(0);
+            outtake.setPower(0);
+            isShooting = false;
+
+
+            imu.resetYaw();
+
+            turnToHeading(TURN_SPEED, -55);
+            holdHeading(TURN_SPEED, -55, .5);
+
+            // 4. go very slowly towards the balls
+            DRIVE_SPEED = 0.1
+            ;
+           // intake.setPower(-1);
+            imu.resetYaw();
+            driveStraight(DRIVE_SPEED, 45, 0.0);
+            imu.resetYaw();
+            DRIVE_SPEED = 0.3;
+            driveStraight(DRIVE_SPEED, -40, 0.0);
+            imu.resetYaw();
+            turnToHeading(TURN_SPEED, 55);
+            holdHeading(TURN_SPEED, 55, .5);
+            distanceToTarget = getDistanceToTag(24);
+            resetRuntime();
+            checkIfShooting();
+            setGoalVelocity();
+            resetRuntime();
+            runtime = getRuntime();
+            while (runtime <= 10) {
+                runOuttakeMotor();
+                doShooting();
+                runtime = getRuntime();
+                telemetry.addData("Motor running", -0);
+                telemetry.update();
             }
+
 
         }
 
         telemetry.update();
-
 
 
 //        while (opModeIsActive()) {
@@ -460,10 +475,10 @@ public class autoTest extends LinearOpMode {
 ////        imu.resetYaw();
 //
 
-        telemetry.addData("Path","Complete");
+        telemetry.addData("Path", "Complete");
         telemetry.update();
-    //sleep(5000);  // Pause to display last telemetry message.
-}
+        //sleep(5000);  // Pause to display last telemetry message.
+    }
 
 
     private void initializeMotors() {
@@ -756,7 +771,7 @@ public class autoTest extends LinearOpMode {
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)));
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget))+25);
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
