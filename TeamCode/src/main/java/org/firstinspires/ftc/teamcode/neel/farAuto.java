@@ -220,7 +220,7 @@ public class farAuto extends LinearOpMode {
         // gyro = hardwareMap.get(IntegratingGyroscope.class, "navx");
 
         // The gyro automatically starts calibrating. This takes a few seconds.
-        telemetry.log().add("Gyro Calibrating. Do Not Move!");
+        telemetry.log().add("Gyro/Camera Calibrating...");
 
         //todo: this initializes the navx.
 //        // Wait until the gyro calibration is complete
@@ -232,39 +232,31 @@ public class farAuto extends LinearOpMode {
 //        }
         imu.resetYaw();
 
-        telemetry.log().clear();
-        telemetry.log().add("Gyro Calibrated. Press Start.");
-        telemetry.clear();
-        telemetry.update();
-
-        // Wait for the game to start (Display Gyro value while waiting)
-        while (opModeInInit()) {
-            // AngularVelocity rates = gyro.getAngularVelocity(AngleUnit.DEGREES);
-            //  Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
-
-            telemetry.addData(">", "Imu int = %4.1f", getHeading());
-//                    .addData(">", "Imu fa = %4.1f", angles.firstAngle)
-//                    .addData("Imu ext = ", formatAngle(angles.angleUnit, angles.firstAngle));
-            int ticks = frontLeftMotor.getCurrentPosition(); //todo: this only reads a single wheel.
-            telemetry.addData("> ticks", ticks);
+        //give the camera time to initialize
+        while ( getDistanceToTag(24) == 0) {
+            telemetry.addData("dist...", 0);
             telemetry.update();
+            sleep(100);
         }
 
-        // Set the encoders for closed loop speed control, and reset the heading.
+        telemetry.log().clear();
+        telemetry.addLine("Calibrated. Press Start to run Autonomous.");
+        telemetry.update();
 
-
-        // Step through each leg of the path,
+        waitForStart();
+        telemetry.log().clear();
+        telemetry.addLine("Auto running...");
+        telemetry.update();
         // Notes:   Reverse movement is obtained by setting a negative distance (not speed)
         //          holdHeading() is used after turns to let the heading stabilize
         //          Add a sleep(2000) after any step to keep the telemetry data visible for review
+
         //backing away from goal
         imu.resetYaw();
         shooterNeedsReset = false;
 
-
         DRIVE_SPEED = 0.3;
-        if (isStopRequested()) return;
-
+        distanceToTarget = getDistanceToTag(24);
         intake.setPower(-1);
         checkIfShooting();
         setGoalVelocity();
@@ -273,41 +265,44 @@ public class farAuto extends LinearOpMode {
         resetRuntime();
         double runtime = getRuntime();
         while (runtime <= 6) {
+            if (!opModeIsActive() || isStopRequested()) return;
+
             runOuttakeMotor();
             doShooting();
             runtime = getRuntime();
-            telemetry.addData("Motor running", -0);
+            telemetry.addData("First loop", runtime);
             telemetry.update();
         }
         storageWheel.setPower(0);
         setGoalVelocity();
-        driveStraight(DRIVE_SPEED,35,0);
+        //ALWAYS DO AN IMU RESET BEFORE DRIVING STRAIGHT
+        imu.resetYaw();
+        driveStraight(DRIVE_SPEED, 35, 0);
 
         imu.resetYaw();
-        turnToHeading(TURN_SPEED,-30);
-        holdHeading(TURN_SPEED,-30,0.5);
+        turnToHeading(TURN_SPEED, -30);
+        holdHeading(TURN_SPEED, -30, 0.5);
         distanceToTarget = getDistanceToTag(24);
-        DRIVE_SPEED =0.1;
+        DRIVE_SPEED = 0.1;
         driveStraight(DRIVE_SPEED, 45, 0.0);
         imu.resetYaw();
         DRIVE_SPEED = 0.3;
-        driveStraight(DRIVE_SPEED, -45,0.5);
+        driveStraight(DRIVE_SPEED, -45, 0.5);
         imu.resetYaw();
         turnToHeading(TURN_SPEED, 30);
-        holdHeading(TURN_SPEED,30,0.5);
+        holdHeading(TURN_SPEED, 30, 0.5);
         imu.resetYaw();
-        driveStraight(DRIVE_SPEED, -15,0);
+        driveStraight(DRIVE_SPEED, -15, 0);
         resetRuntime();
-        while(runtime<6) {
+        while (runtime < 6) {
+            if (!opModeIsActive() || isStopRequested()) return;
             intake.setPower(-1);
             checkIfShooting();
             setGoalVelocity();
             runOuttakeMotor();
             runtime = getRuntime();
         }
-        driveStraight(DRIVE_SPEED,15,0);
-
-
+        driveStraight(DRIVE_SPEED, 15, 0);
 
 
 //
@@ -721,9 +716,8 @@ public class farAuto extends LinearOpMode {
             storageTimer.reset();
             storageWheel.setPower(-1);
             //todo: determine correct duration for this timer.
-            while (opModeIsActive() & storageTimer.milliseconds() < 4000 && !shooterNeedsReset) {
-                sleep(1);
-                //todo: delete this telemetry.
+            while (opModeIsActive() && storageTimer.milliseconds() < 4000 && !shooterNeedsReset) {
+//                sleep(1);
                 runOuttakeMotor();
                 telemetry.addData("velocity", goalVelocity);
                 telemetry.addData("curPower", currentPower);
@@ -731,15 +725,13 @@ public class farAuto extends LinearOpMode {
             }
             shooterNeedsReset = true;
         }
-        telemetry.addData("shooterNeedsReset", shooterNeedsReset);
+//        telemetry.addData("shooterNeedsReset", shooterNeedsReset);
     }
 
     private void checkIfShooting() {
         //to shoot, hold down the left_trigger.
 
         isShooting = true;
-
-
     }
 
 
@@ -748,8 +740,8 @@ public class farAuto extends LinearOpMode {
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget))+25);
-            telemetry.addData("tempVelocity", tempVelocity);
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)) + 25);
+//            telemetry.addData("tempVelocity", tempVelocity);
         }
 
         if (isShooting && !shooterNeedsReset) {
@@ -757,15 +749,11 @@ public class farAuto extends LinearOpMode {
         }
 
 
-        telemetry.addData("goalVelocity", goalVelocity);
+//        telemetry.addData("goalVelocity", goalVelocity);
     }
 
-
-    //DATA POINTS //61 1018 //79 1200//65 1080//60 1040//68 1110// 70 1150// 125 1350
-    //NEW DATA ///
-
-
     private void runOuttakeMotor() {
+
         currentVelocity = outtake.getVelocity();
         currentPower = outtake.getPower();
         telemetry.addData("curVelocity", currentVelocity);
@@ -773,6 +761,8 @@ public class farAuto extends LinearOpMode {
 
         double minRange = goalVelocity - (goalVelocity * range);
         double maxRange = goalVelocity + (goalVelocity * range);
+        telemetry.addData("minRange", minRange);
+        telemetry.addData("maxRange", maxRange);
 
         if (currentVelocity < minRange) {
             currentPower = currentPower + 0.001;
@@ -780,7 +770,7 @@ public class farAuto extends LinearOpMode {
         if (currentVelocity > maxRange) {
             currentPower = currentPower - 0.001;
         }
-        isAtGoalVelocity = (currentVelocity < maxRange && currentVelocity > minRange);
+        isAtGoalVelocity = (currentVelocity <= maxRange && currentVelocity >= minRange);
         telemetry.addData("isAtGoalVelocity", isAtGoalVelocity);
         if (isAtGoalVelocity) {
             return;
