@@ -290,6 +290,8 @@ public class autoTest extends LinearOpMode {
             resetRuntime();
             double runtime = getRuntime();
             while (runtime <= 6) {
+                if (isStopRequested() || !opModeIsActive()) return;
+
                 runOuttakeMotor();
                 doShooting();
                 runtime = getRuntime();
@@ -310,7 +312,7 @@ public class autoTest extends LinearOpMode {
             // 4. go very slowly towards the balls
             DRIVE_SPEED = 0.1
             ;
-           // intake.setPower(-1);
+            // intake.setPower(-1);
             imu.resetYaw();
             driveStraight(DRIVE_SPEED, 45, 0.0);
             imu.resetYaw();
@@ -326,6 +328,8 @@ public class autoTest extends LinearOpMode {
             resetRuntime();
             runtime = getRuntime();
             while (runtime <= 10) {
+                if (isStopRequested() || !opModeIsActive()) return;
+
                 runOuttakeMotor();
                 doShooting();
                 runtime = getRuntime();
@@ -744,7 +748,7 @@ public class autoTest extends LinearOpMode {
             storageTimer.reset();
             storageWheel.setPower(-1);
             //todo: determine correct duration for this timer.
-            while (opModeIsActive() & storageTimer.milliseconds() < 4000 && !shooterNeedsReset) {
+            while (opModeIsActive() && !isStopRequested() && storageTimer.milliseconds() < 4000 && !shooterNeedsReset) {
                 sleep(1);
                 //todo: delete this telemetry.
                 runOuttakeMotor();
@@ -771,7 +775,7 @@ public class autoTest extends LinearOpMode {
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget))+25);
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)) + 25);
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
