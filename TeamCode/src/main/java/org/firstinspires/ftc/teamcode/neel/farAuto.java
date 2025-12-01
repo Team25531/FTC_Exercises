@@ -106,7 +106,7 @@ import java.util.List;
  *  Remove or comment out the @Disabled line to add this OpMode to the Driver Station OpMode list
  */
 
-@Autonomous(name = "far auto", group = "Trying")
+@Autonomous(name = "farAuto", group = "Trying")
 //@Disabled
 public class farAuto extends LinearOpMode {
 
@@ -265,53 +265,79 @@ public class farAuto extends LinearOpMode {
         DRIVE_SPEED = 0.3;
         if (isStopRequested()) return;
 
-        intake.setPower(-1);
-        checkIfShooting();
-        setGoalVelocity();
-        runOuttakeMotor();
+//        driveStraight(DRIVE_SPEED, -50, 0.0);
+//        distanceToTarget = getDistanceToTag(24);
+//        if (distanceToTarget < 50) {
+//            int awayFromTarget = (int) (50 - distanceToTarget);
+//            driveStraight(DRIVE_SPEED, -awayFromTarget, 0);
+//
+//        }
+//        setGoalVelocity();
 
-        resetRuntime();
-        double runtime = getRuntime();
-        while (runtime <= 6) {
-            runOuttakeMotor();
-            doShooting();
-            runtime = getRuntime();
-            telemetry.addData("Motor running", -0);
-            telemetry.update();
-        }
-        storageWheel.setPower(0);
-        setGoalVelocity();
-        driveStraight(DRIVE_SPEED,35,0);
 
-        imu.resetYaw();
-        turnToHeading(TURN_SPEED,-30);
-        holdHeading(TURN_SPEED,-30,0.5);
         distanceToTarget = getDistanceToTag(24);
-        DRIVE_SPEED =0.1;
-        driveStraight(DRIVE_SPEED, 45, 0.0);
-        imu.resetYaw();
-        DRIVE_SPEED = 0.3;
-        driveStraight(DRIVE_SPEED, -45,0.5);
-        imu.resetYaw();
-        turnToHeading(TURN_SPEED, 30);
-        holdHeading(TURN_SPEED,30,0.5);
-        imu.resetYaw();
-        driveStraight(DRIVE_SPEED, -15,0);
-        resetRuntime();
-        while(runtime<6) {
+        shooterNeedsReset = false;
+
+        if (distanceToTarget >= 50) {
+
+
+//                driveStraight(DRIVE_SPEED, 0, 0.0);
             intake.setPower(-1);
             checkIfShooting();
             setGoalVelocity();
             runOuttakeMotor();
+
+            resetRuntime();
+            double runtime = getRuntime();
+            while (runtime <= 6) {
+                runOuttakeMotor();
+                doShooting();
+                runtime = getRuntime();
+                telemetry.addData("Motor running", -0);
+                if (isStopRequested() || !opModeIsActive()) return;
+
+                telemetry.update();
+            }
+
+            storageWheel.setPower(0);
+            outtake.setPower(0);
+            isShooting = false;
+
+
+            imu.resetYaw();
+
+            turnToHeading(TURN_SPEED, -55);
+            holdHeading(TURN_SPEED, -55, .5);
+
+            // 4. go very slowly towards the balls
+            DRIVE_SPEED = 0.1
+            ;
+            // intake.setPower(-1);
+            imu.resetYaw();
+            driveStraight(DRIVE_SPEED, 45, 0.0);
+            imu.resetYaw();
+            DRIVE_SPEED = 0.3;
+            driveStraight(DRIVE_SPEED, -40, 0.0);
+            imu.resetYaw();
+            turnToHeading(TURN_SPEED, 55);
+            holdHeading(TURN_SPEED, 55, .5);
+            distanceToTarget = getDistanceToTag(24);
+            resetRuntime();
+            checkIfShooting();
+            setGoalVelocity();
+            resetRuntime();
             runtime = getRuntime();
+            while (runtime <= 10) {
+                runOuttakeMotor();
+                doShooting();
+                runtime = getRuntime();
+                telemetry.addData("Motor running", -0);
+                if (isStopRequested()||!opModeIsActive()) return;
+                telemetry.update();
+            }
+
+
         }
-        driveStraight(DRIVE_SPEED,15,0);
-
-
-
-
-//
-
 
         telemetry.update();
 
@@ -721,7 +747,7 @@ public class farAuto extends LinearOpMode {
             storageTimer.reset();
             storageWheel.setPower(-1);
             //todo: determine correct duration for this timer.
-            while (opModeIsActive() & storageTimer.milliseconds() < 4000 && !shooterNeedsReset) {
+            while (opModeIsActive() && !isStopRequested() & storageTimer.milliseconds() < 4000 && !shooterNeedsReset) {
                 sleep(1);
                 //todo: delete this telemetry.
                 runOuttakeMotor();
