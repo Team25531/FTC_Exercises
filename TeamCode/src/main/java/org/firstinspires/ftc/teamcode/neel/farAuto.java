@@ -278,66 +278,68 @@ public class farAuto extends LinearOpMode {
         distanceToTarget = getDistanceToTag(24);
         shooterNeedsReset = false;
 
-        if (distanceToTarget >= 50) {
-
 
 //                driveStraight(DRIVE_SPEED, 0, 0.0);
-            intake.setPower(-1);
-            checkIfShooting();
-            setGoalVelocity();
+        intake.setPower(-1);
+        checkIfShooting();
+        setGoalVelocity();
+        runOuttakeMotor();
+
+        resetRuntime();
+        double runtime = getRuntime();
+        while (runtime <= 6) {
             runOuttakeMotor();
-
-            resetRuntime();
-            double runtime = getRuntime();
-            while (runtime <= 6) {
-                runOuttakeMotor();
-                doShooting();
-                runtime = getRuntime();
-                telemetry.addData("Motor running", -0);
-                if (isStopRequested() || !opModeIsActive()) return;
-
-                telemetry.update();
-            }
-
-            storageWheel.setPower(0);
-            outtake.setPower(0);
-            isShooting = false;
-
-
-            imu.resetYaw();
-
-            turnToHeading(TURN_SPEED, -55);
-            holdHeading(TURN_SPEED, -55, .5);
-
-            // 4. go very slowly towards the balls
-            DRIVE_SPEED = 0.1
-            ;
-            // intake.setPower(-1);
-            imu.resetYaw();
-            driveStraight(DRIVE_SPEED, 45, 0.0);
-            imu.resetYaw();
-            DRIVE_SPEED = 0.3;
-            driveStraight(DRIVE_SPEED, -40, 0.0);
-            imu.resetYaw();
-            turnToHeading(TURN_SPEED, 55);
-            holdHeading(TURN_SPEED, 55, .5);
-            distanceToTarget = getDistanceToTag(24);
-            resetRuntime();
-            checkIfShooting();
-            setGoalVelocity();
-            resetRuntime();
+            doShooting();
             runtime = getRuntime();
-            while (runtime <= 10) {
-                runOuttakeMotor();
-                doShooting();
-                runtime = getRuntime();
-                telemetry.addData("Motor running", -0);
-                if (isStopRequested()||!opModeIsActive()) return;
-                telemetry.update();
-            }
+            telemetry.addData("Motor running", -0);
+            if (isStopRequested() || !opModeIsActive()) return;
 
-
+            telemetry.update();
         }
+
+        storageWheel.setPower(0);
+        outtake.setPower(0);
+        isShooting = false;
+        imu.resetYaw();
+        driveStraight(DRIVE_SPEED, 30, 0.0);
+
+
+        imu.resetYaw();
+
+        turnToHeading(TURN_SPEED, -30);
+        holdHeading(TURN_SPEED, -30, .5);
+
+        // 4. go very slowly towards the balls
+        DRIVE_SPEED = 0.1
+        ;
+        // intake.setPower(-1);
+        imu.resetYaw();
+        driveStraight(DRIVE_SPEED, 30, 0.0);
+        imu.resetYaw();
+        DRIVE_SPEED = 0.3;
+        driveStraight(DRIVE_SPEED, -30, 0.0);
+        imu.resetYaw();
+        turnToHeading(TURN_SPEED, 30);
+        holdHeading(TURN_SPEED, 30, .5);
+        distanceToTarget = getDistanceToTag(24);
+        imu.resetYaw();
+        driveStraight(DRIVE_SPEED, -15, 0);
+        imu.resetYaw();
+        resetRuntime();
+        checkIfShooting();
+        setGoalVelocity();
+        resetRuntime();
+        runtime = getRuntime();
+        while (runtime <= 10) {
+            runOuttakeMotor();
+            doShooting();
+            runtime = getRuntime();
+            telemetry.addData("Motor running", -0);
+            if (isStopRequested() || !opModeIsActive()) return;
+            telemetry.update();
+        }
+        driveStraight(DRIVE_SPEED, 15, 0);
+
 
         telemetry.update();
 
@@ -774,7 +776,7 @@ public class farAuto extends LinearOpMode {
         int tempVelocity = goalVelocity;
         if (distanceToTarget > 40 && distanceToTarget < 140) {
             telemetry.addData("in loop", 0);
-            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget))+25);
+            tempVelocity = (int) (693.198761 + 1191.999926 * (1.0 - Math.exp(-0.007992 * distanceToTarget)) + 25);
             telemetry.addData("tempVelocity", tempVelocity);
         }
 

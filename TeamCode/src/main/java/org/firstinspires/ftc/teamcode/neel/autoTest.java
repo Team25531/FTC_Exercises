@@ -262,7 +262,7 @@ public class autoTest extends LinearOpMode {
         shooterNeedsReset = false;
 
 
-        DRIVE_SPEED = 0.3;
+        DRIVE_SPEED = 0.5;
         if (isStopRequested()) return;
 
         driveStraight(DRIVE_SPEED, -50, 0.0);
@@ -316,7 +316,7 @@ public class autoTest extends LinearOpMode {
             imu.resetYaw();
             driveStraight(DRIVE_SPEED, 45, 0.0);
             imu.resetYaw();
-            DRIVE_SPEED = 0.3;
+            DRIVE_SPEED = 0.5;
             driveStraight(DRIVE_SPEED, -40, 0.0);
             imu.resetYaw();
             turnToHeading(TURN_SPEED, 55);

@@ -38,8 +38,7 @@ public class flipperTest extends LinearOpMode {
     private CRServo intake2;
 
     private CRServo intake;
-
-    private Servo flipper;
+    private CRServo intake3;
 
     private VoltageSensor myControlHubVoltageSensor;
 
@@ -80,10 +79,10 @@ public class flipperTest extends LinearOpMode {
 
 
 
-
+            intake3Movement();
 
             intake2Movement();
-            flip();
+//            flip();
             controlIntake();
 
 
@@ -104,14 +103,7 @@ public class flipperTest extends LinearOpMode {
     //NEW DATA ///
 
 
-    private void flip(){
-        if(gamepad1.yWasPressed()){
-            flipper.setPosition(1);
-        }
-        if(gamepad1.aWasPressed()){
-            flipper.setPosition(0.5);
-        }
-    }
+
     private void controlIntake() {
         //Bring artifacts into the bot queue
         if (gamepad1.dpad_down) {
@@ -139,15 +131,23 @@ public class flipperTest extends LinearOpMode {
             intake2.setPower(1);
         }
     }
+    private void intake3Movement(){
+        if(gamepad1.bWasPressed()){
+            intake3.setPower(-1);
+        }
+        if(gamepad1.yWasPressed()){
+            intake3.setPower(1);
+        }
+    }
 
 
 
     private void initializeMotors() {
 
         intake = hardwareMap.crservo.get("intake");
+        intake3 = hardwareMap.crservo.get("intake3");
 
-
-        flipper = hardwareMap.servo.get("flipper");
+;
         intake2 = hardwareMap.crservo.get("intake2");
         myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
         //TODO: fix this to pull the correct object.
