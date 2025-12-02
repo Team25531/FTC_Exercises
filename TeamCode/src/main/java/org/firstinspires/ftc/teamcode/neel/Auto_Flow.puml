@@ -2,6 +2,7 @@
 'https://plantuml.com/state-diagram
 
 scale 300 width
+
 [*] --> AlignRobot
 AlignRobot --> IntializeMotor
 IntializeMotor --> PressPlay
