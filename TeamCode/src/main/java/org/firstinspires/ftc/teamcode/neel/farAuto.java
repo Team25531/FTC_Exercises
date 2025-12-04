@@ -255,7 +255,7 @@ public class farAuto extends LinearOpMode {
         imu.resetYaw();
         shooterNeedsReset = false;
 
-        DRIVE_SPEED = 0.3;
+        DRIVE_SPEED = 0.5;
         distanceToTarget = getDistanceToTag(24);
         intake.setPower(-1);
         checkIfShooting();
@@ -264,7 +264,7 @@ public class farAuto extends LinearOpMode {
 
         resetRuntime();
         double runtime = getRuntime();
-        while (runtime <= 6) {
+        while (runtime <= 8) {
             if (!opModeIsActive() || isStopRequested()) return;
 
             runOuttakeMotor();
@@ -277,32 +277,41 @@ public class farAuto extends LinearOpMode {
         setGoalVelocity();
         //ALWAYS DO AN IMU RESET BEFORE DRIVING STRAIGHT
         imu.resetYaw();
-        driveStraight(DRIVE_SPEED, 35, 0);
+        driveStraight(DRIVE_SPEED, 25, 0);
 
         imu.resetYaw();
-        turnToHeading(TURN_SPEED, -30);
-        holdHeading(TURN_SPEED, -30, 0.5);
+        turnToHeading(TURN_SPEED, -65);
+        holdHeading(TURN_SPEED, -65, 0.5);
         distanceToTarget = getDistanceToTag(24);
         DRIVE_SPEED = 0.1;
-        driveStraight(DRIVE_SPEED, 45, 0.0);
         imu.resetYaw();
-        DRIVE_SPEED = 0.3;
-        driveStraight(DRIVE_SPEED, -45, 0.5);
+        driveStraight(DRIVE_SPEED, 23, 0.0);
         imu.resetYaw();
-        turnToHeading(TURN_SPEED, 30);
-        holdHeading(TURN_SPEED, 30, 0.5);
+        DRIVE_SPEED = 0.5;
+        driveStraight(DRIVE_SPEED, -23, 0.5);
         imu.resetYaw();
-        driveStraight(DRIVE_SPEED, -15, 0);
+        turnToHeading(TURN_SPEED, 65);
+        holdHeading(TURN_SPEED, 65, 0.5);
+        imu.resetYaw();
+        driveStraight(DRIVE_SPEED, -18, 0);
+        intake.setPower(-1);
+        checkIfShooting();
+        setGoalVelocity();
+        runOuttakeMotor();
+        setGoalVelocity();
         resetRuntime();
-        while (runtime < 6) {
+        setGoalVelocity();
+        runtime = getRuntime();
+        while (runtime <= 8) {
             if (!opModeIsActive() || isStopRequested()) return;
-            intake.setPower(-1);
-            checkIfShooting();
-            setGoalVelocity();
+
             runOuttakeMotor();
+            doShooting();
             runtime = getRuntime();
+            telemetry.addData("First loop", runtime);
+            telemetry.update();
         }
-        driveStraight(DRIVE_SPEED, 15, 0);
+        driveStraight(DRIVE_SPEED, 18, 0);
 
 
 //
