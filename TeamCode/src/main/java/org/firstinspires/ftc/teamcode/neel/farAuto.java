@@ -289,6 +289,19 @@ public class farAuto extends LinearOpMode {
             doShooting();
             runtime = getRuntime();
             telemetry.addData("First loop", runtime);
+
+            packet.put("getVelocity", outtake.getVelocity());
+            packet.put("Goal Velocity", goalVelocity);
+
+
+
+            packet.put("isShooting", isShooting ? goalVelocity + 125 : 0);
+            packet.put("isAtGoalVelocity", isAtGoalVelocity ? goalVelocity + 150 : 0);
+            packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
+            //Pid Original" 10,3,0 Modified :2.5,0.1,0.2
+
+
+            dashboard.sendTelemetryPacket(packet);
             telemetry.update();
         }
         storageWheel.setPower(0);
