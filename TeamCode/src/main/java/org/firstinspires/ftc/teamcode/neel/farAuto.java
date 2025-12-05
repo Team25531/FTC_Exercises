@@ -31,6 +31,8 @@ package org.firstinspires.ftc.teamcode.neel;
 
 import android.util.Size;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.qualcomm.hardware.kauailabs.NavxMicroNavigationSensor;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -47,6 +49,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
@@ -192,10 +195,25 @@ public class farAuto extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-
+        FtcDashboard dashboard = FtcDashboard.getInstance();
         initializeMotors();
         initializeTagProcessor();
 
+        TelemetryPacket packet = new TelemetryPacket();
+
+
+        packet.put("getVelocity", outtake.getVelocity());
+        packet.put("Goal Velocity", goalVelocity);
+
+
+
+        packet.put("isShooting", isShooting ? goalVelocity + 125 : 0);
+        packet.put("isAtGoalVelocity", isAtGoalVelocity ? goalVelocity + 150 : 0);
+        packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
+        //Pid Original" 10,3,0 Modified :2.5,0.1,0.2
+
+
+        dashboard.sendTelemetryPacket(packet);
         /* The next two lines define Hub orientation.
          * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
          *
