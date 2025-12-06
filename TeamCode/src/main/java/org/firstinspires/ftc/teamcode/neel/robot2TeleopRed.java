@@ -1,0 +1,409 @@
+package org.firstinspires.ftc.teamcode.neel;
+
+import android.util.Size;
+
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
+import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.VoltageSensor;
+import com.qualcomm.robotcore.util.ElapsedTime;
+
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.vision.VisionPortal;
+import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
+import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
+
+import java.util.List;
+
+@Config
+@TeleOp(name = "robot2Teleop2", group = "Robot2")
+public class robot2TeleopRed extends LinearOpMode {
+
+    public static double NEW_P = 7.0;
+    public static double NEW_I = 0.0;
+    public static double NEW_D = 0.0;
+    public static double NEW_F = 15.0;
+    private ElapsedTime storageTimer = new ElapsedTime();
+    private ElapsedTime outtakeInRangeTimer = new ElapsedTime();
+    private DcMotor frontLeftMotor;
+    private DcMotor backLeftMotor;
+    private DcMotor frontRightMotor;
+    private DcMotor backRightMotor;
+    private DcMotorEx outtake;
+    private CRServo intake;
+
+    private CRServo intake2;
+    private Servo flipper;
+    private CRServo storageWheel;
+
+    private VoltageSensor myControlHubVoltageSensor;
+    private AprilTagProcessor aprilTag;
+    public static final String WEBCAM_NAME = "Webcam 1";
+    public static final int TARGET_TAG_ID = 24;
+    public static int IDLE_VELOCITY = 800;
+    private VisionPortal visionPortal;
+    int goalVelocity = 0;
+    double range = 0.02;
+    double minRange = 0;
+    double maxRange = 0;
+
+    double distanceToTarget = 0;
+    double angleToTarget = 0;
+    double currentVelocity = 0;
+    double currentPower = 0;
+    boolean isIdleEnabled = false;
+
+
+    //boolean useOuttake = true;
+    boolean isShooting = false;
+    boolean isAutoAimEnabled = true;
+    boolean isAtGoalVelocity = false;
+    boolean shooterNeedsReset = false;
+    boolean isAimedAtTarget = false;
+    boolean isFeeding = false;
+    boolean wasOuttakeInRangeBefore = false;
+
+    boolean idleVelocity = true;
+
+    @Override
+    public void runOpMode() throws InterruptedException {
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        initializeMotors();
+        initializeTagProcessor();
+
+        waitForStart();
+
+
+        while (opModeIsActive()) {
+            if (isStopRequested()) return;
+            telemetry.addData("frontRight", frontRightMotor.getCurrentPosition());
+
+            telemetry.addData("backLeft", backLeftMotor.getCurrentPosition());
+
+            telemetry.addData("backRight", backRightMotor.getCurrentPosition());
+
+
+            telemetry.addData("frontLeft", frontLeftMotor.getCurrentPosition());
+
+            checkIfShooting();
+            double ve;
+
+            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
+            telemetry.addData("current velocity", ve);
+
+            doDriving();
+
+            TelemetryPacket packet = new TelemetryPacket();
+
+            packet.put("robotVoltage", myControlHubVoltageSensor.getVoltage());
+            packet.put("getVelocity", outtake.getVelocity());
+            packet.put("Goal Velocity", goalVelocity);
+            packet.put("min", minRange);
+            packet.put("p", NEW_P);
+            packet.put("f", NEW_F);
+            packet.put("max", maxRange);
+            packet.put("isFeeding", isFeeding ? goalVelocity + 100 : 0);
+            packet.put("isShooting", isShooting ? goalVelocity + 125 : 0);
+            packet.put("isAtGoalVelocity", isAtGoalVelocity ? goalVelocity + 150 : 0);
+            packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
+            //Pid Original" 10,3,0 Modified :2.5,0.1,0.2
+
+
+            dashboard.sendTelemetryPacket(packet);
+
+            reverse();
+            autoAimOnOff();
+            controlIntake();
+            checkToResetState();
+
+            setGoalVelocity();
+            checkFeeding();
+            runOuttakeMotor();
+            doShooting();
+            idleStateSet();
+
+            telemetry.update();
+        }
+    }
+
+    private void doShooting() {
+        if (!isShooting) return;
+        //if we're using auto aim and it isn't yet at the target then let steering keep going.
+        if (isAutoAimEnabled && !isAimedAtTarget) return;
+
+        //if we are at goal, and not already feeding, then start feeding.
+        if (isAtGoalVelocity && !shooterNeedsReset && !isFeeding) {
+            storageTimer.reset();
+            storageWheel.setPower(-1);
+            resetRuntime();
+            flipper.setPosition(0.8);
+
+            isFeeding = true;
+        }
+    }
+
+    private void checkFeeding() {
+        // Stop feeding if the timer is up OR if the driver releases the trigger.
+        if (isFeeding && (storageTimer.milliseconds() > 1000 || !isShooting)) {
+            isFeeding = false;
+            // shooterNeedsReset = true;
+            storageWheel.setPower(0);
+            flipper.setPosition(0.5);
+
+        }
+    }
+
+
+    private void setGoalVelocity() {
+        //only compute velocity if we're actually shooting.
+        int tempVelocity = goalVelocity;
+        if (distanceToTarget > 40 && distanceToTarget < 140) {
+            telemetry.addData("in loop", 0);
+
+
+            tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) + 147);
+            telemetry.addData("tempVelocity", tempVelocity);
+        }
+
+        if (isShooting && !shooterNeedsReset) {
+            goalVelocity = tempVelocity;
+
+        } else {
+            goalVelocity = IDLE_VELOCITY;
+            storageWheel.setPower(0);
+            telemetry.addData("isShooting", isShooting);
+            telemetry.addData("shooterNEedsReset", shooterNeedsReset);
+            telemetry.update();
+        }
+
+
+        telemetry.addData("goalVelocity", goalVelocity);
+    }
+//NEW DATA POINTS 52 1050 58
+
+
+    //DATA POINTS //61 1018 //79 1200//65 1080//60 1040//68 1110// 70 1150// 125 1350
+    //NEW DATA ///
+    private void checkToResetState() {
+        //Try to stop anything that isn't responding to other commands.
+        if (gamepad1.right_bumper) {
+            goalVelocity = 0;//but Idle is going to get reset after this.
+            outtake.setPower(0);
+            intake.setPower(0);
+            storageWheel.setPower(0);
+        }
+    }
+
+    private void idleStateSet() {
+        if (gamepad1.leftBumperWasPressed()) {
+            IDLE_VELOCITY = 0;
+            idleVelocity = false;
+        }
+        if (gamepad1.bWasPressed()) {
+            IDLE_VELOCITY = 800;
+        }
+    }
+
+    private void controlIntake() {
+        //Bring artifacts into the bot queue
+        if (gamepad1.dpad_down) {
+            intake.setPower(-1);
+            intake2.setPower(-1);
+        }
+        //Push artifacts out of the bot queue
+        if (gamepad1.dpad_up) {
+            intake.setPower(1);
+            intake2.setPower(1);
+        }
+        //Stop intake with any other dpad or x.
+        if (gamepad1.x || gamepad1.dpad_left || gamepad1.dpad_right) {
+            intake.setPower(0);
+            intake2.setPower(0);
+        }
+    }
+
+    private void autoAimOnOff() {
+        //toggle autoAim on off if something is wonky.
+        if (gamepad1.yWasPressed()) {
+            isAutoAimEnabled = !isAutoAimEnabled;
+        }
+        telemetry.addData("isAutoAimEnabled", isAutoAimEnabled);
+    }
+
+    private void checkIfShooting() {
+        //to shoot, hold down the left_trigger.
+        if (gamepad1.left_trigger > 0 && !shooterNeedsReset) {
+            isShooting = true;
+        } else if (gamepad1.left_trigger == 0) {
+            isShooting = false;
+            shooterNeedsReset = false;
+        }
+    }
+
+    private void runOuttakeMotor() {
+        currentVelocity = outtake.getVelocity();
+        telemetry.addData("curVelocity", currentVelocity);
+
+        // Use setVelocity to command the motor controller to achieve the target velocity.
+        // This is much faster and more stable than manually adjusting power.
+
+        minRange = goalVelocity - (goalVelocity * range);
+        maxRange = goalVelocity;// + (goalVelocity * range);
+
+        outtake.setVelocityPIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
+
+        isAtGoalVelocity = (currentVelocity <= maxRange) && (currentVelocity > minRange);
+        telemetry.addData("isAtGoalVelocity", isAtGoalVelocity);
+
+        if (isAtGoalVelocity) {
+            return;
+        }
+
+        outtake.setVelocity(goalVelocity);
+    }
+
+    private void reverse() {
+        if (gamepad1.aWasPressed()) {
+            storageWheel.setPower(-1);
+            outtake.setVelocity(-700);
+        }
+    }
+
+
+    private void doDriving() {
+        double y = -gamepad1.left_stick_y;
+        double x = gamepad1.left_stick_x * 1.1;
+        double rx = gamepad1.right_stick_x;
+
+        distanceToTarget = getDistanceToTag(TARGET_TAG_ID);
+
+        if (distanceToTarget > 100) {
+            angleToTarget = getAngleToTag(TARGET_TAG_ID) - 2;
+        } else {
+            angleToTarget = getAngleToTag(TARGET_TAG_ID);
+        }
+
+        telemetry.addData("dist  goal", distanceToTarget);
+        telemetry.addData("angle goal", angleToTarget);
+
+        //if shooting and the camera is working then override driver input
+        //and try to steer towards the target.
+        if (isShooting && isAutoAimEnabled && !shooterNeedsReset) {
+            isAimedAtTarget = !(angleToTarget < -1 || angleToTarget > 1);
+            if (!isAimedAtTarget) {
+                if (angleToTarget < -1) rx = 0.2;
+                if (angleToTarget > 1) rx = -0.2;
+            }
+            telemetry.addData("isAimedAtTarget", isAimedAtTarget);
+        }
+
+        double denominator = Math.max(Math.abs(y) + Math.abs(x) + Math.abs(rx), 1);
+        double frontLeftPower = (y + x + rx) / denominator;
+        double backLeftPower = (y - x + rx) / denominator;
+        double frontRightPower = (y - x - rx) / denominator;
+        double backRightPower = (y + x - rx) / denominator;
+
+        //todo: enable this.
+        frontLeftMotor.setPower(frontLeftPower);
+        backLeftMotor.setPower(backLeftPower);
+        frontRightMotor.setPower(frontRightPower);
+        backRightMotor.setPower(backRightPower);
+    }
+
+    private void initializeMotors() {
+        frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
+        backLeftMotor = hardwareMap.dcMotor.get("backLeft");
+        frontRightMotor = hardwareMap.dcMotor.get("frontRight");
+        backRightMotor = hardwareMap.dcMotor.get("backRight");
+        intake = hardwareMap.crservo.get("intake");
+        flipper = hardwareMap.servo.get("flipper");
+        intake2 = hardwareMap.crservo.get("intake2");
+        storageWheel = hardwareMap.crservo.get("storageWheel");
+        outtake = hardwareMap.get(DcMotorEx.class, "outtake");
+        myControlHubVoltageSensor = hardwareMap.get(VoltageSensor.class, "Control Hub");
+        //TODO: fix this to pull the correct object.
+        //outtake = hardwareMap.get(DcMotorEx.class, "frontLeft");
+
+        frontLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        backLeftMotor.setDirection(DcMotor.Direction.REVERSE);
+        frontRightMotor.setDirection(DcMotor.Direction.FORWARD);
+        backRightMotor.setDirection(DcMotor.Direction.FORWARD);
+
+        outtake.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        PIDFCoefficients pidfValues = outtake.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("Flywheel PIDF",
+                "P=%.6f I=%.6f D=%.6f F=%.6f",
+                pidfValues.p, pidfValues.i, pidfValues.d, pidfValues.f);
+
+        outtake.setVelocityPIDFCoefficients(NEW_P, NEW_I, NEW_D, NEW_F);
+
+        pidfValues = outtake.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
+        telemetry.addData("Flywheel PIDF",
+                "P=%.6f I=%.6f D=%.6f F=%.6f",
+                pidfValues.p, pidfValues.i, pidfValues.d, pidfValues.f);
+        telemetry.update();
+
+        frontLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backLeftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        frontRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        backRightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
+    private int getDistanceToTag(int tagID) {
+
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        int range = 0;
+
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.id == tagID) {
+                range = (int) detection.ftcPose.range;
+                break;
+            }
+        }
+        return range;
+    }
+
+    private int getAngleToTag(int tagID) {
+
+        List<AprilTagDetection> currentDetections = aprilTag.getDetections();
+        int angle = 0;
+
+        for (AprilTagDetection detection : currentDetections) {
+            if (detection.id == tagID) {
+                angle = (int) detection.ftcPose.bearing;
+                break;
+            }
+        }
+        return angle;
+    }
+
+    private void initializeTagProcessor() {
+
+        aprilTag = new AprilTagProcessor.Builder()
+                .setDrawTagOutline(true)
+                .setOutputUnits(DistanceUnit.INCH, AngleUnit.DEGREES)
+                .build();
+
+        VisionPortal.Builder builder = new VisionPortal.Builder();
+        builder.setCamera(hardwareMap.get(WebcamName.class, WEBCAM_NAME));
+
+        builder.setCameraResolution(new Size(640, 480));
+        builder.addProcessor(aprilTag);
+        visionPortal = builder.build();
+
+        visionPortal.setProcessorEnabled(aprilTag, true);
+    }
+
+}
