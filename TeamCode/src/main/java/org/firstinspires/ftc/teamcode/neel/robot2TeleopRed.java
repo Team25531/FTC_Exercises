@@ -10,6 +10,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -33,7 +34,7 @@ public class robot2TeleopRed extends LinearOpMode {
     public static double NEW_P = 7.0;
     public static double NEW_I = 0.0;
     public static double NEW_D = 0.0;
-    public static double NEW_F = 15.0;
+    public static double NEW_F = 16.0;
     private ElapsedTime storageTimer = new ElapsedTime();
     private ElapsedTime outtakeInRangeTimer = new ElapsedTime();
     private DcMotor frontLeftMotor;
@@ -42,6 +43,9 @@ public class robot2TeleopRed extends LinearOpMode {
     private DcMotor backRightMotor;
     private DcMotorEx outtake;
     private CRServo intake;
+
+    private DistanceSensor distanceSensor;
+
 
     private CRServo intake2;
     private Servo flipper;
@@ -58,6 +62,8 @@ public class robot2TeleopRed extends LinearOpMode {
     double minRange = 0;
     double maxRange = 0;
 
+    double neededDistance = 10;
+
     double distanceToTarget = 0;
     double angleToTarget = 0;
     double currentVelocity = 0;
@@ -67,6 +73,7 @@ public class robot2TeleopRed extends LinearOpMode {
 
     //boolean useOuttake = true;
     boolean isShooting = false;
+    boolean isLoading = false;
     boolean isAutoAimEnabled = true;
     boolean isAtGoalVelocity = false;
     boolean shooterNeedsReset = false;
@@ -81,7 +88,7 @@ public class robot2TeleopRed extends LinearOpMode {
         FtcDashboard dashboard = FtcDashboard.getInstance();
         initializeMotors();
         initializeTagProcessor();
-
+        distanceSensor.getDistance(DistanceUnit.CM);
         waitForStart();
 
 
@@ -92,6 +99,8 @@ public class robot2TeleopRed extends LinearOpMode {
             telemetry.addData("backLeft", backLeftMotor.getCurrentPosition());
 
             telemetry.addData("backRight", backRightMotor.getCurrentPosition());
+
+                telemetry.addData("Distance (cm)", "%.3f", ( distanceSensor).getDistance(DistanceUnit.CM));
 
 
             telemetry.addData("frontLeft", frontLeftMotor.getCurrentPosition());
@@ -108,9 +117,14 @@ public class robot2TeleopRed extends LinearOpMode {
 
             packet.put("robotVoltage", myControlHubVoltageSensor.getVoltage());
             packet.put("getVelocity", outtake.getVelocity());
+            packet.put("flipperPos", flipper.getPosition());
+            packet.put("distanceToBall",distanceSensor.getDistance(DistanceUnit.CM));
             packet.put("Goal Velocity", goalVelocity);
             packet.put("min", minRange);
             packet.put("p", NEW_P);
+            packet.put("DistanceToBackBall", DistanceToBackBall);
+
+            packet.put("DpadDownValue", gamepad1.dpad_up?1:0);
             packet.put("f", NEW_F);
             packet.put("max", maxRange);
             packet.put("isFeeding", isFeeding ? goalVelocity + 100 : 0);
@@ -126,10 +140,13 @@ public class robot2TeleopRed extends LinearOpMode {
             autoAimOnOff();
             controlIntake();
             checkToResetState();
-
+            if(gamepad1.bWasPressed()){
+                flipper.setPosition(0.8);
+            }
             setGoalVelocity();
             checkFeeding();
             runOuttakeMotor();
+            doLoading();
             doShooting();
             idleStateSet();
 
@@ -142,24 +159,35 @@ public class robot2TeleopRed extends LinearOpMode {
         //if we're using auto aim and it isn't yet at the target then let steering keep going.
         if (isAutoAimEnabled && !isAimedAtTarget) return;
 
+        if(isBallReady() == false){
+            flipper.setPosition(0.5);
+            return;
+        }
+
         //if we are at goal, and not already feeding, then start feeding.
-        if (isAtGoalVelocity && !shooterNeedsReset && !isFeeding) {
+        if (isAtGoalVelocity && !shooterNeedsReset && !isFeeding ) {
             storageTimer.reset();
-            storageWheel.setPower(-1);
-            resetRuntime();
-            flipper.setPosition(0.8);
+//            storageWheel.setPower(-1);
+
+                flipper.setPosition(0.8);
+                telemetry.addData("stuck in loop", flipper.getPosition());
+                telemetry.update();
+            
+
 
             isFeeding = true;
         }
     }
+
+
 
     private void checkFeeding() {
         // Stop feeding if the timer is up OR if the driver releases the trigger.
         if (isFeeding && (storageTimer.milliseconds() > 1000 || !isShooting)) {
             isFeeding = false;
             // shooterNeedsReset = true;
-            storageWheel.setPower(0);
-            flipper.setPosition(0.5);
+//            storageWheel.setPower(0);
+
 
         }
     }
@@ -172,7 +200,8 @@ public class robot2TeleopRed extends LinearOpMode {
             telemetry.addData("in loop", 0);
 
 
-            tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) + 147);
+            tempVelocity = 1400 ;
+//            (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) +147)
             telemetry.addData("tempVelocity", tempVelocity);
         }
 
@@ -181,7 +210,7 @@ public class robot2TeleopRed extends LinearOpMode {
 
         } else {
             goalVelocity = IDLE_VELOCITY;
-            storageWheel.setPower(0);
+//            storageWheel.setPower(0);
             telemetry.addData("isShooting", isShooting);
             telemetry.addData("shooterNEedsReset", shooterNeedsReset);
             telemetry.update();
@@ -214,22 +243,42 @@ public class robot2TeleopRed extends LinearOpMode {
             IDLE_VELOCITY = 800;
         }
     }
-
+double DistanceToBackBall =0;
     private void controlIntake() {
         //Bring artifacts into the bot queue
         if (gamepad1.dpad_down) {
             intake.setPower(-1);
             intake2.setPower(-1);
+            storageWheel.setPower(1);
+            isLoading = false;
+
+
+
+
         }
         //Push artifacts out of the bot queue
         if (gamepad1.dpad_up) {
-            intake.setPower(1);
-            intake2.setPower(1);
+            isLoading = true;
+
         }
         //Stop intake with any other dpad or x.
         if (gamepad1.x || gamepad1.dpad_left || gamepad1.dpad_right) {
             intake.setPower(0);
             intake2.setPower(0);
+            storageWheel.setPower(0);
+            isLoading = false;
+        }
+    }
+    private void doLoading(){
+        if(!isLoading) return;
+
+        intake.setPower(0.2);
+        intake2.setPower(0.2);
+        if(distanceSensor.getDistance(DistanceUnit.CM) <= neededDistance){
+            storageWheel.setPower(0);
+        }
+        else{
+            storageWheel.setPower(-1);
         }
     }
 
@@ -321,6 +370,15 @@ public class robot2TeleopRed extends LinearOpMode {
         backRightMotor.setPower(backRightPower);
     }
 
+    private boolean isBallReady(){
+
+        double distanceToBall = distanceSensor.getDistance(DistanceUnit.CM);
+        if(distanceToBall<=neededDistance){
+            return true;
+        }
+        return false;
+    }
+
     private void initializeMotors() {
         frontLeftMotor = hardwareMap.dcMotor.get("frontLeft");
         backLeftMotor = hardwareMap.dcMotor.get("backLeft");
@@ -328,6 +386,7 @@ public class robot2TeleopRed extends LinearOpMode {
         backRightMotor = hardwareMap.dcMotor.get("backRight");
         intake = hardwareMap.crservo.get("intake");
         flipper = hardwareMap.servo.get("flipper");
+        distanceSensor = hardwareMap.get(DistanceSensor.class, "distanceSensor");
         intake2 = hardwareMap.crservo.get("intake2");
         storageWheel = hardwareMap.crservo.get("storageWheel");
         outtake = hardwareMap.get(DcMotorEx.class, "outtake");
