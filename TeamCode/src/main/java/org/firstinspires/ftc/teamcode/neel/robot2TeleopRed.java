@@ -11,7 +11,6 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.VoltageSensor;
@@ -36,7 +35,7 @@ public class robot2TeleopRed extends LinearOpMode {
     public static double NEW_D = 0.0;
     public static double NEW_F = 16.0;
     private ElapsedTime storageTimer = new ElapsedTime();
-    private ElapsedTime outtakeInRangeTimer = new ElapsedTime();
+    private ElapsedTime intake2Timer = new ElapsedTime();
     private DcMotor frontLeftMotor;
     private DcMotor backLeftMotor;
     private DcMotor frontRightMotor;
@@ -62,16 +61,15 @@ public class robot2TeleopRed extends LinearOpMode {
     double minRange = 0;
     double maxRange = 0;
 
-    double neededDistance = 10;
+    double neededDistanceFromBall = 10;
 
     double distanceToTarget = 0;
     double angleToTarget = 0;
     double currentVelocity = 0;
     double currentPower = 0;
+    double DistanceToBackBall =0;
     boolean isIdleEnabled = false;
-
-
-    //boolean useOuttake = true;
+        //boolean useOuttake = true;
     boolean isShooting = false;
     boolean isLoading = false;
     boolean isAutoAimEnabled = true;
@@ -79,8 +77,8 @@ public class robot2TeleopRed extends LinearOpMode {
     boolean shooterNeedsReset = false;
     boolean isAimedAtTarget = false;
     boolean isFeeding = false;
-    boolean wasOuttakeInRangeBefore = false;
-
+    boolean isReadyToShoot = false;
+    boolean isInPositionToShoot = false;
     boolean idleVelocity = true;
 
     @Override
@@ -155,25 +153,31 @@ public class robot2TeleopRed extends LinearOpMode {
     }
 
     private void doShooting() {
-        if (!isShooting) return;
+        if (!isShooting) {
+            storageWheel.setPower(0); // make sure we are not feeding ball in if not ready to shoot
+            return;
+        }
         //if we're using auto aim and it isn't yet at the target then let steering keep going.
         if (isAutoAimEnabled && !isAimedAtTarget) return;
 
-        if(isBallReady() == false){
+        if(!isBallReady()){
             flipper.setPosition(0.5);
+            // if the ball is not ready, start storageWheel to push to flipper.
+            storageWheel.setPower(-1);
             return;
         }
+
+
 
         //if we are at goal, and not already feeding, then start feeding.
         if (isAtGoalVelocity && !shooterNeedsReset && !isFeeding ) {
             storageTimer.reset();
-//            storageWheel.setPower(-1);
-
-                flipper.setPosition(0.8);
-                telemetry.addData("stuck in loop", flipper.getPosition());
-                telemetry.update();
-            
-
+            intake2Timer.reset();
+            flipper.setPosition(0.85);
+            storageWheel.setPower(0); // the storage wheel should stop moving if flipper is pushing ball up
+            intake2.setPower(-0.5); // reverse the intake 2 to ensure second ball doesn't push through
+            telemetry.addData("in doShooting with ", String.valueOf(flipper.getPosition()), " isAtGoalVelocity: ", isAtGoalVelocity);
+            telemetry.update();
 
             isFeeding = true;
         }
@@ -183,12 +187,10 @@ public class robot2TeleopRed extends LinearOpMode {
 
     private void checkFeeding() {
         // Stop feeding if the timer is up OR if the driver releases the trigger.
-        if (isFeeding && (storageTimer.milliseconds() > 1000 || !isShooting)) {
+        if (isFeeding && (storageTimer.milliseconds() > 800 || !isShooting)) {
+            flipper.setPosition(0.5); // reset the flipper to original place after shooting
+            intake2.setPower(0);
             isFeeding = false;
-            // shooterNeedsReset = true;
-//            storageWheel.setPower(0);
-
-
         }
     }
 
@@ -210,7 +212,6 @@ public class robot2TeleopRed extends LinearOpMode {
 
         } else {
             goalVelocity = IDLE_VELOCITY;
-//            storageWheel.setPower(0);
             telemetry.addData("isShooting", isShooting);
             telemetry.addData("shooterNEedsReset", shooterNeedsReset);
             telemetry.update();
@@ -243,7 +244,6 @@ public class robot2TeleopRed extends LinearOpMode {
             IDLE_VELOCITY = 800;
         }
     }
-double DistanceToBackBall =0;
     private void controlIntake() {
         //Bring artifacts into the bot queue
         if (gamepad1.dpad_down) {
@@ -272,15 +272,10 @@ double DistanceToBackBall =0;
     private void doLoading(){
         if(!isLoading) return;
 
-        intake.setPower(0.2);
-        intake2.setPower(0.2);
-        if(distanceSensor.getDistance(DistanceUnit.CM) <= neededDistance){
-            storageWheel.setPower(0);
-        }
-        else{
-            storageWheel.setPower(-1);
-        }
+        intake.setPower(0.5);
+        intake2.setPower(0.5);
     }
+
 
     private void autoAimOnOff() {
         //toggle autoAim on off if something is wonky.
@@ -373,9 +368,7 @@ double DistanceToBackBall =0;
     private boolean isBallReady(){
 
         double distanceToBall = distanceSensor.getDistance(DistanceUnit.CM);
-        if(distanceToBall<=neededDistance){
-            return true;
-        }
+        if (distanceToBall<=neededDistanceFromBall) return true;
         return false;
     }
 
