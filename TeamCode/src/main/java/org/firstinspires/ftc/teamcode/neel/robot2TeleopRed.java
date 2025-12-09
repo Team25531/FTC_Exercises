@@ -20,6 +20,7 @@ import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.CurrentUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Aaron.Controller;
 import org.firstinspires.ftc.vision.VisionPortal;
 import org.firstinspires.ftc.vision.apriltag.AprilTagDetection;
 import org.firstinspires.ftc.vision.apriltag.AprilTagProcessor;
@@ -30,12 +31,12 @@ import java.util.List;
 @TeleOp(name = "robot2Teleop2", group = "Robot2")
 public class robot2TeleopRed extends LinearOpMode {
 
-    public static double NEW_P = 7.0;
-    public static double NEW_I = 0.0;
-    public static double NEW_D = 0.0;
-    public static double NEW_F = 16.0;
+    public  static double NEW_P = 14;
+    public  static double NEW_I = 0.35;
+    public  static double NEW_D = 0.0;
+    public  static double NEW_F = 6.5;
     private ElapsedTime storageTimer = new ElapsedTime();
-    private ElapsedTime intake2Timer = new ElapsedTime();
+//    private ElapsedTime intake2Timer = new ElapsedTime();
     private DcMotor frontLeftMotor;
     private DcMotor backLeftMotor;
     private DcMotor frontRightMotor;
@@ -52,16 +53,16 @@ public class robot2TeleopRed extends LinearOpMode {
 
     private VoltageSensor myControlHubVoltageSensor;
     private AprilTagProcessor aprilTag;
-    public static final String WEBCAM_NAME = "Webcam 1";
-    public static final int TARGET_TAG_ID = 24;
-    public static int IDLE_VELOCITY = 800;
+    public  final String WEBCAM_NAME = "Webcam 1";
+    public  final int TARGET_TAG_ID = 24;
+    public  int IDLE_VELOCITY = 800;
     private VisionPortal visionPortal;
     int goalVelocity = 0;
     double range = 0.02;
     double minRange = 0;
     double maxRange = 0;
 
-    double neededDistanceFromBall = 10;
+    double neededDistanceFromBall = 9;
 
     double distanceToTarget = 0;
     double angleToTarget = 0;
@@ -80,6 +81,7 @@ public class robot2TeleopRed extends LinearOpMode {
     boolean isReadyToShoot = false;
     boolean isInPositionToShoot = false;
     boolean idleVelocity = true;
+    boolean isPrepositioning = false;
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -131,16 +133,14 @@ public class robot2TeleopRed extends LinearOpMode {
             packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
             //Pid Original" 10,3,0 Modified :2.5,0.1,0.2
 
-
             dashboard.sendTelemetryPacket(packet);
 
             reverse();
             autoAimOnOff();
             controlIntake();
             checkToResetState();
-            if(gamepad1.bWasPressed()){
-                flipper.setPosition(0.8);
-            }
+            prepositioning();
+
             setGoalVelocity();
             checkFeeding();
             runOuttakeMotor();
@@ -161,7 +161,7 @@ public class robot2TeleopRed extends LinearOpMode {
         if (isAutoAimEnabled && !isAimedAtTarget) return;
 
         if(!isBallReady()){
-            flipper.setPosition(0.5);
+
             // if the ball is not ready, start storageWheel to push to flipper.
             storageWheel.setPower(-1);
             return;
@@ -172,7 +172,7 @@ public class robot2TeleopRed extends LinearOpMode {
         //if we are at goal, and not already feeding, then start feeding.
         if (isAtGoalVelocity && !shooterNeedsReset && !isFeeding ) {
             storageTimer.reset();
-            intake2Timer.reset();
+        //    intake2Timer.reset();
             flipper.setPosition(0.85);
             storageWheel.setPower(0); // the storage wheel should stop moving if flipper is pushing ball up
             intake2.setPower(-0.5); // reverse the intake 2 to ensure second ball doesn't push through
@@ -195,6 +195,22 @@ public class robot2TeleopRed extends LinearOpMode {
     }
 
 
+    private void prepositioning(){
+        if(gamepad1.bWasPressed()) {
+            isPrepositioning = true;
+        }
+        if(isPrepositioning && !isBallReady()){
+            storageWheel.setPower(-1);
+
+        }
+        if(isPrepositioning && isBallReady()){
+            storageWheel.setPower(0);
+            isPrepositioning = false;
+        }
+
+
+    }
+
     private void setGoalVelocity() {
         //only compute velocity if we're actually shooting.
         int tempVelocity = goalVelocity;
@@ -202,7 +218,7 @@ public class robot2TeleopRed extends LinearOpMode {
             telemetry.addData("in loop", 0);
 
 
-            tempVelocity = 1400 ;
+            tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) +147) ;
 //            (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) +147)
             telemetry.addData("tempVelocity", tempVelocity);
         }
@@ -211,10 +227,15 @@ public class robot2TeleopRed extends LinearOpMode {
             goalVelocity = tempVelocity;
 
         } else {
+            if( IDLE_VELOCITY > 0 && isBallReady() && distanceToTarget > 0){
+                IDLE_VELOCITY = tempVelocity;
+            }
+
             goalVelocity = IDLE_VELOCITY;
+
             telemetry.addData("isShooting", isShooting);
             telemetry.addData("shooterNEedsReset", shooterNeedsReset);
-            telemetry.update();
+//            telemetry.update();
         }
 
 
@@ -240,7 +261,7 @@ public class robot2TeleopRed extends LinearOpMode {
             IDLE_VELOCITY = 0;
             idleVelocity = false;
         }
-        if (gamepad1.bWasPressed()) {
+        if (gamepad1.aWasPressed()) {
             IDLE_VELOCITY = 800;
         }
     }
