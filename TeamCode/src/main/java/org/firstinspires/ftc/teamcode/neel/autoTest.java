@@ -185,10 +185,6 @@ public class autoTest extends LinearOpMode {
     static final double P_TURN_GAIN = 0.02;     // Larger is more responsive, but also less stable.
     static final double P_DRIVE_GAIN = 0.03;     // Larger is more responsive, but also less stable.
 
-    //IntegratingGyroscope gyro;
-    // NavxMicroNavigationSensor navxMicro;
-    ElapsedTime timer = new ElapsedTime();
-
     @Override
     public void runOpMode() throws InterruptedException {
 
@@ -245,6 +241,7 @@ public class autoTest extends LinearOpMode {
 
         DRIVE_SPEED = 0.5;
         if (isStopRequested()) return;
+        outtake.setPower(0.3); // let's see if this works as idle mode
 
         driveStraight(DRIVE_SPEED, -49, 0.0);
         distanceToTarget = getDistanceToTag(24);
@@ -298,6 +295,7 @@ public class autoTest extends LinearOpMode {
             DRIVE_SPEED = 0.6;
             turnToHeading(TURN_SPEED, -20);
 
+            outtake.setPower(0.3);
             driveStraight(DRIVE_SPEED, -48, 0.0);
 
             turnToHeading(TURN_SPEED, 57);
