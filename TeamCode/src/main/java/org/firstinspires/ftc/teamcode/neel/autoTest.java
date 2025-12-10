@@ -307,19 +307,30 @@ public class autoTest extends LinearOpMode {
             isShooting = false;
 
             imu.resetYaw();
+            turnToHeading(TURN_SPEED, -55);
+            holdHeading(TURN_SPEED, -55, .5);
 
             // 4. go very slowly towards the balls
-            DRIVE_SPEED = 0.2;
+            DRIVE_SPEED = 0.4;
 
             // intake.setPower(-1);
             imu.resetYaw();
-            driveStraight(DRIVE_SPEED, 45, 0.0);
-            imu.resetYaw();
+            driveStraight(DRIVE_SPEED, 50, 0.0);
+            turnToHeading(TURN_SPEED, 20);
+            driveStraight(DRIVE_SPEED, 2, 0.0);
+            driveStraight(DRIVE_SPEED, -2, 0.0);
+
+
             DRIVE_SPEED = 0.6;
-            driveStraight(DRIVE_SPEED, -40, 0.0);
+            turnToHeading(TURN_SPEED, -20);
+
+            driveStraight(DRIVE_SPEED, -50, 0.0);
             imu.resetYaw();
-            turnToHeading(TURN_SPEED, 50);
-            holdHeading(TURN_SPEED, 50, .5);
+
+            turnToHeading(TURN_SPEED, 57);
+            holdHeading(TURN_SPEED, 57, .5);
+            driveStraight(DRIVE_SPEED, 2, 0);
+
             distanceToTarget = getDistanceToTag(24);
             resetRuntime();
             checkIfShooting();
