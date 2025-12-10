@@ -140,6 +140,7 @@ public class robot2TeleopRed extends LinearOpMode {
             controlIntake();
             checkToResetState();
             prepositioning();
+            telemetry.addData("flipperPos", flipper.getPosition());
 
             setGoalVelocity();
             checkFeeding();
@@ -173,7 +174,7 @@ public class robot2TeleopRed extends LinearOpMode {
         if (isAtGoalVelocity && !shooterNeedsReset && !isFeeding ) {
             storageTimer.reset();
         //    intake2Timer.reset();
-            flipper.setPosition(0.85);
+            flipper.setPosition(0.5);
             storageWheel.setPower(0); // the storage wheel should stop moving if flipper is pushing ball up
             intake2.setPower(-0.5); // reverse the intake 2 to ensure second ball doesn't push through
             telemetry.addData("in doShooting with ", String.valueOf(flipper.getPosition()), " isAtGoalVelocity: ", isAtGoalVelocity);
@@ -188,8 +189,11 @@ public class robot2TeleopRed extends LinearOpMode {
     private void checkFeeding() {
         // Stop feeding if the timer is up OR if the driver releases the trigger.
         if (isFeeding && (storageTimer.milliseconds() > 800 || !isShooting)) {
-            flipper.setPosition(0.5); // reset the flipper to original place after shooting
+            flipper.setPosition(0);
+            // reset the flipper to original place after shooting
             intake2.setPower(0);
+            telemetry.addData("inside check feeding", 0);
+            telemetry.update();
             isFeeding = false;
         }
     }
@@ -218,8 +222,10 @@ public class robot2TeleopRed extends LinearOpMode {
             telemetry.addData("in loop", 0);
 
 
-            tempVelocity = (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) +147) ;
+            tempVelocity = (int) (876.552847 + 1710.638111 * (1.0 - Math.exp(-0.006577355 * distanceToTarget)));
+            //DATA POINTS 42 1300 50 1350 54 1375 58 1425 63 1455 107 1750 110 1770 115 1780 118 1787
 //            (int) (941.2069 + 0.4127235 * Math.pow(distanceToTarget, 1.4620166) +147)
+
             telemetry.addData("tempVelocity", tempVelocity);
         }
 

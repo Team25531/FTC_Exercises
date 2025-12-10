@@ -265,20 +265,23 @@ public class autoTest extends LinearOpMode {
         DRIVE_SPEED = 0.5;
         if (isStopRequested()) return;
 
-        driveStraight(DRIVE_SPEED, -50, 0.0);
+        driveStraight(DRIVE_SPEED, -49, 0.0);
         distanceToTarget = getDistanceToTag(24);
-        if (distanceToTarget < 50) {
-            int awayFromTarget = (int) (50 - distanceToTarget);
-            driveStraight(DRIVE_SPEED, -awayFromTarget, 0);
-
-        }
+//        if (distanceToTarget < 50) {
+//            int awayFromTarget = (int) (50 - distanceToTarget);
+//            driveStraight(DRIVE_SPEED, -awayFromTarget, 0);
+//
+//        }
         setGoalVelocity();
 
 
         distanceToTarget = getDistanceToTag(24);
         shooterNeedsReset = false;
 
-        if (distanceToTarget >= 50) {
+        if (distanceToTarget >= 48.5) {
+
+            turnToHeading(TURN_SPEED, -5);
+            holdHeading(TURN_SPEED, -5, .5);
 
 
 //                driveStraight(DRIVE_SPEED, 0, 0.0);
@@ -303,24 +306,20 @@ public class autoTest extends LinearOpMode {
             outtake.setPower(0);
             isShooting = false;
 
-
             imu.resetYaw();
 
-            turnToHeading(TURN_SPEED, -55);
-            holdHeading(TURN_SPEED, -55, .5);
-
             // 4. go very slowly towards the balls
-            DRIVE_SPEED = 0.1
-            ;
+            DRIVE_SPEED = 0.2;
+
             // intake.setPower(-1);
             imu.resetYaw();
             driveStraight(DRIVE_SPEED, 45, 0.0);
             imu.resetYaw();
-            DRIVE_SPEED = 0.5;
+            DRIVE_SPEED = 0.6;
             driveStraight(DRIVE_SPEED, -40, 0.0);
             imu.resetYaw();
-            turnToHeading(TURN_SPEED, 55);
-            holdHeading(TURN_SPEED, 55, .5);
+            turnToHeading(TURN_SPEED, 50);
+            holdHeading(TURN_SPEED, 50, .5);
             distanceToTarget = getDistanceToTag(24);
             resetRuntime();
             checkIfShooting();
@@ -340,8 +339,8 @@ public class autoTest extends LinearOpMode {
 
         }
 
-        telemetry.update();
 
+        telemetry.update();
 
 //        while (opModeIsActive()) {
 //            double ve;
@@ -802,7 +801,7 @@ public class autoTest extends LinearOpMode {
         double maxRange = goalVelocity + (goalVelocity * range);
 
         if (currentVelocity < minRange) {
-            currentPower = currentPower + 0.001;
+            currentPower = currentPower + 0.0015;
         }
         if (currentVelocity > maxRange) {
             currentPower = currentPower - 0.001;
