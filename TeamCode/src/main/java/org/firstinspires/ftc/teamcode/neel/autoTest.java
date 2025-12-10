@@ -222,14 +222,6 @@ public class autoTest extends LinearOpMode {
         // The gyro automatically starts calibrating. This takes a few seconds.
         telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
-        //todo: this initializes the navx.
-//        // Wait until the gyro calibration is complete
-//        timer.reset();
-//        while (navxMicro.isCalibrating())  {
-//            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
-//            telemetry.update();
-//            Thread.sleep(50);
-//        }
         imu.resetYaw();
 
         telemetry.log().clear();
@@ -239,25 +231,14 @@ public class autoTest extends LinearOpMode {
 
         // Wait for the game to start (Display Gyro value while waiting)
         while (opModeInInit()) {
-            // AngularVelocity rates = gyro.getAngularVelocity(AngleUnit.DEGREES);
-            //  Orientation angles = gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
 
             telemetry.addData(">", "Imu int = %4.1f", getHeading());
-//                    .addData(">", "Imu fa = %4.1f", angles.firstAngle)
-//                    .addData("Imu ext = ", formatAngle(angles.angleUnit, angles.firstAngle));
             int ticks = frontLeftMotor.getCurrentPosition(); //todo: this only reads a single wheel.
             telemetry.addData("> ticks", ticks);
             telemetry.update();
         }
 
         // Set the encoders for closed loop speed control, and reset the heading.
-
-
-        // Step through each leg of the path,
-        // Notes:   Reverse movement is obtained by setting a negative distance (not speed)
-        //          holdHeading() is used after turns to let the heading stabilize
-        //          Add a sleep(2000) after any step to keep the telemetry data visible for review
-        //backing away from goal
         imu.resetYaw();
         shooterNeedsReset = false;
 
@@ -267,11 +248,6 @@ public class autoTest extends LinearOpMode {
 
         driveStraight(DRIVE_SPEED, -49, 0.0);
         distanceToTarget = getDistanceToTag(24);
-//        if (distanceToTarget < 50) {
-//            int awayFromTarget = (int) (50 - distanceToTarget);
-//            driveStraight(DRIVE_SPEED, -awayFromTarget, 0);
-//
-//        }
         setGoalVelocity();
 
 
@@ -284,7 +260,6 @@ public class autoTest extends LinearOpMode {
             holdHeading(TURN_SPEED, -5, .5);
 
 
-//                driveStraight(DRIVE_SPEED, 0, 0.0);
             intake.setPower(-1);
             checkIfShooting();
             setGoalVelocity();
@@ -313,7 +288,6 @@ public class autoTest extends LinearOpMode {
             // 4. go very slowly towards the balls
             DRIVE_SPEED = 0.4;
 
-            // intake.setPower(-1);
             imu.resetYaw();
             driveStraight(DRIVE_SPEED, 50, 0.0);
             turnToHeading(TURN_SPEED, 20);
@@ -324,12 +298,11 @@ public class autoTest extends LinearOpMode {
             DRIVE_SPEED = 0.6;
             turnToHeading(TURN_SPEED, -20);
 
-            driveStraight(DRIVE_SPEED, -50, 0.0);
-            imu.resetYaw();
+            driveStraight(DRIVE_SPEED, -48, 0.0);
 
             turnToHeading(TURN_SPEED, 57);
             holdHeading(TURN_SPEED, 57, .5);
-            driveStraight(DRIVE_SPEED, 2, 0);
+            driveStraight(DRIVE_SPEED, 3, 0);
 
             distanceToTarget = getDistanceToTag(24);
             resetRuntime();
@@ -352,142 +325,6 @@ public class autoTest extends LinearOpMode {
 
 
         telemetry.update();
-
-//        while (opModeIsActive()) {
-//            double ve;
-//
-//            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
-//            telemetry.addData("current velocity", ve);
-//
-//            if (isStopRequested()) return;
-//
-//            // Assume start from near the depot
-//            // 1. first go back 35 inches
-//            // 2. shoot two balls already loaded
-//            while (distanceToTarget <= 40) {
-//                driveStraight(DRIVE_SPEED, -40, 0.0);
-//                setGoalVelocity();
-//                distanceToTarget = getDistanceToTag(24);
-//                telemetry.addData("distanceToTarget", distanceToTarget);
-//                telemetry.update();
-//            }
-//
-//            distanceToTarget = getDistanceToTag(24);
-//
-//            if (distanceToTarget >=40)
-//            {
-//                driveStraight(DRIVE_SPEED, 0, 0.0);
-//
-//
-//                intake.setPower(-1);
-//                setGoalVelocity();
-//                runOuttakeMotor();
-//                checkIfShooting();
-//
-////                while (!isAimedAtTarget) {
-////                    telemetry.addData("Angle To Target: ", angleToTarget);
-////                    telemetry.update();
-////                    aimToTarget();
-////                }
-//
-//                doShooting();
-//
-//                if (shooterNeedsReset) {
-//                    resetRuntime();
-//                    double runtime = getRuntime();
-//                    while (runtime < 4) {
-//                        runtime = getRuntime();
-//                    }
-//            }
-//
-//            // Check distance again
-////            distanceToTarget = getDistanceToTag(24);
-////            shooterNeedsReset = false;
-////
-////            telemetry.addData("isAimed", isAimedAtTarget);
-////            telemetry.update();
-////            isShooting = true; // get ready for shooting
-//
-//
-////             correct the angle
-//
-//
-////            intake.setPower(-1);
-////            setGoalVelocity();
-////            runOuttakeMotor();
-////            checkIfShooting();
-////
-////            doShooting();
-//
-//
-//            }
-//            // ensure we're not moving while shooting.
-////            resetRuntime();
-////            double runtime = getRuntime();
-////            while (runtime < 4) {
-////                runtime = getRuntime();
-////            }
-////            imu.resetYaw();
-////
-////            // 3. Turn towards first row of balls
-////            turnToHeading(TURN_SPEED, -45);
-////            holdHeading(TURN_SPEED, -45, .5);
-////            imu.resetYaw();
-////
-////            // 4. go very slowly towards the balls
-////            DRIVE_SPEED = 0.2;
-////            intake.setPower(-1);
-////            driveStraight(DRIVE_SPEED, 35, 0.0);
-////            imu.resetYaw();
-////            DRIVE_SPEED = 0.6;
-////            driveStraight(DRIVE_SPEED, -35, 0.0);
-////            imu.resetYaw();
-////            turnToHeading(TURN_SPEED, 45);
-////            holdHeading(TURN_SPEED, 45, .5);
-////            imu.resetYaw();
-////            isShooting = true;
-////            while (!isAimedAtTarget) {
-////                telemetry.addData("Angle To Target: ", angleToTarget);
-////                telemetry.update();
-////
-////                aimToTarget();
-////            }
-////            intake.setPower(-1);
-////            setGoalVelocity();
-////            runOuttakeMotor();
-////            checkIfShooting();
-////
-////            doShooting();
-//
-//
-//        }
-////turn towards ball
-//
-//
-//        //drive to ball and pick up
-//        //ADJUST DRIVE SPEED
-//        //DRIVE_SPEED = 0.2
-//        //INTAKE
-//        //intake.setPower(-1)
-//        //driveStraight(DRIVE_SPEED, 55, 0.0);
-//
-//
-////        imu.resetYaw()
-////        //go back to shooting line
-////        DRIVE_SPEED = 0.6
-////        driveStraight(DRIVE_SPEED, -55, 0.0);
-//
-////        imu.resetYaw();
-//        //angle to goal then shoot
-////        turnToHeading(TURN_SPEED, 45);
-////        holdHeading(TURN_SPEED, 45, .5);
-//        //angle
-//        //angeToTarget();
-//        //SHOOT NOW
-//        //setGoalVelocity();
-//        //runOuttakeMotor();
-////        imu.resetYaw();
-//
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
