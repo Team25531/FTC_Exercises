@@ -188,7 +188,6 @@ public class autoTest extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
 
-
         initializeMotors();
         initializeTagProcessor();
 

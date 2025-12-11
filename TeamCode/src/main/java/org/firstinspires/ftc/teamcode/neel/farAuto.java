@@ -128,7 +128,7 @@ public class farAuto extends LinearOpMode {
     private ElapsedTime storageTimer = new ElapsedTime();
     private VisionPortal visionPortal;
     int goalVelocity = 0;
-    double range = 0.05;
+    double range = 0.02;
     double distanceToTarget = 0;
     double angleToTarget = 0;
     double currentVelocity = 0;
@@ -188,32 +188,14 @@ public class farAuto extends LinearOpMode {
     static final double P_TURN_GAIN = 0.02;     // Larger is more responsive, but also less stable.
     static final double P_DRIVE_GAIN = 0.03;     // Larger is more responsive, but also less stable.
 
-    //IntegratingGyroscope gyro;
-    // NavxMicroNavigationSensor navxMicro;
-    ElapsedTime timer = new ElapsedTime();
-
     @Override
     public void runOpMode() throws InterruptedException {
 
         FtcDashboard dashboard = FtcDashboard.getInstance();
+
         initializeMotors();
         initializeTagProcessor();
 
-        TelemetryPacket packet = new TelemetryPacket();
-
-
-        packet.put("getVelocity", outtake.getVelocity());
-        packet.put("Goal Velocity", goalVelocity);
-
-
-
-        packet.put("isShooting", isShooting ? goalVelocity + 125 : 0);
-        packet.put("isAtGoalVelocity", isAtGoalVelocity ? goalVelocity + 150 : 0);
-        packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
-        //Pid Original" 10,3,0 Modified :2.5,0.1,0.2
-
-
-        dashboard.sendTelemetryPacket(packet);
         /* The next two lines define Hub orientation.
          * The Default Orientation (shown) is when a hub is mounted horizontally with the printed logo pointing UP and the USB port pointing FORWARD.
          *
@@ -229,52 +211,58 @@ public class farAuto extends LinearOpMode {
         imu.initialize(new IMU.Parameters(orientationOnRobot));
 
 
-        //todo: these 3 are needed for the navx init.
-//        navxMicro = hardwareMap.get(NavxMicroNavigationSensor.class, "navx");
-//        gyro = (IntegratingGyroscope)navxMicro;
-//        navxMicro.initialize();
-
-        // If you're only interested int the IntegratingGyroscope interface, the following will suffice.
-        // gyro = hardwareMap.get(IntegratingGyroscope.class, "navx");
-
         // The gyro automatically starts calibrating. This takes a few seconds.
-        telemetry.log().add("Gyro/Camera Calibrating...");
+        telemetry.log().add("Gyro Calibrating. Do Not Move!");
 
-        //todo: this initializes the navx.
-//        // Wait until the gyro calibration is complete
-//        timer.reset();
-//        while (navxMicro.isCalibrating())  {
-//            telemetry.addData("calibrating", "%s", Math.round(timer.seconds())%2==0 ? "|.." : "..|");
-//            telemetry.update();
-//            Thread.sleep(50);
-//        }
         imu.resetYaw();
 
-        //give the camera time to initialize
-        while ( getDistanceToTag(24) == 0) {
-            telemetry.addData("dist...", 0);
+        telemetry.log().clear();
+        telemetry.log().add("Gyro Calibrated. Press Start.");
+        telemetry.clear();
+        telemetry.addData("DistanceToTarget", getDistanceToTag(24));
+        telemetry.update();
+
+        // Wait for the game to start (Display Gyro value while waiting)
+        while (opModeInInit()) {
+
+            telemetry.addData(">", "Imu int = %4.1f", getHeading());
+            int ticks = frontLeftMotor.getCurrentPosition(); //todo: this only reads a single wheel.
+            telemetry.addData("> ticks", ticks);
+            telemetry.addData("DistanceToTarget", getDistanceToTag(24));
             telemetry.update();
-            sleep(100);
+
         }
 
-        telemetry.log().clear();
-        telemetry.addLine("Calibrated. Press Start to run Autonomous.");
-        telemetry.update();
 
-        waitForStart();
-        telemetry.log().clear();
-        telemetry.addLine("Auto running...");
-        telemetry.update();
-        // Notes:   Reverse movement is obtained by setting a negative distance (not speed)
-        //          holdHeading() is used after turns to let the heading stabilize
-        //          Add a sleep(2000) after any step to keep the telemetry data visible for review
-
-        //backing away from goal
-        imu.resetYaw();
-        shooterNeedsReset = false;
 
         DRIVE_SPEED = 0.5;
+        if (isStopRequested()) return;
+        outtake.setPower(0.4); // let's see if this works as idle mode
+
+        TelemetryPacket packet = new TelemetryPacket();
+        packet.put("getVelocity", outtake.getVelocity());
+        packet.put("Goal Velocity", goalVelocity);
+        packet.put("isShooting", isShooting ? goalVelocity + 125 : 0);
+        packet.put("isAtGoalVelocity", isAtGoalVelocity ? goalVelocity + 150 : 0);
+        packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
+
+        dashboard.sendTelemetryPacket(packet);
+
+        outtake.setPower(0.4); // let's see if this works as idle mode. higher RPM for far
+
         distanceToTarget = getDistanceToTag(24);
+
+
+        // Set the encoders for closed loop speed control, and reset the heading.
+        imu.resetYaw();
+        shooterNeedsReset = false;
+        DRIVE_SPEED = 0.5;
+
+//        driveStraight(DRIVE_SPEED, 4,0);
+        distanceToTarget = getDistanceToTag(24);
+
+
+
         intake.setPower(-1);
         checkIfShooting();
         setGoalVelocity();
@@ -282,51 +270,47 @@ public class farAuto extends LinearOpMode {
 
         resetRuntime();
         double runtime = getRuntime();
-        while (runtime <= 8) {
-            if (!opModeIsActive() || isStopRequested()) return;
+        while (runtime <= 6) {
+            if (isStopRequested() || !opModeIsActive()) return;
+            distanceToTarget = getDistanceToTag(24);
+            setGoalVelocity();
 
             runOuttakeMotor();
             doShooting();
             runtime = getRuntime();
-            telemetry.addData("First loop", runtime);
 
-            packet.put("getVelocity", outtake.getVelocity());
-            packet.put("Goal Velocity", goalVelocity);
-
-
-
-            packet.put("isShooting", isShooting ? goalVelocity + 125 : 0);
-            packet.put("isAtGoalVelocity", isAtGoalVelocity ? goalVelocity + 150 : 0);
-            packet.put("motorCurrent", outtake.getCurrent(CurrentUnit.AMPS));
-            //Pid Original" 10,3,0 Modified :2.5,0.1,0.2
-
-
-            dashboard.sendTelemetryPacket(packet);
+            telemetry.addData("Motor running", runtime);
             telemetry.update();
         }
+
         storageWheel.setPower(0);
-        setGoalVelocity();
+        outtake.setPower(0);
+        isShooting = false;
+
         //ALWAYS DO AN IMU RESET BEFORE DRIVING STRAIGHT
         imu.resetYaw();
         driveStraight(DRIVE_SPEED, 25, 0);
 
         imu.resetYaw();
-        turnToHeading(TURN_SPEED, -65);
-        holdHeading(TURN_SPEED, -65, 0.5);
-        distanceToTarget = getDistanceToTag(24);
-        DRIVE_SPEED = 0.1;
+        turnToHeading(TURN_SPEED, -66);
+        holdHeading(TURN_SPEED, -66, 0.5);
+        DRIVE_SPEED = 0.2;
         imu.resetYaw();
-        driveStraight(DRIVE_SPEED, 23, 0.0);
+        driveStraight(DRIVE_SPEED, 29, 0.0);
         imu.resetYaw();
         DRIVE_SPEED = 0.5;
-        driveStraight(DRIVE_SPEED, -23, 0.5);
+        outtake.setPower(0.5); // rev to a higher RPM for far
+
+        driveStraight(DRIVE_SPEED, -26, 0.5);
         imu.resetYaw();
-        turnToHeading(TURN_SPEED, 65);
-        holdHeading(TURN_SPEED, 65, 0.5);
+        turnToHeading(TURN_SPEED, 66);
+        holdHeading(TURN_SPEED, 66, 0.5);
         imu.resetYaw();
         driveStraight(DRIVE_SPEED, -18, 0);
         intake.setPower(-1);
         checkIfShooting();
+
+        distanceToTarget = getDistanceToTag(24);
         setGoalVelocity();
         runOuttakeMotor();
         setGoalVelocity();
@@ -335,7 +319,7 @@ public class farAuto extends LinearOpMode {
         runtime = getRuntime();
         while (runtime <= 8) {
             if (!opModeIsActive() || isStopRequested()) return;
-
+            setGoalVelocity();
             runOuttakeMotor();
             doShooting();
             runtime = getRuntime();
@@ -344,148 +328,7 @@ public class farAuto extends LinearOpMode {
         }
         driveStraight(DRIVE_SPEED, 18, 0);
 
-
-//
-
-
         telemetry.update();
-
-
-//        while (opModeIsActive()) {
-//            double ve;
-//
-//            ve = (int) ((-0.0861 * Math.pow(distanceToTarget, 2)) + (20.729 * distanceToTarget) + 104.51);
-//            telemetry.addData("current velocity", ve);
-//
-//            if (isStopRequested()) return;
-//
-//            // Assume start from near the depot
-//            // 1. first go back 35 inches
-//            // 2. shoot two balls already loaded
-//            while (distanceToTarget <= 40) {
-//                driveStraight(DRIVE_SPEED, -40, 0.0);
-//                setGoalVelocity();
-//                distanceToTarget = getDistanceToTag(24);
-//                telemetry.addData("distanceToTarget", distanceToTarget);
-//                telemetry.update();
-//            }
-//
-//            distanceToTarget = getDistanceToTag(24);
-//
-//            if (distanceToTarget >=40)
-//            {
-//                driveStraight(DRIVE_SPEED, 0, 0.0);
-//
-//
-//                intake.setPower(-1);
-//                setGoalVelocity();
-//                runOuttakeMotor();
-//                checkIfShooting();
-//
-////                while (!isAimedAtTarget) {
-////                    telemetry.addData("Angle To Target: ", angleToTarget);
-////                    telemetry.update();
-////                    aimToTarget();
-////                }
-//
-//                doShooting();
-//
-//                if (shooterNeedsReset) {
-//                    resetRuntime();
-//                    double runtime = getRuntime();
-//                    while (runtime < 4) {
-//                        runtime = getRuntime();
-//                    }
-//            }
-//
-//            // Check distance again
-////            distanceToTarget = getDistanceToTag(24);
-////            shooterNeedsReset = false;
-////
-////            telemetry.addData("isAimed", isAimedAtTarget);
-////            telemetry.update();
-////            isShooting = true; // get ready for shooting
-//
-//
-////             correct the angle
-//
-//
-////            intake.setPower(-1);
-////            setGoalVelocity();
-////            runOuttakeMotor();
-////            checkIfShooting();
-////
-////            doShooting();
-//
-//
-//            }
-//            // ensure we're not moving while shooting.
-////            resetRuntime();
-////            double runtime = getRuntime();
-////            while (runtime < 4) {
-////                runtime = getRuntime();
-////            }
-////            imu.resetYaw();
-////
-////            // 3. Turn towards first row of balls
-////            turnToHeading(TURN_SPEED, -45);
-////            holdHeading(TURN_SPEED, -45, .5);
-////            imu.resetYaw();
-////
-////            // 4. go very slowly towards the balls
-////            DRIVE_SPEED = 0.2;
-////            intake.setPower(-1);
-////            driveStraight(DRIVE_SPEED, 35, 0.0);
-////            imu.resetYaw();
-////            DRIVE_SPEED = 0.6;
-////            driveStraight(DRIVE_SPEED, -35, 0.0);
-////            imu.resetYaw();
-////            turnToHeading(TURN_SPEED, 45);
-////            holdHeading(TURN_SPEED, 45, .5);
-////            imu.resetYaw();
-////            isShooting = true;
-////            while (!isAimedAtTarget) {
-////                telemetry.addData("Angle To Target: ", angleToTarget);
-////                telemetry.update();
-////
-////                aimToTarget();
-////            }
-////            intake.setPower(-1);
-////            setGoalVelocity();
-////            runOuttakeMotor();
-////            checkIfShooting();
-////
-////            doShooting();
-//
-//
-//        }
-////turn towards ball
-//
-//
-//        //drive to ball and pick up
-//        //ADJUST DRIVE SPEED
-//        //DRIVE_SPEED = 0.2
-//        //INTAKE
-//        //intake.setPower(-1)
-//        //driveStraight(DRIVE_SPEED, 55, 0.0);
-//
-//
-////        imu.resetYaw()
-////        //go back to shooting line
-////        DRIVE_SPEED = 0.6
-////        driveStraight(DRIVE_SPEED, -55, 0.0);
-//
-////        imu.resetYaw();
-//        //angle to goal then shoot
-////        turnToHeading(TURN_SPEED, 45);
-////        holdHeading(TURN_SPEED, 45, .5);
-//        //angle
-//        //angeToTarget();
-//        //SHOOT NOW
-//        //setGoalVelocity();
-//        //runOuttakeMotor();
-////        imu.resetYaw();
-//
 
         telemetry.addData("Path", "Complete");
         telemetry.update();
@@ -800,12 +643,12 @@ public class farAuto extends LinearOpMode {
         telemetry.addData("curPower", currentPower);
 
         double minRange = goalVelocity - (goalVelocity * range);
-        double maxRange = goalVelocity + (goalVelocity * range);
+        double maxRange = goalVelocity ;// + (goalVelocity * range);
         telemetry.addData("minRange", minRange);
         telemetry.addData("maxRange", maxRange);
 
         if (currentVelocity < minRange) {
-            currentPower = currentPower + 0.001;
+            currentPower = currentPower + 0.0015;
         }
         if (currentVelocity > maxRange) {
             currentPower = currentPower - 0.001;
