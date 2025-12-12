@@ -172,11 +172,15 @@ public class RedFTCComp extends LinearOpMode {
             goalVelocity = tempVelocity;
 
         } else {
+            if( IDLE_VELOCITY > 0 && distanceToTarget > 0){
+                IDLE_VELOCITY = tempVelocity;
+            }
+
             goalVelocity = IDLE_VELOCITY;
             storageWheel.setPower(0);
             telemetry.addData("isShooting", isShooting);
             telemetry.addData("shooterNEedsReset", shooterNeedsReset);
-            telemetry.update();
+//            telemetry.update();
         }
 
 
